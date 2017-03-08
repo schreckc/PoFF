@@ -1,0 +1,26 @@
+#include "Object.hpp"
+
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
+
+using namespace glm;
+
+Object::Object(int shader, int texture) {
+  m_texture = texture;
+  m_shader = shader;
+  m_model_view = glm::mat4(1.0f);
+}
+
+int Object::getTextureID() {
+  return m_texture;
+}
+
+int Object::getShaderID() {
+  return m_shader;
+}
+
+void Object::getModelView(glm::mat4 & model) {
+  model = m_model_view;
+}

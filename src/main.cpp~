@@ -1,0 +1,15 @@
+#include "Scene.hpp"
+
+int main(int argc, char **argv) {
+	
+  //  Scene scene("test", 2400, 1800);
+	
+  if(Scene::SCENE->initialiserFenetre() == false)
+	return -1;
+	
+  if(Scene::SCENE->initGL() == false)
+	return -1;
+
+  Scene::SCENE->bouclePrincipale();
+    return 0;
+}

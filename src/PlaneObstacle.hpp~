@@ -1,0 +1,27 @@
+#ifndef PLANE_OBSTACLE_HPP
+#define PLANE_OBSTACLE_HPP
+
+#include "Obstacle.hpp"
+
+class PlaneObstacle : public Obstacle {
+private :
+  float pos;
+  Vector3f normal;
+
+public :
+  PlaneObstacle(float p = 0, Vector3f n = Vector3f(0, 0, 1), Shader *shader = NULL);
+  ~PlaneObstacle();
+
+  void animate();
+  void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
+  
+  float getPosition() const;
+  Vector3f getNormal(Vector3f pos) const;
+  Vector3f getNormal() const;
+  
+  float distance(Vector3f v) const;
+  void getCollisionValues(Vector3f p, float & dist, Vector3f &n) const;
+};
+
+#endif
+ 

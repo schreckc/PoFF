@@ -1,0 +1,24 @@
+#ifndef OBSTACLE_HPP
+#define OBSTACLE_HPP
+
+#include "Particule.hpp"
+
+class Obstacle : public Object {
+
+private :
+  float friction;
+  
+public :
+  Obstacle(Shader *shader = NULL);
+  virtual void animate() = 0;
+  virtual void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL) = 0;
+  
+  virtual float distance(Vector3f v) const = 0;
+  virtual Vector3f getNormal(Vector3f v) const = 0;
+  virtual void getCollisionValues(Vector3f p, float & dist, Vector3f &normal) const = 0;
+
+  float getFriction() const;
+  void setFriction(float f);
+};
+
+#endif

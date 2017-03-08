@@ -1,0 +1,31 @@
+#ifndef MPM_CONF_HPP
+#define MPM_CONF_HPP
+
+#include "Eigen/Core"
+
+namespace mpm_conf {
+  extern unsigned int nb_particules_;
+
+  extern Eigen::Vector3f size_grid_; // meter
+  extern Eigen::Vector3i size_grid_n_; // nb nodes per side
+  extern float grid_spacing_; // m
+
+  extern Eigen::Vector4f hardenning_param_;
+
+  extern float mu_, lambda_;
+  extern float young_modulus_, poisson_;
+  
+  extern float dt_; // s
+  extern Eigen::Vector3f gravity_; // m/s^2
+
+  extern float density_; //kg/m^3 
+
+  extern float friction_coef_;
+
+  extern bool display_sphere_;
+  extern int replay_speed_;
+  
+  void loadConf(std::string file);
+};
+
+#endif

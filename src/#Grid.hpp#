@@ -1,0 +1,61 @@
+#ifndef GRID_HPP
+#define GRID_HPP
+
+#include "Object.hpp"
+
+#include <vector>
+#include <list>
+#include "Eigen/Core"
+#include "Particule.hpp"
+#include "Obstacle.hpp"
+
+using namespace Eigen;
+
+class Grid : public Object {
+
+private :
+  GLfloat* vertices;
+  GLfloat* colors;
+  uint nb_lines;
+
+  float spacing;
+  
+  float x_max, y_max, z_max;
+  uint i_max, j_max, k_max;
+  uint nb_nodes;
+  uint nb_cells;
+
+  std::vector<float> masses;
+  std::vector<bool> active_nodes;
+  std::vector<Vector3f> velocities;
+  std::vector<Vector3f> inter_velocities;
+  std::vector<Vector3f> positions;
+  std::vector<std::list<Particule*> > cells;
+  std::vector<float> distance_collision;
+
+  inline uint index(uint i, uint j, uint k) const;
+  
+public :
+  Grid();
+  Grid(float width, float depth, float height, float space_step, Shader* shader = NULL);
+  
+  void animate();
+  void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
+
+  Vector3f position(uint i, uint j, uint k) const;
+  Vector3f velocity(uint i, uint j, uint k) const;
+  Vector3f & velocity(uint i, uint j, uint k);
+
+  void nextStep(); //reset values in vectors
+
+  void particulesToGrid(std::vector<Particule*> & particules);
+  void gridToParticules(std::vector<Particule*> & particules);
+
+  void initVolumes(std::vector<Particule*> & particules);
+
+  void initCollision(Obstacle *ob);
+  void collision(Obstacle *ob);
+    
+};
+
+#endif

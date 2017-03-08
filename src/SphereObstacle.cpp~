@@ -1,0 +1,124 @@
+#include "SphereObstacle.hpp"
+#include "error.hpp"
+
+SphereObstacle::SphereObstacle(Vector3f p, float r, float ha, Vector3f hn, Shader *shader) : Obstacle(shader){
+  pos = p;
+  ray = r;
+
+  hole_angle = ha;
+  hole_normal = hn;
+  cosangle = cos(hole_angle);
+}
+
+SphereObstacle::~SphereObstacle() {
+}
+
+void SphereObstacle::animate() {
+  //  ray -= 0.0005;
+  //  INFO(3, "ray "<<ray);
+}
+
+void SphereObstacle::draw(glm::mat4 m, Shader *s) {
+  
+  GLfloat lines[18] = {pos(0),  pos(1), pos(2) + ray,    pos(0), pos(1), pos(2) - ray,
+		       pos(0) + ray,  pos(1), pos(2),    pos(0) - ray, pos(1), pos(2),
+		       pos(0),  pos(1) + ray, pos(2),    pos(0), pos(1) - ray, pos(2)};
+  GLfloat colors[18] = {0, 1, 1,     0, 1, 1,
+			0, 1, 1,     0, 1, 1,
+			0, 1, 1,     0, 1, 1};
+
+  enableShader();
+  setMVP(m, s);
+  
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, lines);
+  glEnableVertexAttribArray(0);
+  
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, colors);
+  glEnableVertexAttribArray(1);
+  
+  glDrawArrays(GL_LINES, 0, 6);
+
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
+  
+  disableShader();
+}
+  
+Vector3f SphereObstacle::getPosition() const {
+  return pos;
+}
+
+float SphereObstacle::getRay() const {
+  return ray;
+}
+
+
+Vector3f SphereObstacle::getNormal(Vector3f p) const {
+  // Vector3f n = pos - p;
+  // n.normalize();
+  // return n;
+
+  Vector3f normal;
+  
+  Vector3f n = p - pos;
+  float norm = n.norm();
+  assert(norm != 0);
+  n /= norm;
+
+  normal = -n;
+  
+  float cosalpha = n.dot(hole_normal);
+  if (cosangle < cosalpha) {
+    float alpha = acos(cosalpha);
+    Vector3f axe = hole_normal.cross(n);
+    axe.normalize();
+    AngleAxisf rot = AngleAxisf(hole_angle, axe);
+
+    Vector3f closest = pos + ray * (rot * hole_normal);
+    normal = p - closest;
+    normal.normalize();
+  }
+  return normal;
+}
+
+float SphereObstacle::distance(Vector3f v) const {
+   // Vector3f n = v - pos;
+   // return ray - n.norm();
+
+  float dist;
+  Vector3f n = v - pos;
+  float norm = n.norm();
+  dist = ray - norm;
+  
+  float cosalpha = n.dot(hole_normal);
+  if (cosangle < cosalpha) {
+    dist = sqrt(norm*norm + ray*ray - 2 * norm * ray * cosalpha);
+  }
+
+  return dist;
+}
+
+void SphereObstacle::getCollisionValues(Vector3f p, float & dist, Vector3f &normal) const {
+  Vector3f n = p - pos;
+  float norm = n.norm();
+  assert(norm != 0);
+  n /= norm;
+
+  normal = -n;
+  dist = ray - norm;
+  
+  float cosalpha = n.dot(hole_normal);
+  if (cosangle < cosalpha) {
+    float alpha = acos(cosalpha);
+    Vector3f axe = hole_normal.cross(n);
+    axe.normalize();
+    AngleAxisf rot = AngleAxisf(hole_angle, axe);
+
+    Vector3f closest = pos + ray * (rot * hole_normal);
+    normal = p - closest;
+    normal.normalize();
+
+    dist = sqrt(norm*norm + ray*ray - 2 * norm * ray * cosalpha);
+  }
+
+}

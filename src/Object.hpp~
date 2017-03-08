@@ -1,0 +1,33 @@
+#ifndef OBJECT_HPP
+#define OBJECT_HPP
+
+#include <glm/glm.hpp>
+#ifdef WIN32
+#include <GL/glew.h>
+
+#else
+#define GL3_PROTOTYPES 1
+#include <GLES3/gl3.h>
+
+#endif
+
+class Object {
+  
+protected:
+  int m_texture;
+  int m_shader;
+  glm::mat4 m_model_view;
+
+public:
+Object(int shader = -1, int texture = -1);
+
+  virtual void animate() = 0;
+  virtual void draw() = 0;
+
+  int getTextureID();
+  int getShaderID();
+void getModelView(glm::mat4 & model);
+  
+};
+
+#endif

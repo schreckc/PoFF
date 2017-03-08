@@ -1,0 +1,30 @@
+#ifndef SPHERE_OBSTACLE_HPP
+#define SPHERE_OBSTACLE_HPP
+
+#include "Obstacle.hpp"
+
+class SphereObstacle : public Obstacle {
+private :
+  Vector3f pos;
+  float ray;
+  
+  float hole_angle;
+  Vector3f hole_normal;
+  float cosangle;
+  
+public :
+  SphereObstacle(Vector3f p = Vector3f(0, 0, 0), float r = 1, float hr = 0.0, Vector3f hn = Vector3f(0, 0, 0), Shader *shader = NULL);
+  ~SphereObstacle();
+
+  void animate();
+  void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
+  
+  Vector3f getPosition() const;
+  float getRay() const;
+  Vector3f getNormal(Vector3f p) const;
+   
+  float distance(Vector3f v) const;
+  void getCollisionValues(Vector3f p, float & dist, Vector3f &normal) const;
+};
+
+#endif
