@@ -11,6 +11,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <thread>
 
+#define MAX_STRING_LEN 4
+#include "common.h"
+
 
 using namespace glm;
 
@@ -69,6 +72,7 @@ bool Scene::initialiserFenetre() {
 	
     // Création de la fenêtre
     m_fenetre = SDL_CreateWindow(m_titreFenetre.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_largeurFenetre, m_hauteurFenetre, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+    m_renderer = SDL_CreateRenderer( m_fenetre, -1, SDL_RENDERER_ACCELERATED);
 
     if (m_fenetre == 0) {
         std::cout << "Erreur lors de la creation de la fenetre : " << SDL_GetError() << std::endl;
@@ -102,6 +106,18 @@ bool Scene::initGL() {
 #endif
   glEnable( GL_DEPTH_TEST );
   glDepthFunc(GL_LESS);
+
+  /* Init TTF. */
+  if (TTF_Init()) {
+     fprintf(stderr, "error: cannot init ttf\n");
+        exit(EXIT_FAILURE);
+  }
+    font = TTF_OpenFont("/home/cschreck/Documents/forest/poff/FreeSans.ttf", 60);
+    if (font == NULL) {
+        fprintf(stderr, "error: font not found\n");
+        exit(EXIT_FAILURE);
+    }
+
   return true;
 }
 
@@ -154,6 +170,8 @@ void Scene::init() {
 
   sim = new Simulation(l_shaders[0]);
   l_objects.push_back(sim);
+
+ 
 }
 
 void Scene::animate() {
@@ -172,11 +190,33 @@ void Scene::animate() {
 }
 
 void Scene::draw() {
+   SDL_Color color;
+    SDL_Event event;
+    SDL_Rect rect;
+    SDL_Renderer *renderer;
+
+  /* initialize variables. */
+    color.r = 0;
+    color.g = 0;
+    color.b = 0;
+    color.a = COMMON_COLOR_MAX;
+     char text[MAX_STRING_LEN];
+ 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
- 
-  std::list<Object*>::iterator it;
-  
+
+   std::list<Object*>::iterator it;
+
+   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+     SDL_RenderClear(renderer);
+     render_text(renderer, 0, 0,               "hello", font, &rect, &color);
+     render_text(renderer, 0, rect.y + rect.h, "world", font, &rect, &color);
+     snprintf(text, MAX_STRING_LEN, "%u", (unsigned int)(time(NULL) % 1000));
+     render_text(renderer, 0, rect.y + rect.h, text, font, &rect, &color);
+     SDL_RenderPresent(renderer);
+
+     //     common_fps_update_and_print();
+   
   for (it = l_objects.begin(); it != l_objects.end(); ++it) {
       (*it)->draw();
   }
@@ -213,7 +253,16 @@ void Scene::animationLoop() {
       ++back;
     }
     if(m_input.getTouche(SDL_SCANCODE_S) ) {
-      mpm_conf::display_sphere_ = !mpm_conf::display_sphere_;
+          mpm_conf::display_sphere_ = !mpm_conf::display_sphere_;
+	   if (mpm_conf::display_sphere_) {
+	     INFO(1, "Display sphere");
+	  //   QString text = QString("Display sphere");
+	  //   displayMessage(text);
+	  } else {
+	      INFO(1, "Do not display sphere");
+	  //   QString text = QString("Do not display sphere");
+	  //   displayMessage(text);
+	   }
     }
      if(m_input.getTouche(SDL_SCANCODE_KP_PLUS) ) {
        if (mpm_conf::replay_speed_ >= 1) {
@@ -223,6 +272,10 @@ void Scene::animationLoop() {
        } else {
 	 assert( mpm_conf::replay_speed_ == -1);
 	 mpm_conf::replay_speed_ = 1;
+	 INFO(1, "Speed x"<<mpm_conf::replay_speed_);
+	 // QString text = QString("Speed x");
+	 // text += QString::number(mpm_conf::replay_speed_);
+	 // displayMessage(text); 
        }
     }
      if(m_input.getTouche(SDL_SCANCODE_KP_MINUS) ) {
@@ -234,6 +287,10 @@ void Scene::animationLoop() {
 	 assert( mpm_conf::replay_speed_ == 1);
 	 mpm_conf::replay_speed_ = -1;
        }
+	 INFO(1, "Speed x"<<mpm_conf::replay_speed_);
+	 // QString text = QString("Speed x");
+	 // text += QString::number(mpm_conf::replay_speed_);
+	 // displayMessage(text); 
     }
     m_camera.deplacer(m_input);
 
@@ -266,9 +323,9 @@ void Scene::bouclePrincipale() {
     animate();
     draw();
 
-    if (t > 20000) {
-        end_ = true;
-      }
+    // if (t > 20000) {
+    //     end_ = true;
+    //   }
 
     Times::TIMES->tock(Times::total_time_);
      if (running) {
@@ -313,6 +370,9 @@ void Scene::setImport(std::string s) {
   sim->setImport(s);
 }
 
+void Scene::setScene(std::string s) {
+  sim->setScene(s);
+}
 
 void Scene::setRun(bool run) {
   if (running) {
@@ -355,4 +415,36 @@ bool saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_Renderer
         infoSurface = NULL;
     }
     return true;
+}
+
+
+
+/*
+- x, y: upper left corner of string
+- rect output Width and height contain rendered dimensions.
+*/
+void render_text(
+    SDL_Renderer *renderer,
+    int x,
+    int y,
+    const char *text,
+    TTF_Font *font,
+    SDL_Rect *rect,
+    SDL_Color *color
+) {
+    SDL_Surface *surface;
+    SDL_Texture *texture;
+
+    surface = TTF_RenderText_Solid(font, text, *color);
+    texture = SDL_CreateTextureFromSurface(renderer, surface);
+    rect->x = x;
+    rect->y = y;
+    rect->w = surface->w;
+    rect->h = surface->h;
+    /* This is wasteful for textures that stay the same.
+     * But makes things less stateful and easier to use.
+     * Not going to code an atlas solution here... are we? */
+    SDL_FreeSurface(surface);
+    SDL_RenderCopy(renderer, texture, NULL, rect);
+    SDL_DestroyTexture(texture);
 }

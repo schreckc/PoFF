@@ -5,7 +5,7 @@
 using namespace Eigen;
 
 namespace mpm_conf {
-  unsigned int nb_particules_ = 1000;
+  //  unsigned int nb_particules_ = 1000;
 
   VEC3 size_grid_ = VEC3(1.0, 1.0, 1.0);
   Vector3i size_grid_n_ = Vector3i(200, 200, 200); 
@@ -27,6 +27,11 @@ namespace mpm_conf {
 
   bool display_sphere_ = false;
   int replay_speed_ = 1;
+
+  uint mode_ = 0;
+  bool plasticity_ = true;
+
+  FLOAT damping_ = 1;
   
   void loadConf(std::string path_file) {
     std::ifstream file(path_file.c_str());
@@ -40,8 +45,8 @@ namespace mpm_conf {
 	if (line.substr(0,1) == "#") {
 	  INFO(2, line);
 	} else if (line.substr(0,9) == "<nb_part>") {
-	  std::istringstream s(line.substr(9));
-	  s >> nb_particules_;
+	  // std::istringstream s(line.substr(9));
+	  // s >> nb_particules_;
 	} else if (line.substr(0,11) == "<grid_size>") {
 	  std::istringstream s(line.substr(11));
 	  for (uint i = 0; i < 3; ++i) {
@@ -93,6 +98,15 @@ namespace mpm_conf {
 	}  else if (line.substr(0,16) == "<display_sphere>") {
 	  std::istringstream s(line.substr(16));
 	  s >> display_sphere_;
+	}  else if (line.substr(0,6) == "<mode>") {
+	  std::istringstream s(line.substr(6));
+	  s >> mode_;
+	}  else if (line.substr(0,12) == "<plasticity>") {
+	  std::istringstream s(line.substr(12));
+	  s >> plasticity_;
+	}  else if (line.substr(0,9) == "<damping>") {
+	  std::istringstream s(line.substr(9));
+	  s >> damping_;
 	} else {
 	  ERROR(false, "Invalid configuration file \""<<path_file<<"\"", line);
 	}

@@ -15,6 +15,7 @@ private :
   std::string conf_file;
   std::string import_path;
   std::string export_path;
+  std::string scene_path;
   bool import_;
   bool export_;
   bool load_conf_;
@@ -47,11 +48,15 @@ public :
   void setLoad(std::string s);
   void setExport(std::string s);
   void setImport(std::string s);
-
+  void setScene(std::string s);
+  
   void backward(uint n);
   //TODO
   void initPoissonSampling(uint i1, uint i2, uint j1, uint j2, uint k1, uint k2);
+
+  friend void loadScene(std::string file, Simulation *sim);
 };
+
 
 
 #endif

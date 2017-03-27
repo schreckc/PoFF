@@ -11,7 +11,7 @@
 #include "Eigen/Core"
 
 namespace mpm_conf {
-  extern unsigned int nb_particules_;
+  //  extern unsigned int nb_particules_;
 
   extern Eigen::VEC3 size_grid_; // meter
   extern Eigen::Vector3i size_grid_n_; // nb nodes per side
@@ -31,6 +31,11 @@ namespace mpm_conf {
 
   extern bool display_sphere_;
   extern int replay_speed_;
+
+  extern unsigned int mode_; //0 sand, 1 snow
+  extern bool plasticity_;
+
+  extern FLOAT damping_;
   
   void loadConf(std::string file);
 };

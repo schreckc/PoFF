@@ -1,4 +1,5 @@
 #include "BoxObstacle.hpp"
+#include "error.hpp"
 
 BoxObstacle::BoxObstacle(VEC3 min_p, VEC3 max_p, Shader *shader) : Obstacle(shader), min_pos(min_p), max_pos(max_p) {
 
@@ -10,7 +11,7 @@ void BoxObstacle::animate() {}
 void BoxObstacle::draw(glm::mat4 m, Shader *s) {
   
    GLfloat ext_vert[72];
-  for (uint l = 0; l < 3; ++l) {
+   //for (uint l = 0; l < 3; ++l) {
     ext_vert[0] = min_pos(0);
     ext_vert[1] = min_pos(1);
     ext_vert[2] = min_pos(2);
@@ -95,7 +96,7 @@ void BoxObstacle::draw(glm::mat4 m, Shader *s) {
     ext_vert[69] = max_pos(0);
     ext_vert[70] = max_pos(1);
     ext_vert[71] = min_pos(2);
-  }
+    //  }
   GLfloat ext_col[72];
   for (uint l = 0; l < 72; l+=3) {
     ext_col[l] = 0;
@@ -120,6 +121,7 @@ void BoxObstacle::draw(glm::mat4 m, Shader *s) {
   glDisableVertexAttribArray(1);
 
   disableShader();
+  //  INFO(3, "BOX\n"<<min_pos<<"\n\n"<<max_pos);
 }
 
 VEC3 BoxObstacle::getNormal(VEC3 p) const {

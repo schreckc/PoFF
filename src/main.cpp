@@ -40,6 +40,13 @@ int main(int argc, char **argv) {
       std::cout<<"export"<<" "<<argv[i+1]<<std::endl;
       Scene::SCENE->setExport(argv[i+1]);
       ++i;
+    } else if (s == "-s") {
+      if (argc < i + 2) {
+	help();
+      }
+      std::cout<<"loading scene"<<" "<<argv[i+1]<<std::endl;
+      Scene::SCENE->setScene(argv[i+1]);
+      ++i;
     } else if (s == "-r") {
       Scene::SCENE->setRun(true);
     }

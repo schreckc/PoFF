@@ -107,6 +107,7 @@ void Grid::animate() {
 }
 
 void Grid::draw(glm::mat4 m, Shader *s) {
+  if (!positions.empty()) {
   GLfloat ext_vert[72];
   for (uint l = 0; l < 3; ++l) {
     ext_vert[l] = positions[index(0, 0, 0)](l);
@@ -228,7 +229,7 @@ void Grid::draw(glm::mat4 m, Shader *s) {
        }
      }
   }
-  
+  }
 }
 
 VEC3 Grid::position(uint i, uint j, uint k) const {
@@ -348,7 +349,7 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 	  velocities[ind] /= masses[ind];
 	  //	  inter_velocities[ind] = velocities[ind];//particules.front()->gradWeight(Vector3i(i, j, k));
 	  velocities[ind] += mpm_conf::dt_*mpm_conf::gravity_;
-
+	  velocities[ind] *= mpm_conf::damping_;
 	  inter_velocities[ind] = -f;//particules.front()->gradWeight(Vector3i(i, j, k));
 
 	}

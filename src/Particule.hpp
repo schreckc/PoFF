@@ -31,11 +31,13 @@ private :
   FLOAT alpha; //parametrize the yield surface
   FLOAT hardenning;
 
+  VEC3 normal;
+
  mutable MAT3 forceIncrement;
   
 public:
   Particule(Shader* shader = NULL);
-  Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 vel = VEC3(0, 0, 0), Shader* shader = NULL);
+  Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n = VEC3(0, 0, 0), VEC3 vel = VEC3(0, 0, 0), Shader* shader = NULL);
 
     
   void animate();

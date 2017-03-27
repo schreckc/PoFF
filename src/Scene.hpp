@@ -21,6 +21,7 @@
 #include "CameraObject.hpp"
 #include "Object.hpp"
 #include "Simulation.hpp"
+#include <SDL2/SDL_ttf.h>
 
 class Scene {
 public:
@@ -47,6 +48,7 @@ public:
   void setLoad(std::string);
   void setExport(std::string);
   void setImport(std::string);
+  void setScene(std::string);
 
   void setRun(bool run);
   
@@ -63,7 +65,10 @@ private:
   int m_hauteurFenetre;
 
   SDL_Window* m_fenetre;
-  SDL_GLContext m_contexteOpenGL;	
+  SDL_GLContext m_contexteOpenGL;
+  SDL_Renderer* m_renderer;
+  TTF_Font *font;
+  
   //  SDL_Event m_evenements;
 
   Input m_input;
@@ -85,5 +90,13 @@ private:
   unsigned int m_input_rate;
   Uint32 m_input_loop0, m_input_loop1, m_input_loop_time;
 };
+
+void render_text(SDL_Renderer *renderer,
+    int x,
+    int y,
+    const char *text,
+    TTF_Font *font,
+    SDL_Rect *rect,
+    SDL_Color *color);
 
 #endif
