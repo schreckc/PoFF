@@ -22,6 +22,7 @@ namespace mpm_conf {
   VEC3 gravity_ = VEC3(0.0, 0.0, -0.01); 
 
   FLOAT density_ = 150.0; //sable 1530 kg/m^3
+  FLOAT lim_density_ = density_/2.0;
 
   FLOAT friction_coef_ = 1.0;
 
@@ -31,7 +32,13 @@ namespace mpm_conf {
   uint mode_ = 0;
   bool plasticity_ = true;
 
-  FLOAT damping_ = 1;
+  FLOAT damping_ = 0;
+  FLOAT cheat_damping_ = 1;
+  bool smooth_vel_ = 0;
+
+  uint method_ = apic_;
+
+  uint export_step_ = 1;
   
   void loadConf(std::string path_file) {
     std::ifstream file(path_file.c_str());
@@ -107,13 +114,35 @@ namespace mpm_conf {
 	}  else if (line.substr(0,9) == "<damping>") {
 	  std::istringstream s(line.substr(9));
 	  s >> damping_;
+	}  else if (line.substr(0,15) == "<cheat_damping>") {
+	  std::istringstream s(line.substr(15));
+	  s >> cheat_damping_;
+	}  else if (line.substr(0,17) == "<smooth_velocity>") {
+	  std::istringstream s(line.substr(17));
+	  s >> smooth_vel_;
+	}  else if (line.substr(0,8) == "<method>") {
+	  std::istringstream s(line.substr(9));
+	  std::string method;
+	  getline(s, method);
+	  if (method.substr(0, 4) == "apic" || method.substr(0, 1) == "0" ) { 
+	    method_ = apic_;
+	  } else if (method.substr(0, 3) == "pic" || method.substr(0, 1) == "1" ) {
+	    method_ = pic_;
+	  } else if (method.substr(0, 4) == "flip" || method.substr(0, 1) == "2" ) {
+	    method_ = flip_;
+	  } else if (method.substr(0, 3) == "mix" || method.substr(0, 1) == "3" ) {
+	    method_ = mix_;
+	  } else {
+	    ERROR(false, "Invalid configuration file \""<<path_file<<"\"", method);
+	  }
+	  INFO(3, "METHOD "<<method_);
 	} else {
 	  ERROR(false, "Invalid configuration file \""<<path_file<<"\"", line);
 	}
       }
       if (young_mod_def) {
-	mu_ = young_modulus_*poisson_/((1+poisson_)*(1-2*poisson_));
-	lambda_ = young_modulus_/(2*(1+poisson_));
+	lambda_ = young_modulus_*poisson_/((1+poisson_)*(1-2*poisson_));
+	mu_ = young_modulus_/(2*(1+poisson_));
 	WARNING(mu_def, "both Lame parameters and Young's modulus and/or Poisson ratio defined: using Young's modulus and Poisson ratio values",
 		young_modulus_<<" "<<poisson_<<" "<<mu_<<" "<<lambda_);
       }

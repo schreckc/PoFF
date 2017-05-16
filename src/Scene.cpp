@@ -1,6 +1,8 @@
 #include "Scene.hpp"
 #include "Cube.hpp"
 #include "Sphere.hpp"
+#include "CylinderObstacle.hpp"
+#include "Cylinder.hpp"
 #include "Simulation.hpp"
 #include "error.hpp"
 #include "Times.hpp"
@@ -55,21 +57,21 @@ Scene::~Scene() {
 
 bool Scene::initialiserFenetre() {
     // Initialisation de la SDL
-	
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cout << "Erreur lors de l'initialisation de la SDL : " << SDL_GetError() << std::endl;
         SDL_Quit();
         return false;
     }
-	
+
     // Version d'OpenGL
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-	
+
     // Double Buffer
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-	
+    std::cout<<"init buffer"<< std::endl;
+    
     // Création de la fenêtre
     m_fenetre = SDL_CreateWindow(m_titreFenetre.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_largeurFenetre, m_hauteurFenetre, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
     m_renderer = SDL_CreateRenderer( m_fenetre, -1, SDL_RENDERER_ACCELERATED);
@@ -88,7 +90,6 @@ bool Scene::initialiserFenetre() {
         SDL_Quit();
         return false;
     }
-
     return true;
 }
 
@@ -123,6 +124,7 @@ bool Scene::initGL() {
 
 void Scene::init() {
   Sphere::create_array();
+  Cylinder::create_array();
   
   l_shaders = std::vector<Shader*>(3);
   l_shaders[0] = new Shader("shaders/simple.vert", "shaders/simple.frag");
@@ -165,13 +167,13 @@ void Scene::init() {
   back = 0;
 
   t = 0;
+  stop = 1000000;
   
   Times::TIMES->init();
 
   sim = new Simulation(l_shaders[0]);
   l_objects.push_back(sim);
 
- 
 }
 
 void Scene::animate() {
@@ -179,6 +181,7 @@ void Scene::animate() {
   m_vp = m_projection * m_view;
   
   if (running || step_by_step > 0) {
+    ++t;
   std::list<Object*>::iterator it;
   for (it = l_objects.begin(); it != l_objects.end(); ++it) {
     (*it)->animate();
@@ -306,9 +309,11 @@ void Scene::bouclePrincipale() {
   std::thread t1(animateScene);
   sim->init();
   FLOAT spacing =  mpm_conf::grid_spacing_;
+
+ 
+  
   while(!end_) {
     m_debutBoucle = SDL_GetTicks();
-    ++t;
     if (re_init) {
       sim->clear();
       sim->init();
@@ -323,9 +328,9 @@ void Scene::bouclePrincipale() {
     animate();
     draw();
 
-    // if (t > 20000) {
-    //     end_ = true;
-    //   }
+    if (t > stop) {
+      end_ = true;
+    }
 
     Times::TIMES->tock(Times::total_time_);
      if (running) {
@@ -381,6 +386,10 @@ void Scene::setRun(bool run) {
     INFO(1, "RUN ANIMATION");
   }
   running = run;
+}
+
+void Scene::setStop(uint t_end) {
+  stop = t_end;
 }
 
 bool saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_Renderer* SDLRenderer) {

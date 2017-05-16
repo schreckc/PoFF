@@ -1,9 +1,4 @@
 <obstacles>
- <sphere>
-  <center> 0.3 0.3 0.5
-  <ray> 0.3
-  <friction> 1
- </sphere>
  <plane>
   <pos> 0.15
   <normal> 0 0 1
@@ -14,10 +9,10 @@
  </box>
 </obstacles>
 <particules>
- <cuboid> 
-  <x> 0.45 0.55
-  <y> 0.45 0.55
-  <z> 0.4 0.5
-  <nb particules> 1000
- </cuboid>
+ <sphere> 
+  <center> 0.5 0.5 0.2
+  <ray> 0.2
+  <nb particules> 10000
+  <velocity> 0 0 -2
+ </sphere>
 </particules>

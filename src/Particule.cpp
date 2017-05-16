@@ -1,11 +1,9 @@
 #include "Particule.hpp"
-
 #include "Sphere.hpp"
 #include "Scene.hpp"
 #include "Grid.hpp"
 #include "Simulation.hpp"
 #include "error.hpp"
-#include "mpm_conf.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
@@ -19,7 +17,7 @@ Particule::Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n, VEC3 velo, Shader* s
   FLOAT h = mpm_conf::grid_spacing_;
   cell = Vector3i((int)(p(0)/h), (int)(p(1)/h), (int)(p(2)/h));
 
-  //INFO(3, cell);//((int)(p(0)/Grid::spacing))<<", "<< ((int)(p(1)/Grid::spacing))<<", "<< ((int)(p(2)/Grid::spacing)));
+  //  INFO(3, velo);//((int)(p(0)/Grid::spacing))<<", "<< ((int)(p(1)/Grid::spacing))<<", "<< ((int)(p(2)/Grid::spacing)));
   m_model_view = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)));
   B = MAT3::Zero();
   forceIncrement = MAT3::Zero();
@@ -33,7 +31,26 @@ Particule::Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n, VEC3 velo, Shader* s
     normal = VEC3((FLOAT)rand()/(FLOAT)RAND_MAX - 0.5, (FLOAT)rand()/(FLOAT)RAND_MAX - 0.5, (FLOAT)rand()/(FLOAT)RAND_MAX - 0.5);
     normal.normalize();
   }
+
+  axex = VEC3(1, 0, 0);
+  axey = VEC3(0, 1, 0);
+  axez = VEC3(0, 0, 1);
+
+  valx = 1;
+  valy = 1;
+  valz = 1;
+
+  ellipse << 1, 0, 0,
+    0, 1, 0,
+    0, 0, 1;
+
+  rotation << 1, 0, 0,
+    0, 1, 0,
+    0, 0, 1;
+
+  color = VEC3(1, 1, 1);
 }
+
 
 void Particule::animate() {
   //  m_model_view = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)));
@@ -43,12 +60,61 @@ void Particule::draw(glm::mat4 m, Shader *s) {
   /* draw spheres */
   m_model_view = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)));
   if (mpm_conf::display_sphere_) {
-    Sphere sp(500*v0, m_shader);
+      //   MAT3 F =  F_e*F_p;
+      //   HouseholderQR<MAT3> decomp(F);
+      // 	MAT3 Q = decomp.householderQ();
+
+      // 	// MAT3 Q = 0.5*(F + F.transpose());
+ 
+    
+    VEC3 x = axex;
+    VEC3 y = axey;
+    VEC3 z = axez;
+    
+      //  x.normalize();
+      //  y.normalize();
+      //  z.normalize();
+   
+      glm::mat3 R;
+      R[0] = glm::vec3(x[0], x[1], x[2]);
+      R[1] = glm::vec3(y[0], y[1], y[2]);
+      R[2] = glm::vec3(z[0], z[1], z[2]);
+    
+      glm::mat3 D;
+      // D[0] = glm::vec3(valx, 0, 0);
+      // D[1] = glm::vec3(0, valy, 0);
+      // D[2] = glm::vec3(0, 0, valz);
+    
+
+      glm::mat3 S = R*D;
+      glm::mat4 S4 = glm::mat4(S);
+
+    // // //       HouseholderQR<MAT3> decomp(ellipse);
+    // MAT3 Q =  ellipse;//decomp.householderQ();
+    // glm::mat3 S(Q(0, 0), Q(1, 0), Q(2, 0),
+    // 		Q(0, 1), Q(1, 1), Q(2, 1),
+    // 		Q(0, 2), Q(1, 2), Q(2, 2));
+    // glm::mat4 S4 = glm::mat4(S);
+
+    // MAT3 Q;
+    // Q <<1, 0, 0,
+    //   0, 0, -1,
+    //   0, 1, 0;
+    // Q *= ellipse;
+    //  glm::mat3 S(Q(0, 0), Q(1, 0), Q(2, 0),
+    //      		Q(0, 1), Q(1, 1), Q(2, 1),
+    //      		Q(0, 2), Q(1, 2), Q(2, 2));
+    //        glm::mat4 S4 = glm::mat4(S);
+
+    //INFO(3, x<<"\n\n"<<y<<"\n\n"<<z);
+    
+    Sphere sp(0.01, m_shader);
+    sp.setColor(color(0), color(1), color(2));
     Shader *cur_shader = m_shader;
     if (m_shader == NULL) {
       cur_shader = s;
     }
-    glm::mat4 cur_model = m * m_model_view;
+    glm::mat4 cur_model = m * m_model_view * S4;
     sp.draw(cur_model, cur_shader);
 
   //   glLineWidth(3.0f);
@@ -81,7 +147,7 @@ void Particule::draw(glm::mat4 m, Shader *s) {
   /* draw velocity */
   // glLineWidth(3.0f);
   // m_shader = Scene::SCENE->getShader(2);
-  // GLfloat vel_line[6] = {0, 0, 0, 0.001*vel(0), 0.001*vel(1), 0.001*vel(2)};
+  // GLfloat vel_line[6] = {0, 0, 0, mpm_conf::dt_*vel(0), mpm_conf::dt_*vel(1), mpm_conf::dt_*vel(2)};
   // GLfloat vel_color[6] = {0, 0, 0, 0, 0, 0};
   // enableShader();
   // setMVP(m, s);
@@ -98,7 +164,7 @@ void Particule::draw(glm::mat4 m, Shader *s) {
   // glDisableVertexAttribArray(1);
 
   // disableShader();
-  // m_shader = cur_shader;
+  //  m_shader = cur_shader;
 
   // /* draw points */
   GLfloat vertex[6] = {0, 0, 0};//{pos(0), pos(1), pos(2)};
@@ -169,6 +235,15 @@ Vector3i Particule::getCell() const {
   return cell;
 }
 
+
+void Particule::setDensity(FLOAT d) {
+  density = d;
+}
+
+
+void Particule::setColor(FLOAT r, FLOAT g, FLOAT b) {
+  color = VEC3(r, g, b);
+}
 
 MAT3 Particule::getDeformationElastic() const {
   return F_e;
@@ -317,29 +392,40 @@ VEC3 Particule::gradWeight(Vector3i node) {
 }
 
 void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
-  pos = p;
+  if (mpm_conf::method_ == mpm_conf::apic_) {
+    pos = p;
+  } else {
+    pos += mpm_conf::dt_*v;
+  }
   vel = v;
-  //   pos = pos + mpm_conf::dt_*vel;
-  FLOAT h = mpm_conf::grid_spacing_;
+   FLOAT h = mpm_conf::grid_spacing_;
   cell = Vector3i((int)(pos(0)/h), (int)(pos(1)/h), (int)(pos(2)/h));
   B = b;
   F_e *= (MAT3::Identity() + mpm_conf::dt_*t);
-  // INFO(3, "vel "<<vel(0)<<", "<<vel(1)<<", "<<vel(2));
+
+  //ellipse += mpm_conf::dt_*(ellipse*t.transpose() + t*ellipse);
+
+  //INFO(3, "vel "<<vel(0)<<", "<<vel(1)<<", "<<vel(2));
   //INFO(3, "pos "<<pos(0)<<", "<<pos(1)<<", "<<pos(2));
   // INFO(3, cell);//((int)(p(0)/Grid::spacing))<<", "<< ((int)(p(1)/Grid::spacing))<<", "<< ((int)(p(2)/Grid::spacing)));
-  // INFO(3, F_p);
+  //   INFO(3, F_e);
    
+  // EigenSolver<MAT3> solver(F_e);
+  // INFO(3, solver.eigenvalues());
+  //  VEC3 ev = solver.eigenvalues();
+
   
   JacobiSVD<MATX> svd(F_e, ComputeThinU | ComputeThinV);
   MAT3 U = svd.matrixU();
   MAT3 V = svd.matrixV();
   VEC3 T(0, 0, 0);
   VEC3 sigma = svd.singularValues();
+  // INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
   if (mpm_conf::plasticity_) {  
     
     FLOAT plastic_def;
     project(sigma, alpha, T, plastic_def);
-    // INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
+    //    INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
     
     MAT3 inv_T = MAT3::Zero();
     MAT3 T_m =  MAT3::Zero();
@@ -350,10 +436,10 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
       T_m(i, i) = T(i);
       TEST(T(i) != 0);
       if (T(i) != 0) {
-	inv_T(i, i) = 1.0/T(i);
-	det_Fp *= sigma(i)*inv_T(i, i);
+  	inv_T(i, i) = 1.0/T(i);
+  	det_Fp *= sigma(i)*inv_T(i, i);
       } else {
-	det_Fp = 0;
+  	det_Fp = 1;
       }
       sigma_m(i, i) = sigma(i);
     }
@@ -379,6 +465,8 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   } else {
     forceIncrement = v0*U*energyDerivative(sigma)*V.transpose()*F_e.transpose();
   }
+  
+  // INFO(3, "force incr\n "<<forceIncrement);
 }
 
 void Particule::initVolume(FLOAT d) {
@@ -414,7 +502,7 @@ MAT3 Particule::energyDerivative(VEC3 sigma) {
 }
 
 
-void project(VEC3 sigma, FLOAT alpha, VEC3 & T, FLOAT & plastic_def) {
+void Particule::project(VEC3 sigma, FLOAT alpha, VEC3 & T, FLOAT & plastic_def) {
   if (mpm_conf::mode_ == 0) {
     VEC3 ln_sigma(0, 0, 0);
     VEC3 dev_ln_sigma(0, 0, 0);
@@ -454,16 +542,154 @@ void project(VEC3 sigma, FLOAT alpha, VEC3 & T, FLOAT & plastic_def) {
       }
     }
   } else if (mpm_conf::mode_ == 1) {
-    double smax = mpm_conf::hardenning_param_(1);//1 + 7.5e-3;
-    double smin = mpm_conf::hardenning_param_(2);//1 - 2.5e-2;
-    for (uint i = 0; i < 3; ++i) {
-      T(i) = sigma(i);
-      if (sigma(i) < smin) {
-	T(i) = smin;
-      } else if (sigma(i) > smax) {
-       	T(i) = smax;
+    if (density > 0.5*mpm_conf::density_) {
+      double smax = mpm_conf::hardenning_param_(1);//1 + 7.5e-3;
+      double smin = mpm_conf::hardenning_param_(2);//1 - 2.5e-2;
+      
+      // INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
+      for (uint i = 0; i < 3; ++i) {
+	T(i) = sigma(i);
+	if (sigma(i) < smin) {
+	  T(i) = smin;
+	  //  T(i) = 1;
+	} else if (sigma(i) > smax) {
+	  T(i) = smax;
+	  //T(i) = 1;
+	}
       }
-    }
+     } else {
+       for (uint i = 0; i < 3; ++i) {
+     	T(i) = 1;
+       }
+     }
     plastic_def = 0;
   }
+  
 }
+
+
+
+ //anisotropy
+void Particule::setAnisotropyAxes(VEC3 x, VEC3 y, VEC3 z) {
+  axex = x;
+  axez = x.cross(y);
+  axey = axez.cross(x);
+  
+  axex.normalize();
+  axey.normalize();
+  axez.normalize();
+
+  // glm::mat3 R;
+  // R[0] = glm::vec3(axex[0], axex[1], axex[2]);
+  // R[1] = glm::vec3(axey[0], axey[1], axey[2]);
+  // R[2] = glm::vec3(axez[0], axez[1], axez[2]);
+    
+  // glm::mat3 D;
+  // D[0] = glm::vec3(valx, 0, 0);
+  // D[1] = glm::vec3(0, valy, 0);
+  // D[2] = glm::vec3(0, 0, valz);
+
+  // ellipse = transpose(R)*D*R;
+
+  MAT3 R;
+  R.col(0) = axex;
+  R.col(1) = axey;
+  R.col(2) = axez;
+
+  //TODO check this
+  rotation = R;
+    
+  MAT3 D;
+  D.col(0) << valx, 0, 0;
+  D.col(1) << 0, valy, 0;
+  D.col(2) << 0, 0, valz;
+
+  // ellipse = R.transpose()*D*R;
+  ellipse = R*D;
+}
+
+void Particule::setAnisotropyValues(FLOAT vx, FLOAT vy, FLOAT vz) {
+  valx = vx;
+  valy = vy;
+  valz = vz;
+
+  MAT3 R;
+  R.col(0) = axex;
+  R.col(1) = axey;
+  R.col(2) = axez;
+
+  //TODO check this
+  rotation = R;
+    
+  MAT3 D;
+  D.col(0) << valx, 0, 0;
+  D.col(1) << 0, valy, 0;
+  D.col(2) << 0, 0, valz;
+
+  //  ellipse = R.transpose()*D*R;
+  ellipse = R*D;
+}
+
+
+
+
+void Particule::rotate(MAT3 rot) {
+  ellipse = rot*ellipse;
+
+  axex = rot*axex;
+  axey = rot*axey;
+  axez = rot*axez;
+
+  rotation = rot*rotation;
+}
+
+MAT3 Particule::getRotation() const {
+  return rotation;
+}
+
+VEC3 Particule::getAnisotropy() const {
+  return VEC3(valx, valy, valz);
+}
+
+void Particule::anisotropicProject(MAT3 &T) {
+  MAT3 rotF = rotation.transpose()*F_e;
+  JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
+  MAT3 U = svd.matrixU();
+  MAT3 V = svd.matrixV();
+  VEC3 sigma = svd.singularValues();
+
+  VEC3 smax(1, 1.0075, 1.0075);
+  VEC3 smin(9.975, 10.0, 10.0);
+  
+  for (uint i = 0; i < 3; ++i) {
+    VEC3 v = sigma(i)*U.col(i);
+    VEC3 vmin;
+    VEC3 vmax;
+    for (uint k = 0; k < 3; ++k) {
+      vmax(k) = v(k) / smax(k);
+      vmin(k) = v(k) / smin(k);
+    }
+    if (vmax.squaredNorm() > 1) {
+      vmax.normalize();
+      for (uint k = 0; k < 3; ++k) {
+	v(k) = vmax(k) * smax(k);
+      }
+      sigma(i) = v.norm();
+    } else if (vmin.squaredNorm() < 1) {
+      vmin.normalize();
+      for (uint k = 0; k < 3; ++k) {
+	v(k) = vmin(k) * smin(k);
+      }
+      sigma(i) = v.norm();
+    }
+  }
+ 
+  MAT3 sigma_m =  MAT3::Zero();
+   for (uint i = 0; i < 3; ++i) {
+     sigma_m(i, i) = T(i);
+   }
+
+   T = rotation*U*sigma_m*V.transpose();
+    
+}
+

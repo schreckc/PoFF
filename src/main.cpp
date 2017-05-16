@@ -1,56 +1,92 @@
 #include "Scene.hpp"
+#include "mpm_conf.hpp"
+#include "error.hpp"
 
 void help() {
-  std::cout<<"help: "<<std::endl;
+  std::cout<<"\n     *** PILES OF STUFFS: Help ***\n"<<std::endl;
+  std::cout<<"Synopsis: \n     .\\poff <options>\n\nOptions:"<<std::endl;
+  std::cout<<"     -l, -load <file>: load configuration file"<<std::endl;
+  std::cout<<"     -s, -scene <file>: load scene from file"<<std::endl;
+  std::cout<<"     -e, -export <name>: export animation in a set of files <name><frame number>.obj"<<std::endl;
+  std::cout<<"     -i, -import <name>: import animation from a set of files <name><frame number>.obj"<<std::endl;
+  std::cout<<"     -stop <t>: stop animation and exit at time t"<<std::endl;
+  std::cout<<"     -es, -export_step <n>: export every n frames"<<std::endl;
+  std::cout<<"     -r, -run: run directly the animation"<<std::endl;
+  std::cout<<"     -h, -help: print help\n"<<std::endl;
   exit(0);
 }
 
 int main(int argc, char **argv) {
 	
   //  Scene scene("test", 2400, 1800);
-	
   if(Scene::SCENE->initialiserFenetre() == false)
-	return -1;
-	
-  if(Scene::SCENE->initGL() == false)
-	return -1;
-  
+    return -1;  
   Scene::SCENE->init();
 
   for (int i = 1;  i < argc; ++i) {
     std::string s(argv[i]);
-    if (s == "-l") {
+    //    INFO(3, s);
+    if (s == "-l" || s == "-load") {
       if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
 	help();
       }
-      std::cout<<"load"<<" "<<argv[i+1]<<std::endl;
+      std::cout<<"Loading configuration file:"<<" "<<argv[i+1]<<std::endl;
       Scene::SCENE->setLoad(argv[i+1]);
       ++i;
-    } else if (s == "-i") {
+    } else if (s == "-i" || s == "-import") {
       if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
 	help();
       }
-      std::cout<<"import"<<" "<<argv[i+1]<<std::endl;
-       Scene::SCENE->setImport(argv[i+1]);
+      std::cout<<"Importing"<<" "<<argv[i+1]<<std::endl;
+      Scene::SCENE->setImport(argv[i+1]);
       ++i;
     } else if (s == "-e") {
       if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
 	help();
       }
-      std::cout<<"export"<<" "<<argv[i+1]<<std::endl;
+      std::cout<<"Exporting"<<" "<<argv[i+1]<<std::endl;
       Scene::SCENE->setExport(argv[i+1]);
       ++i;
-    } else if (s == "-s") {
+    } else if (s == "-s" || s == "-scene") {
       if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
 	help();
       }
-      std::cout<<"loading scene"<<" "<<argv[i+1]<<std::endl;
+      std::cout<<"Loading scene"<<" "<<argv[i+1]<<std::endl;
       Scene::SCENE->setScene(argv[i+1]);
       ++i;
-    } else if (s == "-r") {
+    } else if (s == "-r" || s == "-run") {
       Scene::SCENE->setRun(true);
+    } else if (s == "-stop") {
+      if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+	help();
+      }
+      std::cout<<"Stop at t = "<<argv[i+1]<<std::endl;
+      Scene::SCENE->setStop(atoi(argv[i+1]));
+      ++i;
+    } else if (s == "-export_step" || s == "-es") {
+      if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+	help();
+      }
+      std::cout<<"Export every "<<argv[i+1]<<" steps"<<std::endl;
+      mpm_conf::export_step_ = atoi(argv[i+1]);
+      ++i;
+    } else if (s == "-h" || s == "-help") {
+      help();
+    } else {
+      std::cerr<<"\nERROR: Unknown option\n"<<std::endl;
+      help();
     }
   }
+  
+  if(Scene::SCENE->initGL() == false)
+    return -1;
+  
   Scene::SCENE->bouclePrincipale();
   return 0;
 }

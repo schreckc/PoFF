@@ -29,7 +29,7 @@ void close();
 //#define INFO(debug_info) if (__MODE_DEBUG == 3) {std::cout<<"INFO: \n"<<debug_info<<std::endl;}
 #define INFO(level, debug_info) if (__MODE_DEBUG >= level) {std::cout<<"INFO: \n"<<debug_info<<std::endl;}
 
-#define TEST(cond) if (!cond) {close(); assert(cond);}
+#define TEST(cond) if (!(cond)) {close(); assert(cond);}
 
 #define IS_DEF(nombre) assert(!std::isnan(nombre) && !std::isinf(nombre))
 

@@ -38,8 +38,10 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, Shader* sha
   active_nodes = std::vector<bool>(nb_nodes);
   velocities = std::vector<VEC3>(nb_nodes);
   inter_velocities = std::vector<VEC3>(nb_nodes);
+  prev_velocities = std::vector<VEC3>(nb_nodes);
   positions = std::vector<VEC3>(nb_nodes);
-  cells = std::vector<std::list<Particule*> >(nb_cells);
+  new_positions = std::vector<VEC3>(nb_nodes);
+   cells = std::vector<std::list<Particule*> >(nb_cells);
   distance_collision = std::vector<FLOAT>(nb_nodes);
 
   vertices = new GLfloat[nb_lines*6];
@@ -50,6 +52,7 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, Shader* sha
       for (uint k = 0; k <= k_max; ++k) {
 	//std::cout<<index(i, j, k)<<std::endl;
 	positions[index(i, j, k)] = VEC3(i*mpm_conf::grid_spacing_, j*mpm_conf::grid_spacing_, k*mpm_conf::grid_spacing_);
+	velocities[index(i, j, k)] = VEC3(0, 0, 0);
       }
     }
   }
@@ -189,7 +192,7 @@ void Grid::draw(glm::mat4 m, Shader *s) {
 
   //  disableShader();
 
-    glLineWidth(5.0f);
+    glLineWidth(1.0f);
   for (uint i = 0; i <= i_max; ++i) {
      for (uint j = 0; j <= j_max; ++j) {
        for (uint k = 0; k <= k_max; ++k) {
@@ -202,21 +205,28 @@ void Grid::draw(glm::mat4 m, Shader *s) {
   	 //    sp.setColor(1, 0, 0);
   	 //  }
   	 VEC3 pos = positions[ind];
-  	 VEC3 vel = 0.01*inter_velocities[ind]+pos; 
+  	 VEC3 vel = mpm_conf::dt_ * velocities[ind]+pos; 
   	 // glm::mat4 model = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)));
   	 // glm::mat4 cur_model = model * m_model_view;
   	 // 	 sp.draw(cur_model, Scene::SCENE->getShader(0));
-  	 // INFO(3, "vel "<<vel(0)<<", "<<vel(1)<<", "<<vel(2));
-	 
+  	   //   INFO(3, "vel "<<vel(0)<<", "<<vel(1)<<", "<<vel(2));
+  	 //   //assert(false);
+  	 // }
   	GLfloat vel_line[6] = {pos(0),  pos(1), pos(2), vel(0), vel(1), vel(2)};
   	GLfloat vel_color[6] = {0, 0, 1, 0, 0, 1};
+  	GLfloat vel_color2[6] = {1, 0, 0, 1, 0, 0};
+
   	enableShader();
   	setMVP(m, s);
   
   	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vel_line);
   	glEnableVertexAttribArray(0);
 
-  	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, vel_color);
+  	if (velocities[ind].norm() < 2) {
+  	  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, vel_color);
+  	} else {
+  	  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, vel_color2);
+  	}
   	glEnableVertexAttribArray(1);
 
   	glDrawArrays(GL_LINES, 0, 2);
@@ -225,10 +235,12 @@ void Grid::draw(glm::mat4 m, Shader *s) {
   	glDisableVertexAttribArray(1);
 
   	disableShader();
+      
   	}
        }
      }
   }
+  
   }
 }
 
@@ -267,11 +279,13 @@ void Grid::nextStep() {
   // for (auto & elem : inter_velocities) {
   //   elem = VEC3(0, 0, 0);
   // }
+  //  INFO(3, "next step");
 #pragma omp parallel for
   for (uint i = 0; i < nb_nodes; ++i) {
     masses[i] = 0;
     active_nodes[i] = false;
-    inter_velocities[i] = velocities[i];  
+    inter_velocities[i] = VEC3(0, 0, 0);
+    prev_velocities[i] = velocities[i]; 
     velocities[i] = VEC3(0, 0, 0);
   }
 #pragma omp parallel for
@@ -280,6 +294,67 @@ void Grid::nextStep() {
   }
 }
 
+void Grid::smoothVelocity() {
+  std::vector<FLOAT> laplacien = {0, 0, 0,
+				  0, 1.0/6.0, 0,
+				  0, 0, 0,
+
+				  0, 1.0/6.0, 0,
+				  1.0/6.0, -1, 1.0/6.0,
+				  0, 1.0/6.0, 0,
+
+				  0, 0, 0,
+				  0, 1.0/6.0, 0,
+				  0, 0, 0};
+  
+  
+  
+#pragma omp parallel for
+  for (int i = 0; i <= (int)i_max; ++i) {
+    for (int j = 0; j <= (int)j_max; ++j) {
+      for (int k = 0; k <= (int)k_max; ++k) {
+	
+	uint ind = index(i, j, k);
+	if (active_nodes[ind]) {
+	  VEC3 sv(0, 0, 0);
+
+	  for (int l = 0; l < 3; ++l) {
+	    if (i-1+l >= 0 && i-1+l < (int)i_max) {
+
+	      for (int m = 0; m < 3; ++m) {
+		if (j-1+m >= 0 && j-1+m < (int)j_max) {
+
+		  for (int n = 0; n < 3; ++n) {
+		    if (k-1+n >= 0 && k-1+n < (int)k_max) {
+		      uint ind_neigh = index(i-1+l, j-1+m, k-1+n);
+		      if (active_nodes[ind_neigh]) {
+			sv += inter_velocities[ind_neigh]*laplacien[l*9 + m*3 + n];
+		       } else {
+		       	sv += inter_velocities[ind]*laplacien[l*9 + m*3 + n];
+		       }
+		      // if (active_nodes[ind]) {
+		      // 	if (inter_velocities[ind_neigh](0) != 0) {
+		      // 	  INFO(3,"laplace coef\n "<<inter_velocities[ind_neigh]);
+		      // 	}
+		      // }
+		    }
+		  }
+
+		}
+	      }
+	    }
+	  }
+	  velocities[ind] += 1*sv;
+	  // if (active_nodes[ind]) {
+	  //   INFO(3, "lapl vel\n"<<sv);
+	  // }
+	}
+
+      }
+    }
+  }
+	
+}
 
 void Grid::particulesToGrid(std::vector<Particule*> & particules) {
   for (auto &p : particules) {
@@ -295,6 +370,14 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
     }
     
   }
+  uint nb_ac = 0;
+  for (uint i = 0; i < cells.size(); ++i) {
+    if (cells[i].size() != 0) {
+      ++nb_ac;
+    }
+  }
+  INFO(2, "particules per cell : "<<((FLOAT)particules.size())/(FLOAT)nb_ac<<" / active cells: "<<nb_ac<<" / particules: "<<particules.size());
+  
   // for (uint i = 0; i < nb_cells; ++i) {
   //   INFO(3, "part per cell "<<i<<" "<<cells[i].size());
   //  }
@@ -319,12 +402,16 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 		      // INFO(3,"lmn "<<indc<<" "<<l<<" "<<m<<" "<<n);
 		      // INFO(3, "part per cell "<<cells[index(l, m, n)].size());
 		      FLOAT w = p->weight(Vector3i(i, j, k));
-		      if (w != 0) {
+		      if (w > 0) {
 			active_nodes[ind] = true;
 		  
 			//INFO(3, "weight "<<w);
 			masses[ind] += w*p->getMass();
-			velocities[ind] += w*p->getMass()*(p->getVelocity() + 3.0/s2*p->getB()*(positions[ind] - p->getPosition()));
+			if (mpm_conf::method_ == mpm_conf::apic_) {
+			  velocities[ind] += w*p->getMass()*(p->getVelocity() + 3.0/s2*p->getB()*(positions[ind] - p->getPosition()));
+			} else {
+			  velocities[ind] += w*p->getMass()*p->getVelocity();
+			}
 			f += p->getForceIncrement()*p->gradWeight(Vector3i(i, j, k));
 		      }
 		    }
@@ -344,14 +431,18 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 
 	  //     }
 	  //inter_velocities[ind] = velocities[ind]/ masses[ind];
-	  //INFO(3,"masses" << masses[ind]<<" "<<f.norm()/masses[ind]);
-	   velocities[ind] -= mpm_conf::dt_*f;
-	  velocities[ind] /= masses[ind];
-	  //	  inter_velocities[ind] = velocities[ind];//particules.front()->gradWeight(Vector3i(i, j, k));
+	  //	  INFO(3,"masses " << masses[ind]<<" "<<f.norm()/masses[ind]);
+	  if (masses[ind] > 1e-8*mpm_conf::dt_) {
+	    velocities[ind] -= /*mpm_conf::cheat_damping_*/mpm_conf::dt_*f + mpm_conf::dt_*mpm_conf::damping_*velocities[ind];
+	    velocities[ind] /= masses[ind];
+	  } else {
+	    velocities[ind] = VEC3(0, 0, 0);
+	  }
 	  velocities[ind] += mpm_conf::dt_*mpm_conf::gravity_;
-	  velocities[ind] *= mpm_conf::damping_;
-	  inter_velocities[ind] = -f;//particules.front()->gradWeight(Vector3i(i, j, k));
-
+	  inter_velocities[ind] = velocities[ind];//particules.front()->gradWeight(Vector3i(i, j, k));
+	  new_positions[ind] = positions[ind] + mpm_conf::dt_*velocities[ind];
+		  //	  inter_velocities[ind] =  velocities[ind];//particules.front()->gradWeight(Vector3i(i, j, k));
+	  //	  INFO(3, "vel\n" << velocities[ind]);
 	}
 	// } else {
 	//   velocities[ind] = VEC3(0, 0, 0);
@@ -362,17 +453,22 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 }
 
 void Grid::gridToParticules(std::vector<Particule*> & particules) {
-  //  INFO(2, "Grid 2 Part");
+    INFO(2, "Grid 2 Part");
+    FLOAT s3 = pow(mpm_conf::grid_spacing_, 3);
 #pragma omp parallel for
   //for (auto& p : particules) {
   for (uint ip = 0; ip < particules.size(); ++ip) {
     Particule *p = particules[ip];
     Vector3i cell = p->getCell();
     VEC3 vel(0, 0, 0);
-    VEC3 vel_flip(0, 0, 0);
+    VEC3 vel_flip = p->getVelocity();
+    // INFO(3, "vel FLIP \n"<<vel_flip);
     MAT3 B = MAT3::Zero();
     MAT3 T = MAT3::Zero();
     VEC3 pos(0, 0, 0);
+    VEC3 prev_pos = p->getPosition();
+    FLOAT density_max = 0;
+    FLOAT density_av = 0;
     for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
       if (i >= 0 && i <= (int)i_max) {
     	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
@@ -380,53 +476,140 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
     	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
 	      if (k >= 0 && k <= (int)k_max) {
 		uint ind = index(i, j, k);
-		//	if (active_nodes[ind]) {
-		FLOAT w = p->weight(Vector3i(i, j, k));
-		vel += w*velocities[ind];
-		vel_flip += w*(velocities[ind] - inter_velocities[ind]);
-		B += w*velocities[ind]*(positions[ind] - p->getPosition()).transpose();
-		pos += w*(positions[ind] + mpm_conf::dt_*w*velocities[ind]); //mult by w twice ?
-		T += velocities[ind]*p->gradWeight(Vector3i(i, j, k)).transpose();
-		//	}
+		if (active_nodes[ind]) {
+		  FLOAT w = p->weight(Vector3i(i, j, k));
+		  vel += w*velocities[ind];
+		  vel_flip += w*(velocities[ind] - prev_velocities[ind]);
+		  B += w*velocities[ind]*(positions[ind] - p->getPosition()).transpose();
+		  pos += w*(positions[ind] + mpm_conf::dt_*velocities[ind]); //mult by w twice ?
+		  T += mpm_conf::cheat_damping_*velocities[ind]*p->gradWeight(Vector3i(i, j, k)).transpose();
+		  //	INFO(3, "vel g2p \n"<<prev_velocities[ind]);
+
+		  if (density_max < masses[ind]) {
+		    density_max = masses[ind];
+		  }
+		  density_av += masses[ind]*w;
+		}
 	      }
 	    }
 	  }
 	}
       }
     }
-    // VEC3 v  = 0.05*vel+0.95*(p->getVelocity() + vel_flip);
-    p->update(pos, vel, B, T);
+    density_max /= s3;
+    density_av /= s3;
+    p->setDensity(density_max);
+    if (mpm_conf::method_ == mpm_conf::apic_ || mpm_conf::method_ == mpm_conf::pic_) {
+      p->update(pos, vel, B, T);
+    } else if (mpm_conf::method_ == mpm_conf::flip_) {
+      p->update(pos, vel_flip, B, T); 
+    } else if  (mpm_conf::method_ == mpm_conf::mix_) {
+      FLOAT alpha = 0.95;
+      VEC3 v = alpha*vel_flip + (1-alpha)*vel;
+      p->update(pos, v, B, T);
+    }
+
+    /* Rotation */
+    MAT3 A = MAT3::Zero(3, 3);
+    FLOAT sum = 0;
+     for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
+      if (i >= 0 && i <= (int)i_max) {
+    	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
+    	  if (j >= 0 && j <= (int)j_max) {
+    	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
+	      if (k >= 0 && k <= (int)k_max) {
+		uint ind = index(i, j, k);
+		if (active_nodes[ind]) {
+		  FLOAT w = p->weight(Vector3i(i, j, k));
+		  sum += w;
+		  A += w * (new_positions[ind] - p->getPosition())*(positions[ind] - prev_pos).transpose();
+		}
+	      }
+	    }
+	  }
+	}
+      }
+     }
+     A /= sum;
+     JacobiSVD<MAT3> svd(A, ComputeFullU | ComputeFullV);
+     MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
+     p->rotate(rot);
+    
   }
   // INFO(2, "END Grid 2 Part");
 }
 
-void Grid::initVolumes(std::vector<Particule*> & particules) {
-  //INFO(2, "Init Volume");
+void Grid::init(std::vector<Particule*> & particules) {
+  for (auto &p : particules) {
+    Vector3i c = p->getCell();
+    uint ind = c(0)*j_max*k_max + c(1)*(k_max) + c(2);
+    if (ind < nb_cells) {
+      cells[ind].push_back(p);
+    }
+  }
+
+  FLOAT s2 = mpm_conf::grid_spacing_*mpm_conf::grid_spacing_;
+#pragma omp parallel for
+  for (int i = 0; i <= (int)i_max; ++i) {
+    for (int j = 0; j <= (int)j_max; ++j) {
+      for (int k = 0; k <= (int)k_max; ++k) {
+	uint ind = index(i, j, k);
+	VEC3 f(0, 0, 0);
+	for (int l = i - 2; l < i + 2; ++l) {
+	  if (l >= 0 && l < (int)i_max) {
+	    for (int m = j - 2; m < j + 2; ++m) {
+	      if (m >= 0 && m < (int)j_max) {
+		for (int n = k - 2; n < k + 2; ++n) {
+		  if (n >= 0 && n < (int)k_max) {
+		    uint indc = l*j_max*k_max + m*(k_max) + n;
+		    for (auto& p : cells[indc]) {
+		      FLOAT w = p->weight(Vector3i(i, j, k));
+		      if (w > 0) {
+			active_nodes[ind] = true;
+			masses[ind] += w*p->getMass();
+			velocities[ind] += w*p->getMass()*p->getVelocity();
+		      }
+		    }
+		  }
+		}
+	      }
+	    }
+	  }
+	}
+	if (active_nodes[ind]) {
+	  if (masses[ind] > 1e-8*mpm_conf::dt_) {
+	    velocities[ind] /= masses[ind];
+	  } else {
+	    velocities[ind] = VEC3(0, 0, 0);
+	  }
+	}
+      }
+    }
+  }
   FLOAT s3 = pow(mpm_conf::grid_spacing_, 3);
 #pragma omp parallel for
-   for (uint ip = 0; ip < particules.size(); ++ip) {
-  //   //    INFO(3, "nb THread "<<omp_get_num_threads());
-    
-     Particule *p = particules[ip];
-  //   //  for (auto& p : particules) {
-  FLOAT density = mpm_conf::density_;;
-  //   Vector3i cell = p->getCell();
-  //   for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
-  //     if (i >= 0 && i <= (int)i_max) {
-  //   	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
-  //   	  if (j >= 0 && j <= (int)j_max) {
-  //   	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
-  //   	      if (k >= 0 && k <= (int)k_max) {
-  // 		uint ind = index(i, j, k);
-  // 		FLOAT w = p->weight(Vector3i(i, j, k));
-  // 		density += masses[ind]*w;
-  // 	      }
-  // 	    }
-  // 	  }
-  // 	}
-  //     }
-  //   }
-  //   density /= s3;
+  for (uint ip = 0; ip < particules.size(); ++ip) {
+    Particule *p = particules[ip];
+    FLOAT density = mpm_conf::density_;
+    // FLOAT density = 0;//mpm_conf::density_;;
+    // Vector3i cell = p->getCell();
+    // for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
+    //   if (i >= 0 && i <= (int)i_max) {
+    // 	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
+    // 	  if (j >= 0 && j <= (int)j_max) {
+    // 	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
+    // 	      if (k >= 0 && k <= (int)k_max) {
+    // 		uint ind = index(i, j, k);
+    // 		FLOAT w = p->weight(Vector3i(i, j, k));
+    // 		density += masses[ind]*w;
+    // 	      }
+    // 	    }
+    // 	  }
+    // 	}
+    //   }
+    // }
+    // density /= s3;
+    //INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
  
     p->initVolume(density);
   }
@@ -457,28 +640,31 @@ void Grid::collision(Obstacle *ob) {
       VEC3 n;// = ob->getNormal(pos);
       FLOAT d;// = ob->distance(pos);
       ob->getCollisionValues(pos, d, n);
-      FLOAT dcomp = d - std::min(ob->distance(positions[i]), (FLOAT)0.0);
-      //FLOAT dcomp = d - std::min(distance_collision[i], 0.0);
+      //FLOAT dcomp = d - std::min(ob->distance(positions[i]), (FLOAT)0.0);
+      FLOAT dcomp = d - std::min(distance_collision[i],(FLOAT)0.0);
       
       //   distance_collision[i] = ob->distance(positions[i]);
       if (fabs(d) <= 2*mpm_conf::grid_spacing_ && dcomp < 0) {
-	//	INFO(3, "dist coll "<<ob->distance(positions[i])<<" "<<distance_collision[i]);
-	//active_nodes[i] = false;
-
-	VEC3 n = ob->getNormal(pos);
+	VEC3 vel_prev = velocities[i];
+	//INFO(3,"vel prev "<< velocities[i](0)<<" "<< velocities[i](1)<<" "<< velocities[i](2));
+	//	VEC3 n = ob->getNormal(pos);
 	FLOAT dv = -dcomp/mpm_conf::dt_;
 	velocities[i] += dv*n;//dcomp*ob->getNormal(pos)/Simulation::dt;
-
+	//INFO(3,"vel new\n"<< velocities[i]);
+	
 	//friction
 	VEC3 vt = velocities[i] - velocities[i].dot(n)*n;
 	FLOAT nvt = vt.norm();
-	//	INFO(3, "nvt dv" <<nvt<<" "<<dv);
+	//INFO(3, "nvt dv" <<nvt<<" "<<dv);
 	
 	if (nvt > ob->getFriction()*dv) {
 	  velocities[i] -= ob->getFriction()*dv*vt/nvt;
 	} else {
 	  velocities[i] -= vt;
 	}
+	// INFO(3,"vel new "<< velocities[i](0)<<" "<< velocities[i](1)<<" "<< velocities[i](2));
+	// INFO(3,"vel norm"<< velocities[i].norm()<<" "<<vel_prev.norm());
+	//	TEST(velocities[i].norm() <= vel_prev.norm()); 
       }
     }
     // FLOAT d = ob->distance(positions[i]);

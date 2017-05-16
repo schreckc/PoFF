@@ -7,7 +7,6 @@
 #include "Eigen/Dense"
 #include "Eigen/Core"
 
-using namespace Eigen;
 
 class Particule : public Object {
 
@@ -31,7 +30,21 @@ private :
   FLOAT alpha; //parametrize the yield surface
   FLOAT hardenning;
 
+  VEC3 color;
+  
+  //anisotropy
   VEC3 normal;
+  
+  VEC3 axex;
+  VEC3 axey;
+  VEC3 axez;
+  FLOAT valx;
+  FLOAT valy;
+  FLOAT valz;
+
+  MAT3 ellipse;
+
+  MAT3 rotation;
 
  mutable MAT3 forceIncrement;
   
@@ -53,6 +66,9 @@ public:
   const MAT3& getB() const;
   void setB(const MAT3 & b);
   Vector3i getCell() const;
+
+  void setDensity(FLOAT d);
+  void setColor(FLOAT r, FLOAT g, FLOAT b);
   
   MAT3 getDeformationElastic() const;
   void addDeformationElastic(MAT3 Ddef); //F_e^n+1 = (I + Ddef)F_e^n
@@ -69,11 +85,22 @@ public:
   void initVolume(FLOAT d);
 
   MAT3 energyDerivative(VEC3 sigma); // take a diag mat in entry
+  void project(VEC3 sigma, FLOAT alpha, VEC3 & T, FLOAT & plastic_def);
+  
+  //anisotropy
+  void setAnisotropyAxes(VEC3 x, VEC3 y, VEC3 z);
+  void setAnisotropyValues(FLOAT vx, FLOAT vy, FLOAT vz);
+
+  void rotate(MAT3 rot);
+
+  MAT3 getRotation() const;
+  VEC3 getAnisotropy() const;
+  
+  void anisotropicProject(MAT3 &T);
 };
 
 
-//TODO
-void project(VEC3 sigma, FLOAT alpha, VEC3 & T, FLOAT & plastic_def);
+
 
 
 #endif

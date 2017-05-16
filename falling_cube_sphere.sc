@@ -1,8 +1,8 @@
 <obstacles>
  <sphere>
-  <center> 0.3 0.3 0.5
-  <ray> 0.3
-  <friction> 1
+  <center> 0.4 0.4 0.5
+  <ray> 0.2
+  <friction> 0
  </sphere>
  <plane>
   <pos> 0.15
@@ -15,9 +15,9 @@
 </obstacles>
 <particules>
  <cuboid> 
-  <x> 0.45 0.55
-  <y> 0.45 0.55
-  <z> 0.4 0.5
-  <nb particules> 1000
+  <x> 0.4 0.5
+  <y> 0.4 0.5
+  <z> 0.45 0.55
+  <nb particules> 10000
  </cuboid>
 </particules>

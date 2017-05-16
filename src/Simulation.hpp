@@ -34,6 +34,7 @@ public :
 
   void init();
   void clear();
+  void clearParticules();
   
   void animate();
   void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
@@ -54,7 +55,7 @@ public :
   //TODO
   void initPoissonSampling(uint i1, uint i2, uint j1, uint j2, uint k1, uint k2);
 
-  friend void loadScene(std::string file, Simulation *sim);
+  void loadScene();
 };
 
 

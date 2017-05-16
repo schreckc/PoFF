@@ -51,6 +51,7 @@ public:
   void setScene(std::string);
 
   void setRun(bool run);
+  void setStop(uint t_end);
   
 private:
   bool running;
@@ -59,6 +60,7 @@ private:
   bool end_;
   bool re_init;
   int back;
+  uint stop;
   
   std::string m_titreFenetre;
   int m_largeurFenetre;

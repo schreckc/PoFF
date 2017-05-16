@@ -29,7 +29,9 @@ private :
   std::vector<bool> active_nodes;
   std::vector<VEC3> velocities;
   std::vector<VEC3> inter_velocities;
+  std::vector<VEC3> prev_velocities;
   std::vector<VEC3> positions;
+  std::vector<VEC3> new_positions;
   std::vector<std::list<Particule*> > cells;
   std::vector<FLOAT> distance_collision;
 
@@ -38,6 +40,8 @@ private :
 public :
   Grid();
   Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, Shader* shader = NULL);
+
+  void init(std::vector<Particule*> & particules);
   
   void animate();
   void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
@@ -47,12 +51,13 @@ public :
   VEC3 & velocity(uint i, uint j, uint k);
 
   void nextStep(); //reset values in vectors
+  void smoothVelocity();
 
   void particulesToGrid(std::vector<Particule*> & particules);
   void gridToParticules(std::vector<Particule*> & particules);
 
+
   void initCollision(Obstacle *ob);
-  void initVolumes(std::vector<Particule*> & particules);
   void collision(Obstacle *ob);
     
 };
