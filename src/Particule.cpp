@@ -115,8 +115,10 @@ void Particule::draw(glm::mat4 m, Shader *s) {
       cur_shader = s;
     }
     glm::mat4 cur_model = m * m_model_view * S4;
+    
     sp.draw(cur_model, cur_shader);
 
+  
   //   glLineWidth(3.0f);
   //   Shader *tmp = m_shader;
   //   // m_shader = Scene::SCENE->getShader(2);
@@ -414,8 +416,9 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   // INFO(3, solver.eigenvalues());
   //  VEC3 ev = solver.eigenvalues();
 
-  
-  JacobiSVD<MATX> svd(F_e, ComputeThinU | ComputeThinV);
+  //  rotation = MAT3::Identity();
+  MAT3 rotF = rotation.transpose()*F_e;
+  JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
   MAT3 U = svd.matrixU();
   MAT3 V = svd.matrixV();
   VEC3 T(0, 0, 0);
@@ -423,8 +426,8 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   // INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
   if (mpm_conf::plasticity_) {  
     
-    FLOAT plastic_def;
-    project(sigma, alpha, T, plastic_def);
+    // project(sigma, T);
+    anisotropicProject(sigma, T, U);
     //    INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
     
     MAT3 inv_T = MAT3::Zero();
@@ -443,12 +446,12 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
       }
       sigma_m(i, i) = sigma(i);
     }
-    F_e = U*(T_m)*V.transpose();
-    F_p = V*inv_T*sigma_m*V.transpose()*F_p;
+    F_e = rotation*U*(T_m)*V.transpose();
+    F_p = rotation*V*inv_T*sigma_m*V.transpose()*F_p;
 
 
     if (mpm_conf::mode_ == 0) {
-      hardenning += plastic_def;
+      // hardenning += plastic_def;
       // FLOAT h0 = 35, h1 = 0, h2 = 0.02, h3 = 10;
       FLOAT fric_angle = mpm_conf::hardenning_param_(0) + (mpm_conf::hardenning_param_(1)*hardenning - mpm_conf::hardenning_param_(3))*exp(-mpm_conf::hardenning_param_(2)*hardenning);
       fric_angle = fric_angle*M_PI/180; //convert radian
@@ -461,7 +464,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
 
     // // INFO(3, F_p);
  
-    forceIncrement = v0*U*energyDerivative(T)*V.transpose()*F_e.transpose();
+    forceIncrement = v0*rotation*U*energyDerivative(T)*V.transpose()*F_e.transpose();
   } else {
     forceIncrement = v0*U*energyDerivative(sigma)*V.transpose()*F_e.transpose();
   }
@@ -502,12 +505,13 @@ MAT3 Particule::energyDerivative(VEC3 sigma) {
 }
 
 
-void Particule::project(VEC3 sigma, FLOAT alpha, VEC3 & T, FLOAT & plastic_def) {
+void Particule::project(VEC3 sigma, VEC3 & T) {
   if (mpm_conf::mode_ == 0) {
     VEC3 ln_sigma(0, 0, 0);
     VEC3 dev_ln_sigma(0, 0, 0);
     FLOAT tr = 0;
     FLOAT fr_norm = 0;
+    FLOAT plastic_def = 0;
     for (uint i = 0; i < 3; ++i) {
       if (sigma(i) != 0) {
 	ln_sigma(i) = log(sigma(i));
@@ -541,28 +545,37 @@ void Particule::project(VEC3 sigma, FLOAT alpha, VEC3 & T, FLOAT & plastic_def) 
 	plastic_def = yield;
       }
     }
+    hardenning += plastic_def;
   } else if (mpm_conf::mode_ == 1) {
-    if (density > 0.5*mpm_conf::density_) {
-      double smax = mpm_conf::hardenning_param_(1);//1 + 7.5e-3;
+          double smax = mpm_conf::hardenning_param_(1);//1 + 7.5e-3;
       double smin = mpm_conf::hardenning_param_(2);//1 - 2.5e-2;
-      
-      // INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
+    if (density > 0.9*mpm_conf::density_) {
+      //      INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
+
+      color = VEC3(1, 1, 1);
       for (uint i = 0; i < 3; ++i) {
 	T(i) = sigma(i);
 	if (sigma(i) < smin) {
 	  T(i) = smin;
-	  //  T(i) = 1;
+	  T(i) = 1;
 	} else if (sigma(i) > smax) {
 	  T(i) = smax;
 	  //T(i) = 1;
 	}
       }
      } else {
-       for (uint i = 0; i < 3; ++i) {
-     	T(i) = 1;
-       }
-     }
-    plastic_def = 0;
+      // INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
+      color = VEC3(0.5, 0.5, 1);
+      for (uint i = 0; i < 3; ++i) {
+       // 	 T(i) = sigma(i);
+       // 	 if (sigma(i) < smin/10.0) {
+	T(i) = 1;
+	 // } else if (sigma(i) > smax/10.0) {
+	 //   //T(i) = smax;
+	 //   T(i) = 1;
+	//}
+      }
+    }
   }
   
 }
@@ -651,15 +664,15 @@ VEC3 Particule::getAnisotropy() const {
   return VEC3(valx, valy, valz);
 }
 
-void Particule::anisotropicProject(MAT3 &T) {
+void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
   MAT3 rotF = rotation.transpose()*F_e;
-  JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
-  MAT3 U = svd.matrixU();
-  MAT3 V = svd.matrixV();
-  VEC3 sigma = svd.singularValues();
+  // JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
+  // MAT3 U = svd.matrixU();
+  // MAT3 V = svd.matrixV();
+  // VEC3 sigma = svd.singularValues();
 
-  VEC3 smax(1, 1.0075, 1.0075);
-  VEC3 smin(9.975, 10.0, 10.0);
+  VEC3 smax(1.0075, 1.0075, 1.0075);
+  VEC3 smin(0.975, 0.975, 0.975);
   
   for (uint i = 0; i < 3; ++i) {
     VEC3 v = sigma(i)*U.col(i);
@@ -674,22 +687,16 @@ void Particule::anisotropicProject(MAT3 &T) {
       for (uint k = 0; k < 3; ++k) {
 	v(k) = vmax(k) * smax(k);
       }
-      sigma(i) = v.norm();
+      T(i) = v.norm();
     } else if (vmin.squaredNorm() < 1) {
       vmin.normalize();
       for (uint k = 0; k < 3; ++k) {
 	v(k) = vmin(k) * smin(k);
       }
-      sigma(i) = v.norm();
+      T(i) = v.norm();
+    } else {
+      T(i) = sigma(i);
     }
   }
- 
-  MAT3 sigma_m =  MAT3::Zero();
-   for (uint i = 0; i < 3; ++i) {
-     sigma_m(i, i) = T(i);
-   }
-
-   T = rotation*U*sigma_m*V.transpose();
-    
 }
 

@@ -55,8 +55,12 @@ void Sphere::draw(glm::mat4 m, Shader *s) {
     // std::cout <<"n ("<<normals_sphere[i]<<", "<<normals_sphere[i+1]<<", "<<normals_sphere[i+2]<<") "<< std::endl;
   }
   //  std::cout<<"draw sph"<<std::endl;
-   enableShader();
-   setMVP(m, s);
+  //  m_shader = Scene::SCENE->getShader(3);
+  enableShader();
+  setMVP(m, s);
+  // glm::vec3 pos_camera = Scene::SCENE->getCameraPosition();
+  // //  std::cout<<"cam pos "<<pos_camera[0]<<" "<<pos_camera[1]<<" "<<pos_camera[2]<<std::endl;
+  // glUniform3fv(glGetUniformLocation(Scene::SCENE->getShader(3)->getProgramID(), "pos_camera"), 1, value_ptr(pos_camera));
   
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertices);
     glEnableVertexAttribArray(0);

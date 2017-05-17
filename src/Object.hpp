@@ -1,6 +1,8 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
+#ifndef  NO_GRAPHICS_ 
+
 #include <glm/glm.hpp>
 #ifdef WIN32
 #include <GL/glew.h>
@@ -11,33 +13,36 @@
 
 #endif
 
-#include "Texture.hpp"
-#include "Shader.hpp"
+ #endif
+
+//#include "Texture.hpp"
+//#include "Shader.hpp"
 
 class Object {
   
 protected:
-  Texture* m_texture;
-  Shader* m_shader;
-  glm::mat4 m_model_view;
+  int m_texture;
+  int m_shader;
+  //glm::mat4 m_model_view;
 
 public:
-Object(Shader* shader = NULL, Texture* texture = NULL);
+Object(int shader = -1, int texture = -1);
 
   virtual void animate() = 0;
-  virtual void draw( glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL) = 0;
 
-  Texture* getTexture() const;
-  Shader* getShader() const;
-  
-  glm::mat4 modelView() const;
-  glm::mat4 & modelView();
-
+#ifndef  NO_GRAPHICS_ 
+  virtual void draw( glm::mat4 m = glm::mat4(1.0f), int s = -1) = 0;
   void setMVP(glm::mat4 m, Shader *s); 
   
   void enableShader();
   void disableShader();
   
+  glm::mat4 modelView() const;
+  glm::mat4 & modelView();  
+#endif
+
+  int getTexture() const;
+  int getShader() const;
 };
 
 #endif

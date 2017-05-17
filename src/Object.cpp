@@ -34,6 +34,7 @@ void Object::setMVP(glm::mat4 m, Shader *s) {
   Shader *cur_shader = m_shader;
   if (m_shader == NULL) {
     cur_shader = s;
+    cur_shader->enable();
   }
 
   assert(cur_shader != NULL);
@@ -47,10 +48,10 @@ void Object::setMVP(glm::mat4 m, Shader *s) {
 void Object::enableShader() {
   if (m_shader != NULL) {
     m_shader->enable();
-    glm::mat4 vp;
-    Scene::SCENE->getProjView(vp);
-    glm::mat4 mvp = vp * m_model_view;
-    glUniformMatrix4fv(glGetUniformLocation(m_shader->getProgramID(), "mvp"), 1, GL_FALSE, value_ptr(mvp));
+    // glm::mat4 vp;
+    // Scene::SCENE->getProjView(vp);
+    // glm::mat4 mvp = vp * m_model_view;
+    // glUniformMatrix4fv(glGetUniformLocation(m_shader->getProgramID(), "mvp"), 1, GL_FALSE, value_ptr(mvp));
   }
   if (m_texture != NULL) {
     glBindTexture(GL_TEXTURE_2D, m_texture->getID());

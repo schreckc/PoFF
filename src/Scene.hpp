@@ -44,6 +44,7 @@ public:
   void getProjView(glm::mat4 &vp);
   Shader* getShader(uint i);
   Texture* getTexture(uint i);
+  glm::vec3 getCameraPosition() const;
 
   void setLoad(std::string);
   void setExport(std::string);

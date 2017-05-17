@@ -548,7 +548,8 @@ void Simulation::loadScene() {
 	      
 	    // }
 	    PoissonGenerator::PRNG prng;
-	    std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsR(nb_part, prng, 30, VEC3(w, l, h)); 
+	    std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsR(nb_part, prng, 30, VEC3(w, l, h));
+	    nb_part = points.size();
 	    for (auto &v: points) {
 	      Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, v + VEC3(xmin, ymin, zmin), VEC3(0, 0, 1), vel);
 	       particules.push_back(p);
@@ -614,7 +615,8 @@ void Simulation::loadScene() {
 	      
 	    // }
 	    PoissonGenerator::PRNG prng;
-	    std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsC(nb_part, prng, 30); 
+	    std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsC(nb_part, prng, 30);
+	    nb_part = points.size();
 	    for (auto &v: points) {
 	      Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*v + center, VEC3(0, 0, 1), vel);
 	       particules.push_back(p);

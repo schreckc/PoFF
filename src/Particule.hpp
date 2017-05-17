@@ -54,8 +54,11 @@ public:
 
     
   void animate();
-  void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
 
+  #ifndef NO_GRAPHICS_ 
+  void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
+  #endif
+  
   VEC3 getPosition() const;
   void setPosition(VEC3 p);
   VEC3 getVelocity() const;
@@ -85,7 +88,7 @@ public:
   void initVolume(FLOAT d);
 
   MAT3 energyDerivative(VEC3 sigma); // take a diag mat in entry
-  void project(VEC3 sigma, FLOAT alpha, VEC3 & T, FLOAT & plastic_def);
+  void project(VEC3 sigma, VEC3 & T);
   
   //anisotropy
   void setAnisotropyAxes(VEC3 x, VEC3 y, VEC3 z);
@@ -96,7 +99,7 @@ public:
   MAT3 getRotation() const;
   VEC3 getAnisotropy() const;
   
-  void anisotropicProject(MAT3 &T);
+  void anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U);
 };
 
 

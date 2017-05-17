@@ -26,6 +26,8 @@ public:
   void setSensibilite(float sensibilite);
   void setVitesse(float vitesse);
 
+  glm::vec3 getPosition() const;
+
 protected:
   glm::vec3 m_orientation;
   glm::vec3 m_axeVertical;

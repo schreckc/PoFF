@@ -1,6 +1,6 @@
-#include "Scene.hpp"
 #include "mpm_conf.hpp"
 #include "error.hpp"
+
 
 void help() {
   std::cout<<"\n     *** PILES OF STUFFS: Help ***\n"<<std::endl;
@@ -15,6 +15,10 @@ void help() {
   std::cout<<"     -h, -help: print help\n"<<std::endl;
   exit(0);
 }
+
+#ifndef NO_GRAPHICS_
+
+#include "Scene.hpp"
 
 int main(int argc, char **argv) {
 	
@@ -90,3 +94,104 @@ int main(int argc, char **argv) {
   Scene::SCENE->bouclePrincipale();
   return 0;
 }
+
+#else
+
+#include "Simulation.hpp"
+#include "Times.hpp"
+#include "mpm_conf.hpp"
+
+int main(int argc, char **argv) {
+  INFO(3, "NO GRAPHICS");
+  Simulation* sim = new Simulation(NULL);
+  bool end_ = false;
+  
+  uint t = 0;
+  uint stop = 1000000;
+  
+  for (int i = 1;  i < argc; ++i) {
+    std::string s(argv[i]);
+    //    INFO(3, s);
+    if (s == "-l" || s == "-load") {
+      if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+	help();
+      }
+      std::cout<<"Loading configuration file:"<<" "<<argv[i+1]<<std::endl;
+      sim->setLoad(argv[i+1]);
+      ++i;
+    } else if (s == "-i" || s == "-import") {
+      if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+	help();
+      }
+      std::cout<<"Importing"<<" "<<argv[i+1]<<std::endl;
+      sim->setImport(argv[i+1]);
+      ++i;
+    } else if (s == "-e") {
+      if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+	help();
+      }
+      std::cout<<"Exporting"<<" "<<argv[i+1]<<std::endl;
+      sim->setExport(argv[i+1]);
+      ++i;
+    } else if (s == "-s" || s == "-scene") {
+      if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+	help();
+      }
+      std::cout<<"Loading scene"<<" "<<argv[i+1]<<std::endl;
+      sim->setScene(argv[i+1]);
+      ++i;
+    } else if (s == "-stop") {
+      if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+	help();
+      }
+      std::cout<<"Stop at t = "<<argv[i+1]<<std::endl;
+      stop = atoi(argv[i+1]);
+      ++i;
+    } else if (s == "-export_step" || s == "-es") {
+      if (argc < i + 2) {
+	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+	help();
+      }
+      std::cout<<"Export every "<<argv[i+1]<<" steps"<<std::endl;
+      mpm_conf::export_step_ = atoi(argv[i+1]);
+      ++i;
+    } else if (s == "-h" || s == "-help") {
+      help();
+    } else {
+      std::cerr<<"\nERROR: Unknown option\n"<<std::endl;
+      help();
+    }
+  }
+
+  sim->init();
+
+  //animation loop
+  while(!end_) {
+    Times::TIMES->tick(Times::total_time_);
+
+    ++t;
+    sim->animate();
+    if (t > stop) {
+      end_ = true;
+    }
+    Times::TIMES->tock(Times::total_time_);
+    Times::TIMES->next_loop();
+    if (t%100==0) {
+      std::cout<<".";
+    }
+    if (t%1000==0) {
+      INFO(1, "Simulation step : "<<t);
+      INFO(2, "Time per frame "<<Times::TIMES->getTime(Times::total_time_));
+    }
+  }
+
+  
+  return 0;
+}
+
+#endif

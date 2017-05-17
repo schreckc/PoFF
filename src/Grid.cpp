@@ -443,6 +443,7 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 	  new_positions[ind] = positions[ind] + mpm_conf::dt_*velocities[ind];
 		  //	  inter_velocities[ind] =  velocities[ind];//particules.front()->gradWeight(Vector3i(i, j, k));
 	  //	  INFO(3, "vel\n" << velocities[ind]);
+	  //	  INFO(3, "density "<<masses[ind]/pow(mpm_conf::grid_spacing_, 3));
 	}
 	// } else {
 	//   velocities[ind] = VEC3(0, 0, 0);

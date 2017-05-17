@@ -126,10 +126,11 @@ void Scene::init() {
   Sphere::create_array();
   Cylinder::create_array();
   
-  l_shaders = std::vector<Shader*>(3);
+  l_shaders = std::vector<Shader*>(4);
   l_shaders[0] = new Shader("shaders/simple.vert", "shaders/simple.frag");
   l_shaders[1] = new Shader("shaders/texture.vert", "shaders/texture.frag");
   l_shaders[2] = new Shader("shaders/point.vert", "shaders/point.frag");
+  l_shaders[3] = new Shader("shaders/toon.vert", "shaders/toon.frag");
 
   l_textures = std::vector<Texture*>(1);
   l_textures[0] = new Texture("Textures/boulet.jpg");
@@ -361,6 +362,10 @@ Shader* Scene::getShader(uint i) {
 
 Texture* Scene::getTexture(uint i) {
   return l_textures[i];
+}
+
+glm::vec3 Scene::getCameraPosition() const {
+  return m_camera.getPosition();
 }
 
 void Scene::setLoad(std::string s) {

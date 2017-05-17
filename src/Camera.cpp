@@ -47,3 +47,7 @@ void Camera::setSensibilite(float sensibilite) {
 void Camera::setVitesse(float vitesse) {
   m_vitesse = vitesse;
 }
+
+glm::vec3 Camera::getPosition() const {
+  return m_position;
+}
