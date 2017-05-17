@@ -67,9 +67,9 @@ void Particule::draw(glm::mat4 m, int s) {
       // 	// MAT3 Q = 0.5*(F + F.transpose());
  
     
-    VEC3 x = axex;
-    VEC3 y = axey;
-    VEC3 z = axez;
+    VEC3 x = rotation*axex;
+    VEC3 y = rotation*axey;
+    VEC3 z = rotation*axez;
     
       //  x.normalize();
       //  y.normalize();
@@ -81,9 +81,9 @@ void Particule::draw(glm::mat4 m, int s) {
       R[2] = glm::vec3(z[0], z[1], z[2]);
     
       glm::mat3 D;
-      // D[0] = glm::vec3(valx, 0, 0);
-      // D[1] = glm::vec3(0, valy, 0);
-      // D[2] = glm::vec3(0, 0, valz);
+      D[0] = glm::vec3(valx, 0, 0);
+      D[1] = glm::vec3(0, valy, 0);
+      D[2] = glm::vec3(0, 0, valz);
     
 
       glm::mat3 S = R*D;
@@ -428,8 +428,8 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   // INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
   if (mpm_conf::plasticity_) {  
     
-    // project(sigma, T);
-    anisotropicProject(sigma, T, U);
+     project(sigma, T);
+     //anisotropicProject(sigma, T, U);
     //    INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
     
     MAT3 inv_T = MAT3::Zero();
@@ -549,9 +549,9 @@ void Particule::project(VEC3 sigma, VEC3 & T) {
     }
     hardenning += plastic_def;
   } else if (mpm_conf::mode_ == 1) {
-          double smax = mpm_conf::hardenning_param_(1);//1 + 7.5e-3;
-      double smin = mpm_conf::hardenning_param_(2);//1 - 2.5e-2;
-    if (density > 0.9*mpm_conf::density_) {
+    double smax = mpm_conf::hardenning_param_(1);//1 + 7.5e-3;
+    double smin = mpm_conf::hardenning_param_(2);//1 - 2.5e-2;
+    //if (density > 0.9*mpm_conf::density_) {
       //      INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
 
       color = VEC3(1, 1, 1);
@@ -559,25 +559,26 @@ void Particule::project(VEC3 sigma, VEC3 & T) {
 	T(i) = sigma(i);
 	if (sigma(i) < smin) {
 	  T(i) = smin;
-	  T(i) = 1;
+	  //  T(i) = 1;
 	} else if (sigma(i) > smax) {
 	  T(i) = smax;
 	  //T(i) = 1;
 	}
       }
-     } else {
-      // INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
-      color = VEC3(0.5, 0.5, 1);
-      for (uint i = 0; i < 3; ++i) {
-       // 	 T(i) = sigma(i);
-       // 	 if (sigma(i) < smin/10.0) {
-	T(i) = 1;
-	 // } else if (sigma(i) > smax/10.0) {
-	 //   //T(i) = smax;
-	 //   T(i) = 1;
-	//}
-      }
-    }
+    //  } else {
+    //   // INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
+    //   color = VEC3(0.5, 0.5, 1);
+    //   for (uint i = 0; i < 3; ++i) {
+    //    // 	 T(i) = sigma(i);
+    //    // 	 if (sigma(i) < smin/10.0) {
+    // 	T(i) = 1;
+    // 	 // } else if (sigma(i) > smax/10.0) {
+    // 	 //   //T(i) = smax;
+    // 	 //   T(i) = 1;
+    // 	//}
+    //   }
+    // }
+      
   }
   
 }

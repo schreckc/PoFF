@@ -69,5 +69,6 @@ void CylinderObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) co
   FLOAT norm = n.norm();
 
   normal = n;
+  normal.normalize();
   dist = norm - ray;
 }

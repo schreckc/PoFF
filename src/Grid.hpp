@@ -14,10 +14,10 @@ using namespace Eigen;
 class Grid : public Object {
 
 private :
-  #ifndef NO_GRAPHICS_ 
+#ifndef NO_GRAPHICS_ 
   GLfloat* vertices;
   GLfloat* colors;
-  #endif
+#endif
   uint nb_lines;
 
   FLOAT spacing;
