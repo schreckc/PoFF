@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #include "Input.hpp"
 #include <iostream>
 #include "error.hpp"
@@ -133,3 +135,5 @@ void Input::capturerPointeur(bool reponse) const {
     SDL_SetRelativeMouseMode(SDL_FALSE);
   }
 }
+
+#endif

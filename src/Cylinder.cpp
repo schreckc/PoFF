@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #include "Cylinder.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -9,7 +11,7 @@
  GLfloat* Cylinder::vertices = new GLfloat[Cylinder::size_array];
  GLfloat* Cylinder::normals = new GLfloat[Cylinder::size_array];
 
-Cylinder::Cylinder(float r, float l, Shader* shader): Object(shader) {
+Cylinder::Cylinder(float r, float l, int shader): Object(shader) {
     ray = r;
     m_texture = NULL;
     m_model_view = scale(m_model_view, glm::vec3(ray, ray, l));
@@ -36,7 +38,7 @@ void Cylinder::setColor(float r, float g, float b) {
 void Cylinder::animate() {
 }
 
-void Cylinder::draw(glm::mat4 m, Shader *s) {
+void Cylinder::draw(glm::mat4 m, int s) {
   GLfloat colors[size_array];
   for (uint i = 0; i < size_array; i+= 3) {
     colors[i] = cr;
@@ -97,3 +99,5 @@ void Cylinder::create_vertex(float theta, float l, uint &index) {
   normals[index+2] = 0;
   index += 3;
 }
+
+#endif

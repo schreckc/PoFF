@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #ifndef INPUT_HPP
 #define INPUT_HPP
 
@@ -42,5 +44,7 @@ private:
 
 };
 
+
+#endif
 
 #endif

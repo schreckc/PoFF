@@ -9,11 +9,13 @@ private :
   VEC3 normal;
 
 public :
-  PlaneObstacle(FLOAT p = 0, VEC3 n = VEC3(0, 0, 1), Shader *shader = NULL);
+  PlaneObstacle(FLOAT p = 0, VEC3 n = VEC3(0, 0, 1), int shader = -1);
   ~PlaneObstacle();
 
   void animate();
-  void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
+#ifndef NO_GRAPHICS_ 
+  void draw(glm::mat4 m = glm::mat4(1.0f), int s = -1);
+#endif
   
   FLOAT getPosition() const;
   VEC3 getNormal(VEC3 pos) const;

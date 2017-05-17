@@ -1,7 +1,7 @@
 #include "Obstacle.hpp"
 #include "mpm_conf.hpp"
 
-Obstacle::Obstacle(Shader *shader) : Object(shader) {
+Obstacle::Obstacle(int shader) : Object(shader) {
   friction = mpm_conf::friction_coef_;
 }
 

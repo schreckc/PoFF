@@ -1,9 +1,12 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
-#ifndef  NO_GRAPHICS_ 
+#ifndef NO_GRAPHICS_ 
 
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/transform.hpp>
+
 #ifdef WIN32
 #include <GL/glew.h>
 
@@ -23,8 +26,11 @@ class Object {
 protected:
   int m_texture;
   int m_shader;
-  //glm::mat4 m_model_view;
 
+#ifndef NO_GRAPHICS_ 
+  glm::mat4 m_model_view;
+#endif
+  
 public:
 Object(int shader = -1, int texture = -1);
 
@@ -32,7 +38,7 @@ Object(int shader = -1, int texture = -1);
 
 #ifndef  NO_GRAPHICS_ 
   virtual void draw( glm::mat4 m = glm::mat4(1.0f), int s = -1) = 0;
-  void setMVP(glm::mat4 m, Shader *s); 
+  void setMVP(glm::mat4 m, int s); 
   
   void enableShader();
   void disableShader();

@@ -1,7 +1,7 @@
 #include "SphereObstacle.hpp"
 #include "error.hpp"
 
-SphereObstacle::SphereObstacle(VEC3 p, FLOAT r, FLOAT ha, VEC3 hn, Shader *shader) : Obstacle(shader){
+SphereObstacle::SphereObstacle(VEC3 p, FLOAT r, FLOAT ha, VEC3 hn, int shader) : Obstacle(shader){
   pos = p;
   ray = r;
 
@@ -18,7 +18,8 @@ void SphereObstacle::animate() {
   //  INFO(3, "ray "<<ray);
 }
 
-void SphereObstacle::draw(glm::mat4 m, Shader *s) {
+#ifndef NO_GRAPHICS_ 
+void SphereObstacle::draw(glm::mat4 m, int s) {
   
   GLfloat lines[18] = {pos(0),  pos(1), pos(2) + ray,    pos(0), pos(1), pos(2) - ray,
 		       pos(0) + ray,  pos(1), pos(2),    pos(0) - ray, pos(1), pos(2),
@@ -43,6 +44,7 @@ void SphereObstacle::draw(glm::mat4 m, Shader *s) {
   
   disableShader();
 }
+#endif
   
 VEC3 SphereObstacle::getPosition() const {
   return pos;

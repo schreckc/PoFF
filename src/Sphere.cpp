@@ -1,19 +1,18 @@
+#ifndef NO_GRAPHICS_ 
+
 #include "Sphere.hpp"
 
-#include <glm/gtc/type_ptr.hpp>
+//#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <cassert>
 
 #include "Scene.hpp"
 
-// uint Sphere::meridians_count = 4;
-// uint Sphere::parallels_count = 1;
-// uint Sphere::size_array = 18*Sphere::meridians_count + 18*Sphere::meridians_count*(Sphere::parallels_count-1);
  GLfloat* Sphere::vertices = new GLfloat[Sphere::size_array];
  GLfloat* Sphere::normals = new GLfloat[Sphere::size_array];
 // GLfloat* Sphere::colors_sphere = new GLfloat[Sphere::size_array];
 
-Sphere::Sphere(float s, Shader* shader): Object(shader) {
+Sphere::Sphere(float s, int shader): Object(shader) {
     m_size = s;
     // m_model_view = translate(m_model_view, glm::vec3(0.0, 5.0, 0.0));
     m_model_view = scale(m_model_view, glm::vec3(s, s, s));
@@ -45,7 +44,7 @@ void Sphere::setColor(float r, float g, float b) {
   void Sphere::animate() {
   }
 
-void Sphere::draw(glm::mat4 m, Shader *s) {
+void Sphere::draw(glm::mat4 m, int s) {
   GLfloat colors[size_array];
   for (uint i = 0; i < size_array; i+= 3) {
     colors[i] = cr;
@@ -149,3 +148,5 @@ void Sphere::create_vertex(float theta, float phi, uint &index) {
 // void Sphere::delete_array() {
 
 // }
+
+#endif

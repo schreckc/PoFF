@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #ifndef CAMERA_OBJECT_HPP
 #define CAMERA_OBJECT_HPP
 
@@ -28,5 +30,7 @@ private:
   
 };
 
+
+#endif
 
 #endif

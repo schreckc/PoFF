@@ -5,20 +5,19 @@
 #include "Simulation.hpp"
 #include "error.hpp"
 
-#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-Particule::Particule(Shader* shader) : Object(shader) {
+Particule::Particule(int shader) : Object(shader) {
   pos = VEC3(0, 0, 0);
 }
 
-Particule::Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n, VEC3 velo, Shader* shader) :
+Particule::Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n, VEC3 velo, int shader) :
   Object(shader), m(mass), v(vol), v0(vol), pos(p), normal(n), vel(velo), F_p(MAT3::Identity(3, 3)), F_e(MAT3::Identity(3, 3)) {
   FLOAT h = mpm_conf::grid_spacing_;
   cell = Vector3i((int)(p(0)/h), (int)(p(1)/h), (int)(p(2)/h));
 
   //  INFO(3, velo);//((int)(p(0)/Grid::spacing))<<", "<< ((int)(p(1)/Grid::spacing))<<", "<< ((int)(p(2)/Grid::spacing)));
-  m_model_view = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)));
+  // m_model_view = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)));
   B = MAT3::Zero();
   forceIncrement = MAT3::Zero();
   hardenning = 0;
@@ -56,7 +55,8 @@ void Particule::animate() {
   //  m_model_view = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)));
 }
 
-void Particule::draw(glm::mat4 m, Shader *s) {
+#ifndef NO_GRAPHICS_ 
+void Particule::draw(glm::mat4 m, int s) {
   /* draw spheres */
   m_model_view = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)));
   if (mpm_conf::display_sphere_) {
@@ -110,8 +110,8 @@ void Particule::draw(glm::mat4 m, Shader *s) {
     
     Sphere sp(0.01, m_shader);
     sp.setColor(color(0), color(1), color(2));
-    Shader *cur_shader = m_shader;
-    if (m_shader == NULL) {
+    int cur_shader = m_shader;
+    if (m_shader == -1) {
       cur_shader = s;
     }
     glm::mat4 cur_model = m * m_model_view * S4;
@@ -200,6 +200,8 @@ void Particule::draw(glm::mat4 m, Shader *s) {
   disableShader();
   }
 }
+#endif
+
 
 VEC3 Particule::getPosition() const {
   return pos;
@@ -591,18 +593,6 @@ void Particule::setAnisotropyAxes(VEC3 x, VEC3 y, VEC3 z) {
   axex.normalize();
   axey.normalize();
   axez.normalize();
-
-  // glm::mat3 R;
-  // R[0] = glm::vec3(axex[0], axex[1], axex[2]);
-  // R[1] = glm::vec3(axey[0], axey[1], axey[2]);
-  // R[2] = glm::vec3(axez[0], axez[1], axez[2]);
-    
-  // glm::mat3 D;
-  // D[0] = glm::vec3(valx, 0, 0);
-  // D[1] = glm::vec3(0, valy, 0);
-  // D[2] = glm::vec3(0, 0, valz);
-
-  // ellipse = transpose(R)*D*R;
 
   MAT3 R;
   R.col(0) = axex;

@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
@@ -101,5 +103,7 @@ void render_text(SDL_Renderer *renderer,
     TTF_Font *font,
     SDL_Rect *rect,
     SDL_Color *color);
+
+#endif
 
 #endif

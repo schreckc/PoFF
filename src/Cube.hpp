@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_
+
 #ifndef CUBE_HPP
 #define CUBE_HPP
 
@@ -16,11 +18,13 @@ private:
 
 
 public:
-  Cube(float s = 1, Shader* shader = NULL, Texture* texture = NULL);
+  Cube(float s = 1, int shader = -1, int texture = -1);
 
   void animate();
-  void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
+  void draw(glm::mat4 m = glm::mat4(1.0f),  int s = -1);
 
 };
+
+#endif
 
 #endif

@@ -1,6 +1,6 @@
 #include "PlaneObstacle.hpp"
 
-PlaneObstacle::PlaneObstacle(FLOAT p, VEC3 n, Shader *shader) : Obstacle(shader) {
+PlaneObstacle::PlaneObstacle(FLOAT p, VEC3 n, int shader) : Obstacle(shader) {
   pos = p;
   normal = n;
   normal.normalize();
@@ -10,7 +10,8 @@ void PlaneObstacle::animate() {
 
 }
 
-void PlaneObstacle::draw(glm::mat4 m, Shader *s) {
+#ifndef NO_GRAPHICS_ 
+void PlaneObstacle::draw(glm::mat4 m, int s) {
   GLfloat vertices[18] = {-0.1, -0.1, pos,   -0.1, 1, pos,    1, 1, pos,
 			  1, 1, pos,  -0.1, -0.1, pos,   1, -0.1, pos};
   GLfloat normals[18] = {0, 0, 1,  0, 0, 1,  0, 0, 1,
@@ -37,6 +38,7 @@ void PlaneObstacle::draw(glm::mat4 m, Shader *s) {
 
     disableShader();
 }
+#endif
 
 FLOAT PlaneObstacle::getPosition() const {
   return pos;

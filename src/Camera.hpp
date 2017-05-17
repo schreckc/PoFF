@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
@@ -40,5 +42,7 @@ protected:
   float m_vitesse;
 };
 
+
+#endif
 
 #endif

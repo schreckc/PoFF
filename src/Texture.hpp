@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #ifndef DEF_TEXTURE
 #define DEF_TEXTURE
 
@@ -34,5 +36,7 @@ private:
   GLuint m_id;
   std::string m_fichierImage;
 };
+
+#endif
 
 #endif

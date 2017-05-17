@@ -2,10 +2,10 @@
 #include "Cylinder.hpp"
 #include "error.hpp"
 #include "utils.hpp"
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/transform.hpp>
+//#include <glm/gtc/type_ptr.hpp>
+//#include <glm/gtx/transform.hpp>
 
-CylinderObstacle::CylinderObstacle(VEC3 p, VEC3 d, FLOAT r, Shader *shader) : Obstacle(shader){
+CylinderObstacle::CylinderObstacle(VEC3 p, VEC3 d, FLOAT r, int shader) : Obstacle(shader){
   pos = p;
   dir = d;
   ray = r;
@@ -21,7 +21,8 @@ void CylinderObstacle::animate() {
   //  INFO(3, "ray "<<ray);
 }
 
-void CylinderObstacle::draw(glm::mat4 m, Shader *s) {
+#ifndef NO_GRAPHICS_ 
+void CylinderObstacle::draw(glm::mat4 m, int s) {
   Cylinder c(ray, 1, m_shader);
 
   VEC3 axe = dir.cross(VEC3(0, 0, 1));
@@ -39,15 +40,15 @@ void CylinderObstacle::draw(glm::mat4 m, Shader *s) {
   m_model_view = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)))*
     rotate(glm::mat4(1.0f), (GLfloat)angle, axis);
 
-   Shader *cur_shader = m_shader;
-    if (m_shader == NULL) {
+   int cur_shader = m_shader;
+    if (m_shader == -1) {
       cur_shader = s;
     }
     glm::mat4 cur_model = m * m_model_view;
     c.draw(cur_model, cur_shader);
     // INFO(3, "ray "<<ray);
 }
-  
+#endif
 
 VEC3 CylinderObstacle::getNormal(VEC3 p) const {
   VEC3 proj = utils::projectionOrtho(p, pos, dir);

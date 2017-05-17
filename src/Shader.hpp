@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
@@ -36,4 +38,4 @@ public:
 
 #endif
 
-  
+#endif

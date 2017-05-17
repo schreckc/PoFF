@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #ifndef CAMERA_PERSO_HPP
 #define CAMERA_PERSO_HPP
 
@@ -24,5 +26,7 @@ private:
   float m_theta;
 };
 
+
+#endif
 
 #endif

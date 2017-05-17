@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #include "CameraPerso.hpp"
 
 
@@ -120,3 +122,5 @@ void CameraPerso::setPosition(glm::vec3 position) {
   m_position = position;
   m_pointCible = m_position + m_orientation;
 }
+
+#endif

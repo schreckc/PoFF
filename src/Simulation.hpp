@@ -29,7 +29,7 @@ private :
 
   inline FLOAT weight(FLOAT x);
 public :
-  Simulation(Shader * shader);
+  Simulation(int shader);
   ~Simulation();
 
   void init();
@@ -37,7 +37,9 @@ public :
   void clearParticules();
   
   void animate();
-  void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
+#ifndef NO_GRAPHICS_ 
+  void draw(glm::mat4 m = glm::mat4(1.0f), int s = -1);
+#endif
 
   void oneStep();
 

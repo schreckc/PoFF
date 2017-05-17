@@ -2,7 +2,7 @@
 #include "error.hpp"
 #include "Sphere.hpp"
 
-BallObstacle::BallObstacle(VEC3 p, FLOAT r, Shader *shader) : Obstacle(shader){
+BallObstacle::BallObstacle(VEC3 p, FLOAT r, int shader) : Obstacle(shader){
   pos = p;
   ray = r;
 }
@@ -15,18 +15,20 @@ void BallObstacle::animate() {
   //  INFO(3, "ray "<<ray);
 }
 
-void BallObstacle::draw(glm::mat4 m, Shader *s) {
+#ifndef NO_GRAPHICS_ 
+void BallObstacle::draw(glm::mat4 m, int s) {
   
   m_model_view = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)));
  Sphere sp(ray, m_shader);
-     Shader *cur_shader = m_shader;
-    if (m_shader == NULL) {
+ int cur_shader = m_shader;
+    if (m_shader == -1) {
       cur_shader = s;
     }
     glm::mat4 cur_model = m * m_model_view;
     sp.draw(cur_model, cur_shader);
 }
-  
+#endif
+
 VEC3 BallObstacle::getPosition() const {
   return pos;
 }

@@ -12,7 +12,7 @@
 #define POISSON_PROGRESS_INDICATOR 1
 #include "PoissonGenerator.hpp"
 
-Simulation::Simulation(Shader * shader) : Object(shader) {
+Simulation::Simulation(int shader) : Object(shader) {
   import_ = false;
   export_ = false;
   load_conf_ = false;
@@ -63,7 +63,7 @@ void Simulation::init() {
     // ob->setFriction(0);
 
          
-    grid = Grid(mpm_conf::size_grid_(0), mpm_conf::size_grid_(1), mpm_conf::size_grid_(2), mpm_conf::grid_spacing_, Scene::SCENE->getShader(2));
+    grid = Grid(mpm_conf::size_grid_(0), mpm_conf::size_grid_(1), mpm_conf::size_grid_(2), mpm_conf::grid_spacing_, 2);
     loadScene();
     // grid.nextStep();
     // grid.particulesToGrid(particules);
@@ -106,7 +106,7 @@ void Simulation::clear() {
 
 void Simulation::animate() {
   ++t;
-  INFO(1, "Simulation step : "<<t);
+  //  INFO(1, "Simulation step : "<<t);
   if (!import_) {
     oneStep();
     if (export_) {
@@ -121,7 +121,8 @@ void Simulation::animate() {
   }
 }
 
-void Simulation::draw(glm::mat4 m, Shader *s) {
+#ifndef NO_GRAPHICS_ 
+void Simulation::draw(glm::mat4 m, int s) {
   // QString text_ls("");
   //  if (!stop_) {
   //    if (load) {
@@ -135,8 +136,8 @@ void Simulation::draw(glm::mat4 m, Shader *s) {
   //  }
   
   Times::TIMES->tick(Times::display_time_);
-  Shader *cur_shader = m_shader;
-  if (m_shader == NULL) {
+  uint cur_shader = m_shader;
+  if (m_shader == -1) {
     cur_shader = s;
   }
   glm::mat4 cur_model = m * m_model_view;
@@ -157,6 +158,7 @@ void Simulation::draw(glm::mat4 m, Shader *s) {
   disableShader();
   Times::TIMES->tock(Times::display_time_);
 }
+#endif
 
 void Simulation::oneStep() {
   Times::TIMES->tick(Times::simu_time_);
@@ -452,7 +454,7 @@ void Simulation::loadScene() {
 	      }
 	      getline(file, line);
 	    }
-	    CylinderObstacle *o = new CylinderObstacle(pos, dir, r, Scene::SCENE->getShader(0));
+	    CylinderObstacle *o = new CylinderObstacle(pos, dir, r, 0);
 	    obstacles.push_back(o);
 	    o->setFriction(fric);
 	    //INFO(3, "obstacles = "<<pos<<"\n"<<n);
@@ -480,7 +482,7 @@ void Simulation::loadScene() {
 	      }
 	      getline(file, line);
 	    }
-	    BallObstacle *o = new BallObstacle(pos, r, Scene::SCENE->getShader(0));
+	    BallObstacle *o = new BallObstacle(pos, r, 0);
 	    obstacles.push_back(o);
 	    o->setFriction(fric);
 	    //INFO(3, "obstacles = "<<pos<<"\n"<<n);

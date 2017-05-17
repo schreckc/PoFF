@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #include "Shader.hpp"
 #include <iostream>
 #include <fstream>
@@ -118,3 +120,5 @@ void Shader::disable() {
 GLuint Shader::getProgramID() const {
   return m_id;
 }
+
+#endif

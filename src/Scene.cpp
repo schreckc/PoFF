@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #include "Scene.hpp"
 #include "Cube.hpp"
 #include "Sphere.hpp"
@@ -172,7 +174,7 @@ void Scene::init() {
   
   Times::TIMES->init();
 
-  sim = new Simulation(l_shaders[0]);
+  sim = new Simulation(0);
   l_objects.push_back(sim);
 
 }
@@ -462,3 +464,5 @@ void render_text(
     SDL_RenderCopy(renderer, texture, NULL, rect);
     SDL_DestroyTexture(texture);
 }
+
+#endif

@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #include "CameraObject.hpp"
 #include <iostream>
 
@@ -185,3 +187,5 @@ void CameraObject::alignAxis() {
   m_orientation = cross(m_deplacementLateral, m_axeVertical);
   m_orientation = normalize(m_orientation);
 }
+
+#endif

@@ -9,9 +9,12 @@ private :
   FLOAT friction;
   
 public :
-  Obstacle(Shader *shader = NULL);
+  Obstacle(int shader = -1);
   virtual void animate() = 0;
-  virtual void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL) = 0;
+
+#ifndef NO_GRAPHICS_ 
+  virtual void draw(glm::mat4 m = glm::mat4(1.0f), int s = -1) = 0;
+#endif
   
   virtual FLOAT distance(VEC3 v) const = 0;
   virtual VEC3 getNormal(VEC3 v) const = 0;

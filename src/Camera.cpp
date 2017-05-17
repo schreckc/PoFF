@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #include "Camera.hpp"
 
 Camera::Camera() :  m_orientation(), m_axeVertical(0, 0, 1),
@@ -51,3 +53,5 @@ void Camera::setVitesse(float vitesse) {
 glm::vec3 Camera::getPosition() const {
   return m_position;
 }
+
+#endif

@@ -17,8 +17,8 @@ inline uint Grid::index(uint i, uint j, uint k) const {
 Grid::Grid() : Object(), x_max(0),  y_max(0), z_max(0),  i_max(0),  j_max(0),  k_max(0) {
 }
 
-Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, Shader* shader): Object(shader) {
-  assert(m_shader != NULL);
+Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, int shader): Object(shader) {
+  // assert(m_shader != -1);
   x_max = width;
   y_max = depth;
   z_max = height;
@@ -44,10 +44,7 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, Shader* sha
    cells = std::vector<std::list<Particule*> >(nb_cells);
   distance_collision = std::vector<FLOAT>(nb_nodes);
 
-  vertices = new GLfloat[nb_lines*6];
-  colors = new GLfloat[nb_lines*6];
-  
-  for (uint i = 0; i <= i_max; ++i) {
+ for (uint i = 0; i <= i_max; ++i) {
     for (uint j = 0; j <= j_max; ++j) {
       for (uint k = 0; k <= k_max; ++k) {
 	//std::cout<<index(i, j, k)<<std::endl;
@@ -56,6 +53,11 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, Shader* sha
       }
     }
   }
+  
+#ifndef NO_GRAPHICS_ 
+  vertices = new GLfloat[nb_lines*6];
+  colors = new GLfloat[nb_lines*6];
+ 
   //  std::cout<<"size "<<((i_max+1)*(j_max+1) + (k_max+1)*(j_max+1) +(k_max+1)*(i_max+1))*6<<std::endl;
   uint h = 0;
   for (uint i = 0; i <= i_max; ++i) {
@@ -101,6 +103,8 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, Shader* sha
     colors[i+1] = 0;
     colors[i+2] = 0;
   }
+  #endif
+
   nextStep();
 }
 
@@ -109,7 +113,8 @@ void Grid::animate() {
   
 }
 
-void Grid::draw(glm::mat4 m, Shader *s) {
+#ifndef NO_GRAPHICS_ 
+void Grid::draw(glm::mat4 m, int s) {
   if (!positions.empty()) {
   GLfloat ext_vert[72];
   for (uint l = 0; l < 3; ++l) {
@@ -243,6 +248,7 @@ void Grid::draw(glm::mat4 m, Shader *s) {
   
   }
 }
+#endif
 
 VEC3 Grid::position(uint i, uint j, uint k) const {
   assert(i <= i_max);
@@ -376,7 +382,7 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
       ++nb_ac;
     }
   }
-  INFO(2, "particules per cell : "<<((FLOAT)particules.size())/(FLOAT)nb_ac<<" / active cells: "<<nb_ac<<" / particules: "<<particules.size());
+  //  INFO(2, "particules per cell : "<<((FLOAT)particules.size())/(FLOAT)nb_ac<<" / active cells: "<<nb_ac<<" / particules: "<<particules.size());
   
   // for (uint i = 0; i < nb_cells; ++i) {
   //   INFO(3, "part per cell "<<i<<" "<<cells[i].size());
@@ -454,7 +460,7 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 }
 
 void Grid::gridToParticules(std::vector<Particule*> & particules) {
-    INFO(2, "Grid 2 Part");
+  // INFO(2, "Grid 2 Part");
     FLOAT s3 = pow(mpm_conf::grid_spacing_, 3);
 #pragma omp parallel for
   //for (auto& p : particules) {

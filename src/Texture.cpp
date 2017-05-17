@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #include "Texture.hpp"
 #include <GL/gl.h>
 //#include <GL/glu.h>
@@ -121,3 +123,5 @@ Texture& Texture::operator=(Texture const &textureACopier) {
   
   return *this;
 }
+
+#endif

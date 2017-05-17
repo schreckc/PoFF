@@ -14,8 +14,10 @@ using namespace Eigen;
 class Grid : public Object {
 
 private :
+  #ifndef NO_GRAPHICS_ 
   GLfloat* vertices;
   GLfloat* colors;
+  #endif
   uint nb_lines;
 
   FLOAT spacing;
@@ -39,13 +41,16 @@ private :
   
 public :
   Grid();
-  Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, Shader* shader = NULL);
+  Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, int shader = -1);
 
   void init(std::vector<Particule*> & particules);
   
   void animate();
-  void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
 
+#ifndef NO_GRAPHICS_ 
+  void draw(glm::mat4 m = glm::mat4(1.0f), int s = -1);
+#endif
+  
   VEC3 position(uint i, uint j, uint k) const;
   VEC3 velocity(uint i, uint j, uint k) const;
   VEC3 & velocity(uint i, uint j, uint k);

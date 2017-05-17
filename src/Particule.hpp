@@ -49,14 +49,14 @@ private :
  mutable MAT3 forceIncrement;
   
 public:
-  Particule(Shader* shader = NULL);
-  Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n = VEC3(0, 0, 0), VEC3 vel = VEC3(0, 0, 0), Shader* shader = NULL);
+  Particule(int shader = -1);
+  Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n = VEC3(0, 0, 0), VEC3 vel = VEC3(0, 0, 0), int shader = -1);
 
     
   void animate();
 
   #ifndef NO_GRAPHICS_ 
-  void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
+  void draw(glm::mat4 m = glm::mat4(1.0f), int s = -1);
   #endif
   
   VEC3 getPosition() const;

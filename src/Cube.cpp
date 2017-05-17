@@ -1,3 +1,5 @@
+#ifndef NO_GRAPHICS_ 
+
 #include "Cube.hpp"
 #include "Scene.hpp"
 #include <glm/gtc/type_ptr.hpp>
@@ -56,7 +58,7 @@ const  float Cube::coordTexture[72] =  {0, 0,   1, 0,   1, 1,
 					0, 0,   1, 0,   1, 1,
 					0, 0,   0, 1,   1, 1};
 
-Cube::Cube(float s, Shader* shader, Texture* texture): Object(shader, texture) {
+Cube::Cube(float s, int shader, int texture): Object(shader, texture) {
     size = s;
     //m_model_view = translate(m_model_view, glm::vec3(0.0, 5.0, 0.0));
     m_model_view = scale(m_model_view, glm::vec3(s, s, s));
@@ -68,7 +70,7 @@ Cube::Cube(float s, Shader* shader, Texture* texture): Object(shader, texture) {
   // m_model_view = translate(m_model_view, glm::vec3(0.0, 5.0, 0.0));
   }
   
-  void Cube::draw(glm::mat4 m, Shader *s) {
+  void Cube::draw(glm::mat4 m, int s) {
     float couleurs[108] = {1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,           // Face 1
 		1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,           // Face 1
 
@@ -114,3 +116,5 @@ Cube::Cube(float s, Shader* shader, Texture* texture): Object(shader, texture) {
 
   disableShader();
   }
+
+#endif

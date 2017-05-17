@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 
 int main(int argc, char **argv) {
   INFO(3, "NO GRAPHICS");
-  Simulation* sim = new Simulation(NULL);
+  Simulation* sim = new Simulation(-1);
   bool end_ = false;
   
   uint t = 0;
@@ -181,10 +181,10 @@ int main(int argc, char **argv) {
     }
     Times::TIMES->tock(Times::total_time_);
     Times::TIMES->next_loop();
+    // if (t%100==0) {
+    //   std::cout<<".";
+    // }
     if (t%100==0) {
-      std::cout<<".";
-    }
-    if (t%1000==0) {
       INFO(1, "Simulation step : "<<t);
       INFO(2, "Time per frame "<<Times::TIMES->getTime(Times::total_time_));
     }

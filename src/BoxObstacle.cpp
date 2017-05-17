@@ -1,14 +1,15 @@
 #include "BoxObstacle.hpp"
 #include "error.hpp"
 
-BoxObstacle::BoxObstacle(VEC3 min_p, VEC3 max_p, Shader *shader) : Obstacle(shader), min_pos(min_p), max_pos(max_p) {
+BoxObstacle::BoxObstacle(VEC3 min_p, VEC3 max_p, int shader) : Obstacle(shader), min_pos(min_p), max_pos(max_p) {
 
 }
 
 BoxObstacle::~BoxObstacle() {}
 
 void BoxObstacle::animate() {}
-void BoxObstacle::draw(glm::mat4 m, Shader *s) {
+#ifndef NO_GRAPHICS_ 
+void BoxObstacle::draw(glm::mat4 m, int s) {
   
    GLfloat ext_vert[72];
    //for (uint l = 0; l < 3; ++l) {
@@ -123,6 +124,7 @@ void BoxObstacle::draw(glm::mat4 m, Shader *s) {
   disableShader();
   //  INFO(3, "BOX\n"<<min_pos<<"\n\n"<<max_pos);
 }
+#endif
 
 VEC3 BoxObstacle::getNormal(VEC3 p) const {
   VEC3 normal;

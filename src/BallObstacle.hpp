@@ -9,11 +9,13 @@ private :
   FLOAT ray;
   
 public :
-  BallObstacle(VEC3 p = VEC3(0, 0, 0), FLOAT r = 1, Shader *shader = NULL);
+  BallObstacle(VEC3 p = VEC3(0, 0, 0), FLOAT r = 1, int shader = -1);
   ~BallObstacle();
 
   void animate();
-  void draw(glm::mat4 m = glm::mat4(1.0f), Shader *s = NULL);
+#ifndef NO_GRAPHICS_ 
+  void draw(glm::mat4 m = glm::mat4(1.0f), int s = -1);
+#endif
   
   VEC3 getPosition() const;
   FLOAT getRay() const;
