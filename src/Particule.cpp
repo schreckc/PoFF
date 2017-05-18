@@ -428,8 +428,8 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   // INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
   if (mpm_conf::plasticity_) {  
     
-     project(sigma, T);
-     //anisotropicProject(sigma, T, U);
+    //project(sigma, T);
+     anisotropicProject(sigma, T, U);
     //    INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
     
     MAT3 inv_T = MAT3::Zero();
@@ -662,8 +662,8 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
   // MAT3 V = svd.matrixV();
   // VEC3 sigma = svd.singularValues();
 
-  VEC3 smax(1.0075, 1.0075, 1.0075);
-  VEC3 smin(0.975, 0.975, 0.975);
+  VEC3 smax(1.0, 1.0, 1.0075);
+  VEC3 smin(0.0, 0.0, 0.975);
   
   for (uint i = 0; i < 3; ++i) {
     VEC3 v = sigma(i)*U.col(i);
