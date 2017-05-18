@@ -174,6 +174,19 @@ VEC3 utils::intersection3d(const VEC3 o1,
 
 }
 
+MAT3 utils::rotation(FLOAT angle, VEC3 axe) {
+  FLOAT cosx = cos(angle);
+  FLOAT sinx = sin(angle);
+  MAT3 Q(3,3);
+  Q << 0, -axe(2), axe(1), 
+    axe(2), 0, -axe(0), 
+    -axe(1), axe(0), 0;
+  
+  MAT3 P = axe*axe.transpose();
+  MAT3 R = P + (MAT3::Identity(3,3) - P) * cosx + Q * sinx;
+  return R;
+}
+
 VEC3 utils::rotation(VEC3 v, FLOAT angle, VEC3 axe) {
   FLOAT cosx = cos(angle);
   FLOAT sinx = sin(angle);

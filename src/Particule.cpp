@@ -612,6 +612,22 @@ void Particule::setAnisotropyAxes(VEC3 x, VEC3 y, VEC3 z) {
   ellipse = R*D;
 }
 
+// void Particule::setAnisotropyRotation(MAT3 rot) {
+//   axex = rot*axex;
+//   axey = rot*axey;
+//   axez = rot*axez;
+  
+//   rotation = rot;
+    
+//   MAT3 D;
+//   D.col(0) << valx, 0, 0;
+//   D.col(1) << 0, valy, 0;
+//   D.col(2) << 0, 0, valz;
+
+//   // ellipse = R.transpose()*D*R;
+//   ellipse = rot*D;
+// }
+
 void Particule::setAnisotropyValues(FLOAT vx, FLOAT vy, FLOAT vz) {
   valx = vx;
   valy = vy;
@@ -662,8 +678,8 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
   // MAT3 V = svd.matrixV();
   // VEC3 sigma = svd.singularValues();
 
-  VEC3 smax(1.0, 1.0, 1.0075);
-  VEC3 smin(0.0, 0.0, 0.975);
+  VEC3 smax(1.0075, 1.0075, 1.0);
+  VEC3 smin(0.975, 0.975, 0.0);
   
   for (uint i = 0; i < 3; ++i) {
     VEC3 v = sigma(i)*U.col(i);

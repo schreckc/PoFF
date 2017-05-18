@@ -29,6 +29,8 @@ namespace mpm_conf {
   extern FLOAT grid_spacing_; // m
 
   extern Eigen::VEC4 hardenning_param_;
+  extern Eigen::VEC3 stretch_max;
+  extern Eigen::VEC3 stretch_min;
 
   extern FLOAT mu_, lambda_;
   extern FLOAT young_modulus_, poisson_;

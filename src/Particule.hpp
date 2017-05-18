@@ -92,6 +92,7 @@ public:
   
   //anisotropy
   void setAnisotropyAxes(VEC3 x, VEC3 y, VEC3 z);
+  void setAnisotropyRotation(MAT3 rot);
   void setAnisotropyValues(FLOAT vx, FLOAT vy, FLOAT vz);
 
   void rotate(MAT3 rot);

@@ -63,9 +63,13 @@ namespace utils {
    * apply the rotation around the axe (with the angle a) to the
    * vector v
    */
+  
   VEC3 rotation(VEC3 v, FLOAT angle, VEC3 axe);
 
   VEC2 rotation(VEC2 v, FLOAT angle);
+
+  MAT3 rotation(FLOAT angle, VEC3 axe);
+
 
   VEC2 projection(const VEC2 p, const VEC2 origine, const VEC2 dir, const VEC2 dir_proj, FLOAT & coef);
   /**

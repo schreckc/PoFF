@@ -12,6 +12,8 @@ namespace mpm_conf {
   FLOAT grid_spacing_ = 0.01; 
 
   VEC4 hardenning_param_ = VEC4(35.0, 0.0, 0.02, 10.0);
+  VEC3 stretch_max = VEC3(1.0075, 1.0075, 1.0075);
+  VEC3 stretch_min = VEC3(0.975, 0.975, 0.975);
 
   FLOAT young_modulus_ = 3.537e+7;
   FLOAT poisson_ = 0.3;
@@ -136,6 +138,16 @@ namespace mpm_conf {
 	    ERROR(false, "Invalid configuration file \""<<path_file<<"\"", method);
 	  }
 	  INFO(3, "METHOD "<<method_);
+	}  else if (line.substr(0,13) == "<stretch_max>") {
+	  std::istringstream s(line.substr(13));
+	  for (uint i = 0; i < 3; ++i) {
+	    s >> stretch_max(i);
+	  }
+	}  else if (line.substr(0,13) == "<stretch_min>") {
+	  std::istringstream s(line.substr(13));
+	  for (uint i = 0; i < 3; ++i) {
+	    s >> stretch_min(i);
+	  }
 	} else {
 	  ERROR(false, "Invalid configuration file \""<<path_file<<"\"", line);
 	}

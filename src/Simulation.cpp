@@ -8,6 +8,7 @@
 #include "BallObstacle.hpp"
 #include "Times.hpp"
 #include "mpm_conf.hpp"
+#include "utils.hpp"
 
 #define POISSON_PROGRESS_INDICATOR 1
 #include "PoissonGenerator.hpp"
@@ -495,14 +496,36 @@ void Simulation::loadScene() {
 	}
        // end obstacles
     } else if (line.substr(0,12) == "<particules>") {
+	MAT3 rotation = MAT3::Identity();
 	getline(file, line);	
 	while (line.substr(0,13) != "</particules>") {
 	  if (!import_) {
-	    if (line.substr(0,9) == " <cuboid>") {
+	    if (line.substr(0,11) == " <rotation>") {
+	      getline(file, line);
+	      FLOAT angle = 0;
+	      VEC3 axe;
+	      while (line.substr(0,12) != " </rotation>") {
+		if (line.substr(0,7) == "  <axe>") {
+		  std::istringstream s(line.substr(7));
+		  for (uint i = 0; i < 3; ++i) {
+		    s >> axe(i);
+		  }
+		} else  if (line.substr(0,9) == "  <angle>") {
+		  std::istringstream s(line.substr(9));
+		  s >> angle;
+		} else {
+		  std::cerr<<"Line not recognized in file \""<<scene_path<<"\": "<<line<<std::endl;
+		  exit(-1);
+		}
+		getline(file, line);
+	      }
+	      rotation = utils::rotation(angle/2.0, axe)*rotation;
+	      //INFO(3, "rot \n"<<rotation);
+	    } else if (line.substr(0,9) == " <cuboid>") {
 	    FLOAT xmin = 0, xmax = 0, ymin = 0, ymax = 0, zmin = 0, zmax = 0;
 	    uint nb_part;
 	    VEC3 vel(0, 0, 0);
-	      getline(file, line);
+	    getline(file, line);
 	    while (line.substr(0,10) != " </cuboid>") {
 	      if (line.substr(0,5) == "  <x>") {
 		std::istringstream s(line.substr(5));
@@ -556,15 +579,8 @@ void Simulation::loadScene() {
 	      Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, v + VEC3(xmin, ymin, zmin), VEC3(0, 0, 1), vel);
 	       particules.push_back(p);
 
-	       // VEC3 x((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
-	       // VEC3 y((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
-	       // VEC3 z((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
-	       VEC3 x(1, 0, 0);
-	       VEC3 y(0, 1, 0);
-	       VEC3 z(0, 0, 1);
-	      
-	       p->setAnisotropyAxes(x, y, z);
 	       p->setAnisotropyValues(0.5, 0.5, 2);
+	       p->rotate(rotation);
 	      
 	     }
 	    
@@ -623,15 +639,16 @@ void Simulation::loadScene() {
 	      Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*v + center, VEC3(0, 0, 1), vel);
 	       particules.push_back(p);
 
-	       // VEC3 x((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
-	       // VEC3 y((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
-	       // VEC3 z((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
-	       VEC3 x(1, 0, 0);
-	       VEC3 y(0, 1, 0);
-	       VEC3 z(0, 0, 1);
+	       // // VEC3 x((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
+	       // // VEC3 y((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
+	       // // VEC3 z((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
+	       // VEC3 x(1, 0, 0);
+	       // VEC3 y(0, 1, 0);
+	       // VEC3 z(0, 0, 1);
 	      
-	       p->setAnisotropyAxes(x, y, z);
+	       // p->setAnisotropyAxes(x, y, z);
 	       p->setAnisotropyValues(0.5, 0.5, 2);
+	       p->rotate(rotation);
 	      
 	     }
 	    
