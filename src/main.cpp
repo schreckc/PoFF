@@ -179,15 +179,17 @@ int main(int argc, char **argv) {
     if (t > stop) {
       end_ = true;
     }
+    if (t%100==0) {
+      INFO(1, "Simulation step : "<<t);
+      INFO(2, "Time per frame "<<Times::TIMES->getTime(Times::total_time_));
+    }
+    
     Times::TIMES->tock(Times::total_time_);
     Times::TIMES->next_loop();
     // if (t%100==0) {
     //   std::cout<<".";
     // }
-    if (t%100==0) {
-      INFO(1, "Simulation step : "<<t);
-      INFO(2, "Time per frame "<<Times::TIMES->getTime(Times::total_time_));
-    }
+
   }
 
   

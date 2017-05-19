@@ -519,7 +519,10 @@ void Simulation::loadScene() {
 		}
 		getline(file, line);
 	      }
-	      rotation = utils::rotation(angle/2.0, axe)*rotation;
+	      rotation = utils::rotation(angle, axe)*rotation;
+	      // rotation << 1, 0, 0,
+	      // 	0, sqrt(2.0)*0.5, sqrt(2.0)*0.5,
+	      // 	0, -sqrt(2.0)*0.5, sqrt(2.0)*0.5;
 	      //INFO(3, "rot \n"<<rotation);
 	    } else if (line.substr(0,9) == " <cuboid>") {
 	    FLOAT xmin = 0, xmax = 0, ymin = 0, ymax = 0, zmin = 0, zmax = 0;
@@ -580,8 +583,7 @@ void Simulation::loadScene() {
 	       particules.push_back(p);
 
 	       p->setAnisotropyValues(0.5, 0.5, 2);
-	       p->rotate(rotation);
-	      
+	       p->setAnisotropyRotation(rotation);
 	     }
 	    
 	    //cuboid
@@ -648,7 +650,7 @@ void Simulation::loadScene() {
 	      
 	       // p->setAnisotropyAxes(x, y, z);
 	       p->setAnisotropyValues(0.5, 0.5, 2);
-	       p->rotate(rotation);
+	       p->setAnisotropyRotation(rotation);
 	      
 	     }
 	    

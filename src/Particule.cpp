@@ -199,6 +199,12 @@ void Particule::draw(glm::mat4 m, int s) {
 
   disableShader();
   }
+  
+  if (Scene::SCENE->running) {
+    color = VEC3(1, 1, 1);
+  } else {
+    color = VEC3(0.5, 1, 0.5);
+  }
 }
 #endif
 
@@ -553,8 +559,7 @@ void Particule::project(VEC3 sigma, VEC3 & T) {
     double smin = mpm_conf::hardenning_param_(2);//1 - 2.5e-2;
     //if (density > 0.9*mpm_conf::density_) {
       //      INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
-
-      color = VEC3(1, 1, 1);
+    
       for (uint i = 0; i < 3; ++i) {
 	T(i) = sigma(i);
 	if (sigma(i) < smin) {
@@ -612,34 +617,26 @@ void Particule::setAnisotropyAxes(VEC3 x, VEC3 y, VEC3 z) {
   ellipse = R*D;
 }
 
-// void Particule::setAnisotropyRotation(MAT3 rot) {
-//   axex = rot*axex;
-//   axey = rot*axey;
-//   axez = rot*axez;
+void Particule::setAnisotropyRotation(MAT3 rot) {
+   // axex = rot*axex;
+   // axey = rot*axey;
+   // axez = rot*axez;
   
-//   rotation = rot;
+  rotation = rot;
     
-//   MAT3 D;
-//   D.col(0) << valx, 0, 0;
-//   D.col(1) << 0, valy, 0;
-//   D.col(2) << 0, 0, valz;
+  // MAT3 D;
+  // D.col(0) << valx, 0, 0;
+  // D.col(1) << 0, valy, 0;
+  // D.col(2) << 0, 0, valz;
 
-//   // ellipse = R.transpose()*D*R;
-//   ellipse = rot*D;
-// }
+  // // ellipse = R.transpose()*D*R;
+  // ellipse = rot*D;
+}
 
 void Particule::setAnisotropyValues(FLOAT vx, FLOAT vy, FLOAT vz) {
   valx = vx;
   valy = vy;
   valz = vz;
-
-  MAT3 R;
-  R.col(0) = axex;
-  R.col(1) = axey;
-  R.col(2) = axez;
-
-  //TODO check this
-  rotation = R;
     
   MAT3 D;
   D.col(0) << valx, 0, 0;
@@ -647,7 +644,7 @@ void Particule::setAnisotropyValues(FLOAT vx, FLOAT vy, FLOAT vz) {
   D.col(2) << 0, 0, valz;
 
   //  ellipse = R.transpose()*D*R;
-  ellipse = R*D;
+  ellipse = rotation*D;
 }
 
 
@@ -678,8 +675,8 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
   // MAT3 V = svd.matrixV();
   // VEC3 sigma = svd.singularValues();
 
-  VEC3 smax(1.0075, 1.0075, 1.0);
-  VEC3 smin(0.975, 0.975, 0.0);
+  VEC3 smax = mpm_conf::stretch_max;
+  VEC3 smin = mpm_conf::stretch_min;
   
   for (uint i = 0; i < 3; ++i) {
     VEC3 v = sigma(i)*U.col(i);

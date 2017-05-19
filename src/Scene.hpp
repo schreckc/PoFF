@@ -55,9 +55,9 @@ public:
 
   void setRun(bool run);
   void setStop(uint t_end);
-  
+
+    bool running;
 private:
-  bool running;
   uint step_by_step;
   uint t;
   bool end_;
