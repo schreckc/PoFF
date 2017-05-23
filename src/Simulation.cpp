@@ -209,7 +209,7 @@ void Simulation::importParticules(std::ifstream & file) {
 	for (uint i = 0; i < 9; ++i) {
 	  s >> r(i);
 	}
-	particules[ir]->setAnisotropyAxes(VEC3(r(0), r(1), r(2)), VEC3(r(3), r(4), r(5)), VEC3(r(6), r(7), r(8)));
+	particules[ir]->setAnisotropyRotation(r);//setAnisotropyAxes(VEC3(r(0), r(3), r(6)), VEC3(r(1), r(4), r(7)), VEC3(r(2), r(5), r(8)));
 	++ir;
 	//INFO(3, r);
       } else if (line.substr(0,2) == "a ") {
@@ -315,6 +315,20 @@ void Simulation::backward(uint n) {
   } else {
     nb_file_i = 0;
   }
+}
+
+void randomRotation(MAT3 & R) {
+  VEC3 x((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
+  VEC3 y((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
+  VEC3 z((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
+  z = x.cross(y);
+  y = z.cross(x);
+  x.normalize();
+  y.normalize();
+  z.normalize();
+  R.col(0) = x;
+  R.col(1) = y;
+  R.col(2) = z;
 }
 
 void Simulation::loadScene() {
@@ -497,6 +511,7 @@ void Simulation::loadScene() {
        // end obstacles
     } else if (line.substr(0,12) == "<particules>") {
 	MAT3 rotation = MAT3::Identity();
+	bool random = false;
 	getline(file, line);	
 	while (line.substr(0,13) != "</particules>") {
 	  if (!import_) {
@@ -513,6 +528,8 @@ void Simulation::loadScene() {
 		} else  if (line.substr(0,9) == "  <angle>") {
 		  std::istringstream s(line.substr(9));
 		  s >> angle;
+		} else  if (line.substr(0,10) == "  <random>") {
+		  random = true;
 		} else {
 		  std::cerr<<"Line not recognized in file \""<<scene_path<<"\": "<<line<<std::endl;
 		  exit(-1);
@@ -520,7 +537,7 @@ void Simulation::loadScene() {
 		getline(file, line);
 	      }
 	      rotation = utils::rotation(angle, axe)*rotation;
-	      // rotation << 1, 0, 0,
+		// rotation << 1, 0, 0,
 	      // 	0, sqrt(2.0)*0.5, sqrt(2.0)*0.5,
 	      // 	0, -sqrt(2.0)*0.5, sqrt(2.0)*0.5;
 	      //INFO(3, "rot \n"<<rotation);
@@ -582,6 +599,9 @@ void Simulation::loadScene() {
 	      Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, v + VEC3(xmin, ymin, zmin), VEC3(0, 0, 1), vel);
 	       particules.push_back(p);
 
+	       if (random) {
+		 randomRotation(rotation);
+	       }
 	       p->setAnisotropyValues(0.5, 0.5, 2);
 	       p->setAnisotropyRotation(rotation);
 	     }
@@ -649,6 +669,11 @@ void Simulation::loadScene() {
 	       // VEC3 z(0, 0, 1);
 	      
 	       // p->setAnisotropyAxes(x, y, z);
+
+	       if (random) {
+		 randomRotation(rotation);
+	       }
+	       
 	       p->setAnisotropyValues(0.5, 0.5, 2);
 	       p->setAnisotropyRotation(rotation);
 	      

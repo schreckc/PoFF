@@ -10,12 +10,19 @@
 </obstacles>
 <particules>
  <rotation>
-  <axe> 1 0 0
-  <angle> 0
+  <random>
  </rotation>
  <cuboid> 
   <x> 0.45 0.55
-  <y> 0.2 0.3
+  <y> 0.15 0.25
+  <z> 0.16 0.46
+  <nb particules> 6000
+ </cuboid>
+</particules>
+<particules>
+ <cuboid> 
+  <x> 0.45 0.55
+  <y> 0.35 0.45
   <z> 0.16 0.46
   <nb particules> 6000
  </cuboid>
@@ -27,7 +34,7 @@
  </rotation>
  <cuboid> 
   <x> 0.45 0.55
-  <y> 0.45 0.55
+  <y> 0.55 0.65
   <z> 0.16 0.46
   <nb particules> 6000
  </cuboid>
@@ -39,7 +46,7 @@
  </rotation>
  <cuboid> 
   <x> 0.45 0.55
-  <y> 0.7 0.8
+  <y> 0.75 0.85
   <z> 0.16 0.46
   <nb particules> 6000
  </cuboid>
