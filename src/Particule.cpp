@@ -669,38 +669,65 @@ VEC3 Particule::getAnisotropy() const {
 }
 
 void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
-  MAT3 rotF = rotation.transpose()*F_e;
-  // JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
-  // MAT3 U = svd.matrixU();
-  // MAT3 V = svd.matrixV();
-  // VEC3 sigma = svd.singularValues();
+ 
+  // MAT3 rotF = rotation.transpose()*F_e;
+  // // JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
+  // // MAT3 U = svd.matrixU();
+  // // MAT3 V = svd.matrixV();
+  // // VEC3 sigma = svd.singularValues();
 
-  VEC3 smax = mpm_conf::stretch_max;
-  VEC3 smin = mpm_conf::stretch_min;
+  // VEC3 smax = mpm_conf::stretch_max;
+  // VEC3 smin = mpm_conf::stretch_min;
+
+  // // TEST(sigma(0) >= sigma(1));
+  // // TEST(sigma(1) >= sigma(2));
+  // //  INFO(3,sigma);
   
+  // for (uint i = 0; i < 3; ++i) {
+  //   VEC3 v = sigma(i)*U.col(i);
+  //   VEC3 vmin;
+  //   VEC3 vmax;
+  //   for (uint k = 0; k < 3; ++k) {
+  //     vmax(k) = v(k) / smax(k);
+  //     vmin(k) = v(k) / smin(k);
+  //   }
+  //   if (vmax.squaredNorm() > 1) {
+  //     vmax.normalize();
+  //     for (uint k = 0; k < 3; ++k) {
+  // 	v(k) = vmax(k) * smax(k);
+  //     }
+  //     T(i) = v.norm();
+  //   } else if (vmin.squaredNorm() < 1) {
+  //     vmin.normalize();
+  //     for (uint k = 0; k < 3; ++k) {
+  // 	v(k) = vmin(k) * smin(k);
+  //     }
+  //     T(i) = v.norm();
+  //   } else {
+  //     T(i) = sigma(i);
+  //   }
+  // }
+
   for (uint i = 0; i < 3; ++i) {
-    VEC3 v = sigma(i)*U.col(i);
-    VEC3 vmin;
-    VEC3 vmax;
-    for (uint k = 0; k < 3; ++k) {
-      vmax(k) = v(k) / smax(k);
-      vmin(k) = v(k) / smin(k);
-    }
-    if (vmax.squaredNorm() > 1) {
-      vmax.normalize();
-      for (uint k = 0; k < 3; ++k) {
-	v(k) = vmax(k) * smax(k);
-      }
-      T(i) = v.norm();
-    } else if (vmin.squaredNorm() < 1) {
-      vmin.normalize();
-      for (uint k = 0; k < 3; ++k) {
-	v(k) = vmin(k) * smin(k);
-      }
-      T(i) = v.norm();
+    if (sigma(i) > 1) {
+      T(i) = 1;
     } else {
       T(i) = sigma(i);
     }
   }
+  //0.0005 wokrs well with falling_cube_cylinder
+    FLOAT diff = T(1) - T(2) - 0.0005;
+    if (diff > 0) {
+      //T(1) = sigma(1) - diff;
+      T(1) = sigma(1) - diff/2.0;
+      T(2) = sigma(2) + diff/2.0;
+    }
+
+    diff = T(0) - T(1) - 0.0005;
+    if (diff > 0) {
+      //T(0) = sigma(0) - diff;
+      T(0) = sigma(0) - diff/2.0;
+      T(1) = sigma(1) + diff/2.0;
+    }
 }
 
