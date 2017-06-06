@@ -716,47 +716,49 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
        //}
    }
   
-   FLOAT lim = 0.0005;
-   // for (uint i = 0; i < 3; ++i) {
-   VEC3 v = U.col(0);
-   for (uint k = 0; k < 3; ++k) {
-    v(k) = v(k)*smin(k);
+   VEC3 lim;// = 0.0005;
+   for (uint i = 0; i < 3; ++i) {
+     VEC3 v = U.col(i);
+     for (uint k = 0; k < 3; ++k) {
+       v(k) = v(k)*smin(k);
+     }
+     lim(i) = v.norm();
    }
-    lim = v.norm();
-   FLOAT diff = T(1) - T(2) - lim;
+   FLOAT diff = T(1) - T(2) - lim(0);
    if (diff > 0) {
      //     //T(1) = sigma(1) - diff;
      T(1) = T(1) - diff/2.0;
      T(2) = T(2) + diff/2.0;
    }
 
-   v = U.col(1);
-   for (uint k = 0; k < 3; ++k) {
-     v(k) = v(k)*smin(k);
-   }
-   lim = v.norm();
+   // v = U.col(2);
+   // for (uint k = 0; k < 3; ++k) {
+   //   v(k) = v(k)*smin(k);
+   // }
+   // lim = v.norm();
    
-   diff = T(0) - T(1) - lim;
+   diff = T(0) - T(1) - lim(2);
    if (diff > 0) {
      //     //T(1) = sigma(1) - diff;
      T(0) = T(0) - diff/2.0;
      T(1) = T(1) + diff/2.0;
    }
 
-   v = U.col(0);
-   for (uint k = 0; k < 3; ++k) {
-     v(k) = v(k)*smin(k);
-   }
-     lim = v.norm();
-   diff = T(0) - T(2) - lim;
+   // v = U.col(1);
+   // for (uint k = 0; k < 3; ++k) {
+   //   v(k) = v(k)*smin(k);
+   // }
+   //  lim = v.norm();
+     diff = T(0) - T(2) - lim(1);
    if (diff > 0) {
      //     //T(1) = sigma(1) - diff;
      T(0) = T(0) - diff/2.0;
      T(2) = T(2) + diff/2.0;
    }
    
-   
-  
+   // INFO(3, "sigma : "<< sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
+   // INFO(3, "T : "<< T(0)<<" "<<T(1)<<" "<<T(2));
+   INFO(3, "lim : "<< lim(0)<<" "<<lim(1)<<" "<<lim(2));
   
  
   // // //0.0005 wokrs well with falling_cube_cylinder
