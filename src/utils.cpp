@@ -270,15 +270,15 @@ VEC3 utils::projectionOrtho(const VEC3 p, const VEC3 origine, const VEC3 dir) {
 
 
 VEC3 utils::projectionOrtho(const VEC3 p, const VEC3 origine, const VEC3 dir, FLOAT & coef) {
-  IS_DEF(p(0));
-  IS_DEF(p(1));
-  IS_DEF(p(2));
-  IS_DEF(origine(0));
-  IS_DEF(origine(1));
-  IS_DEF(origine(2));
-  IS_DEF(dir(0));
-  IS_DEF(dir(1));
-  IS_DEF(dir(2));
+  // IS_DEF(p(0));
+  // IS_DEF(p(1));
+  // IS_DEF(p(2));
+  // IS_DEF(origine(0));
+  // IS_DEF(origine(1));
+  // IS_DEF(origine(2));
+  // IS_DEF(dir(0));
+  // IS_DEF(dir(1));
+  // IS_DEF(dir(2));
   MAT4 M(4, 4);
   assert(dir.norm() != 0);
   M << 1, 0, 0, -dir(0), 
@@ -289,10 +289,10 @@ VEC3 utils::projectionOrtho(const VEC3 p, const VEC3 origine, const VEC3 dir, FL
   v << origine(0), origine(1), origine(2), p.dot(dir);
   Vector4d result = M.inverse()*v;
   coef = result(3);
-  IS_DEF(result(0));
-  IS_DEF(result(1));
-  IS_DEF(result(2));
-  IS_DEF(result(3));
+  // IS_DEF(result(0));
+  // IS_DEF(result(1));
+  // IS_DEF(result(2));
+  // IS_DEF(result(3));
   return VEC3(result(0), result(1), result(2));
 }
 

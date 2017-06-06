@@ -64,6 +64,7 @@ FLOAT CylinderObstacle::distance(VEC3 v) const {
 }
 
 void CylinderObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) const {
+  // INFO(3, p);
   VEC3 proj = utils::projectionOrtho(p, pos, dir);
   VEC3 n = p - proj;
   FLOAT norm = n.norm();

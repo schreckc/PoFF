@@ -114,7 +114,7 @@ void Particule::draw(glm::mat4 m, int s) {
     if (m_shader == -1) {
       cur_shader = s;
     }
-    glm::mat4 cur_model = m * m_model_view * S4;
+    glm::mat4 cur_model = m * m_model_view;// * S4;
     
     sp.draw(cur_model, cur_shader);
 
@@ -293,6 +293,7 @@ const MAT3& Particule::getForceIncrement() const {
   // // INFO(3, F_p);
   
   // forceIncrement = v0*U*energyDerivative(sigma)*V.transpose()*F_e.transpose();
+  IS_DEF(forceIncrement(0, 0));
   return forceIncrement;
 }
 
@@ -397,6 +398,8 @@ VEC3 Particule::gradWeight(Vector3i node) {
   //     // gradn(i) = 0;
   //   }
   // }
+  IS_DEF(n(0));
+  IS_DEF(gradn(0));
   return 1.0/mpm_conf::grid_spacing_*VEC3(gradn(0)*n(1)*n(2), gradn(1)*n(0)*n(2), gradn(2)*n(1)*n(0));
   //return VEC3(gradn(0)*n(1)*n(2), gradn(1)*n(0)*n(2), gradn(2)*n(1)*n(0)); 
 }
@@ -407,6 +410,9 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   } else {
     pos += mpm_conf::dt_*v;
   }
+  IS_DEF(pos(0));
+  IS_DEF(pos(1));
+  IS_DEF(pos(2));
   vel = v;
    FLOAT h = mpm_conf::grid_spacing_;
   cell = Vector3i((int)(pos(0)/h), (int)(pos(1)/h), (int)(pos(2)/h));
@@ -465,14 +471,17 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
       fric_angle = fric_angle*M_PI/180; //convert radian
       alpha = sqrt(2.0/3.0)*(2*sin(fric_angle))/(3-sin(fric_angle));
     } else if (mpm_conf::mode_ == 1) {
-      alpha = exp(mpm_conf::hardenning_param_(3)*(1-det_Fp));
+      alpha = 1;//exp(mpm_conf::hardenning_param_(3)*(1-det_Fp));
     }
 
     //  INFO(3, "hardenning "<< alpha);
 
     // // INFO(3, F_p);
- 
+    IS_DEF(rotation(0,0));
+    IS_DEF(T(0));
+    IS_DEF(energyDerivative(T)(0, 0));
     forceIncrement = v0*rotation*U*energyDerivative(T)*V.transpose()*F_e.transpose();
+	   
   } else {
     forceIncrement = v0*U*energyDerivative(sigma)*V.transpose()*F_e.transpose();
   }
@@ -488,6 +497,9 @@ void Particule::initVolume(FLOAT d) {
 }
 
 MAT3 Particule::energyDerivative(VEC3 sigma) {
+  IS_DEF(sigma(0));
+  IS_DEF(sigma(1));
+  IS_DEF(sigma(2));
   if (mpm_conf::mode_ == 0) {
     MAT3 invSigma = MAT3::Zero();
     MAT3 lnSigma = MAT3::Zero();
@@ -498,15 +510,31 @@ MAT3 Particule::energyDerivative(VEC3 sigma) {
 	invSigma(i, i) = 1.0/ev;
 	lnSigma(i, i) = log(ev);
 	tr += log(ev);
+	IS_DEF(invSigma(i, i));
+	IS_DEF(lnSigma(i, i));
       }
     }
     return 2*mpm_conf::mu_*invSigma*lnSigma + mpm_conf::lambda_*tr*invSigma;
   } else if (mpm_conf::mode_ == 1) {
-
+    //   INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
+     for (uint i = 0; i < 3; ++i) {
+       if (sigma(i) < 1e-10) {
+	 sigma(i) = 0;
+       }
+     }
     FLOAT det = sigma(0)*sigma(1)*sigma(2);
+    if (std::isnan(det) || std::isinf(det)) {
+      det = 1;
+    }
+    IS_DEF(det);
     MAT3 der = MAT3::Zero();
     for (uint i = 0; i < 3; ++i) {
+      IS_DEF(alpha);
       der(i, i) = 2*mpm_conf::mu_*alpha*(sigma(i)-1) + mpm_conf::lambda_*alpha*sigma((i+1)%3)*sigma((i+2)%3)*(det -1);
+      if (std::isnan(der(i, i))) {
+	der(i, i) = 0;
+      }
+      IS_DEF(der(i, i));
     }
     return der;
   }
@@ -651,6 +679,7 @@ void Particule::setAnisotropyValues(FLOAT vx, FLOAT vy, FLOAT vz) {
 
 
 void Particule::rotate(MAT3 rot) {
+  IS_DEF(rot(0, 0));
   ellipse = rot*ellipse;
 
   axex = rot*axex;
@@ -756,9 +785,10 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
      T(2) = T(2) + diff/2.0;
    }
    
-   // INFO(3, "sigma : "<< sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
-   // INFO(3, "T : "<< T(0)<<" "<<T(1)<<" "<<T(2));
-   // INFO(3, "lim : "<< lim(0)<<" "<<lim(1)<<" "<<lim(2));
+    // INFO(3, "sigma : "<< sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
+    // INFO(3, "T : "<< T(0)<<" "<<T(1)<<" "<<T(2));
+    // INFO(3, "lim : "<< lim(0)<<" "<<lim(1)<<" "<<lim(2));
+    IS_DEF(T(0, 0));
   
  
   // // //0.0005 wokrs well with falling_cube_cylinder

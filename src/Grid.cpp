@@ -418,7 +418,9 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 			} else {
 			  velocities[ind] += w*p->getMass()*p->getVelocity();
 			}
+			 IS_DEF(velocities[ind](0));
 			f += p->getForceIncrement()*p->gradWeight(Vector3i(i, j, k));
+			IS_DEF(f(0));
 		      }
 		    }
 		  }
@@ -438,18 +440,22 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 	  //     }
 	  //inter_velocities[ind] = velocities[ind]/ masses[ind];
 	  //	  INFO(3,"masses " << masses[ind]<<" "<<f.norm()/masses[ind]);
+	   IS_DEF(velocities[ind](0));
 	  if (masses[ind] > 1e-8*mpm_conf::dt_) {
+	    IS_DEF(f(0));
 	    velocities[ind] -= /*mpm_conf::cheat_damping_*/mpm_conf::dt_*f + mpm_conf::dt_*mpm_conf::damping_*velocities[ind];
 	    velocities[ind] /= masses[ind];
 	  } else {
 	    velocities[ind] = VEC3(0, 0, 0);
 	  }
+	  IS_DEF(velocities[ind](0));
 	  velocities[ind] += mpm_conf::dt_*mpm_conf::gravity_;
 	  inter_velocities[ind] = velocities[ind];//particules.front()->gradWeight(Vector3i(i, j, k));
 	  new_positions[ind] = positions[ind] + mpm_conf::dt_*velocities[ind];
 		  //	  inter_velocities[ind] =  velocities[ind];//particules.front()->gradWeight(Vector3i(i, j, k));
 	  //	  INFO(3, "vel\n" << velocities[ind]);
 	  //	  INFO(3, "density "<<masses[ind]/pow(mpm_conf::grid_spacing_, 3));
+	   IS_DEF(velocities[ind](0));
 	}
 	// } else {
 	//   velocities[ind] = VEC3(0, 0, 0);
@@ -491,7 +497,9 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
 		  pos += w*(positions[ind] + mpm_conf::dt_*velocities[ind]); //mult by w twice ?
 		  T += mpm_conf::cheat_damping_*velocities[ind]*p->gradWeight(Vector3i(i, j, k)).transpose();
 		  //	INFO(3, "vel g2p \n"<<prev_velocities[ind]);
-
+		  IS_DEF(velocities[ind](0));
+		  IS_DEF(w);
+		  IS_DEF(pos(0));
 		  if (density_max < masses[ind]) {
 		    density_max = masses[ind];
 		  }
