@@ -758,7 +758,7 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
    
    // INFO(3, "sigma : "<< sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
    // INFO(3, "T : "<< T(0)<<" "<<T(1)<<" "<<T(2));
-   //INFO(3, "lim : "<< lim(0)<<" "<<lim(1)<<" "<<lim(2));
+   // INFO(3, "lim : "<< lim(0)<<" "<<lim(1)<<" "<<lim(2));
   
  
   // // //0.0005 wokrs well with falling_cube_cylinder
