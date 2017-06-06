@@ -671,13 +671,13 @@ VEC3 Particule::getAnisotropy() const {
 void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
  
   // MAT3 rotF = rotation.transpose()*F_e;
-  // // JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
-  // // MAT3 U = svd.matrixU();
-  // // MAT3 V = svd.matrixV();
-  // // VEC3 sigma = svd.singularValues();
+   // JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
+   // MAT3 U = svd.matrixU();
+   // MAT3 V = svd.matrixV();
+   // VEC3 sigma = svd.singularValues();
 
-  // VEC3 smax = mpm_conf::stretch_max;
-  // VEC3 smin = mpm_conf::stretch_min;
+   VEC3 smax = mpm_conf::stretch_max;
+   VEC3 smin = Vector3d(1, 1, 1) - mpm_conf::stretch_min;
 
   // // TEST(sigma(0) >= sigma(1));
   // // TEST(sigma(1) >= sigma(2));
@@ -708,26 +708,77 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
   //   }
   // }
 
-  for (uint i = 0; i < 3; ++i) {
-    if (sigma(i) > 1) {
-      T(i) = 1;
-    } else {
-      T(i) = sigma(i);
-    }
-  }
-  //0.0005 wokrs well with falling_cube_cylinder
-    FLOAT diff = T(1) - T(2) - 0.0005;
-    if (diff > 0) {
-      //T(1) = sigma(1) - diff;
-      T(1) = sigma(1) - diff/2.0;
-      T(2) = sigma(2) + diff/2.0;
-    }
+   for (uint i = 0; i < 3; ++i) {
+     // if (sigma(i) > 1) {
+     //   T(i) = 1;
+     // } else {
+       T(i) = sigma(i);
+       //}
+   }
+  
+   FLOAT lim = 0.0005;
+   // for (uint i = 0; i < 3; ++i) {
+   VEC3 v = U.col(0);
+   for (uint k = 0; k < 3; ++k) {
+    v(k) = v(k)*smin(k);
+   }
+    lim = v.norm();
+   FLOAT diff = T(1) - T(2) - lim;
+   if (diff > 0) {
+     //     //T(1) = sigma(1) - diff;
+     T(1) = T(1) - diff/2.0;
+     T(2) = T(2) + diff/2.0;
+   }
 
-    diff = T(0) - T(1) - 0.0005;
-    if (diff > 0) {
-      //T(0) = sigma(0) - diff;
-      T(0) = sigma(0) - diff/2.0;
-      T(1) = sigma(1) + diff/2.0;
-    }
+   v = U.col(1);
+   for (uint k = 0; k < 3; ++k) {
+     v(k) = v(k)*smin(k);
+   }
+   lim = v.norm();
+   
+   diff = T(0) - T(1) - lim;
+   if (diff > 0) {
+     //     //T(1) = sigma(1) - diff;
+     T(0) = T(0) - diff/2.0;
+     T(1) = T(1) + diff/2.0;
+   }
+
+   v = U.col(0);
+   for (uint k = 0; k < 3; ++k) {
+     v(k) = v(k)*smin(k);
+   }
+     lim = v.norm();
+   diff = T(0) - T(2) - lim;
+   if (diff > 0) {
+     //     //T(1) = sigma(1) - diff;
+     T(0) = T(0) - diff/2.0;
+     T(2) = T(2) + diff/2.0;
+   }
+   
+   
+  
+  
+ 
+  // // //0.0005 wokrs well with falling_cube_cylinder
+  //   FLOAT diff = T(1) - T(2) - 0.0005;
+  //   if (diff > 0) {
+  //     //T(1) = sigma(1) - diff;
+  //     T(1) = T(1) - diff/2.0;
+  //     T(2) = T(2) + diff/2.0;
+  //   }
+
+  //   diff = T(0) - T(1) - 0.0005;
+  //   if (diff > 0) {
+  //     //T(0) = sigma(0) - diff;
+  //     T(0) = T(0) - diff/2.0;
+  //     T(1) = T(1) + diff/2.0;
+  //   }
+
+  //   diff = T(0) - T(2) - 0.0005;
+  //   if (diff > 0) {
+  //     //T(0) = sigma(0) - diff;
+  //     T(0) = T(0) - diff/2.0;
+  //     T(2) = T(2) + diff/2.0;
+  //   }
 }
 
