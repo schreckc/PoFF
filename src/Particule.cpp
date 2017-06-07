@@ -114,7 +114,7 @@ void Particule::draw(glm::mat4 m, int s) {
     if (m_shader == -1) {
       cur_shader = s;
     }
-    glm::mat4 cur_model = m * m_model_view;// * S4;
+    glm::mat4 cur_model = m * m_model_view * S4;
     
     sp.draw(cur_model, cur_shader);
 
@@ -405,6 +405,7 @@ VEC3 Particule::gradWeight(Vector3i node) {
 }
 
 void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
+  IS_DEF(t(0, 0));
   if (mpm_conf::method_ == mpm_conf::apic_) {
     pos = p;
   } else {
@@ -424,20 +425,30 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   //INFO(3, "vel "<<vel(0)<<", "<<vel(1)<<", "<<vel(2));
   //INFO(3, "pos "<<pos(0)<<", "<<pos(1)<<", "<<pos(2));
   // INFO(3, cell);//((int)(p(0)/Grid::spacing))<<", "<< ((int)(p(1)/Grid::spacing))<<", "<< ((int)(p(2)/Grid::spacing)));
-  //   INFO(3, F_e);
+  //INFO(3, F_e);
    
   // EigenSolver<MAT3> solver(F_e);
   // INFO(3, solver.eigenvalues());
   //  VEC3 ev = solver.eigenvalues();
 
   //  rotation = MAT3::Identity();
+  //IS_DEF(rotation(0, 0));
+  if (std::isnan(F_e(0, 0)) || std::isinf(F_e(0,0))) {
+    F_e = MAT3::Identity();
+  }
   MAT3 rotF = rotation.transpose()*F_e;
+  // IS_DEF(F_e(0, 0));
+  // IS_DEF(rotF(0, 0));
   JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
   MAT3 U = svd.matrixU();
   MAT3 V = svd.matrixV();
   VEC3 T(0, 0, 0);
   VEC3 sigma = svd.singularValues();
   // INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
+  if (std::isnan(sigma(0)) || std::isinf(sigma(0))) {
+    sigma = VEC3(1, 1, 1);
+  }
+  IS_DEF(sigma(0));
   if (mpm_conf::plasticity_) {  
     
     //project(sigma, T);
@@ -480,8 +491,12 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     IS_DEF(rotation(0,0));
     IS_DEF(T(0));
     IS_DEF(energyDerivative(T)(0, 0));
+    IS_DEF(F_e(0, 0));
     forceIncrement = v0*rotation*U*energyDerivative(T)*V.transpose()*F_e.transpose();
-	   
+    if (std::isnan(forceIncrement(0, 0)) || std::isinf(forceIncrement(0, 0))) {
+      forceIncrement = MAT3::Zero();
+    }
+    IS_DEF(forceIncrement(0, 0));
   } else {
     forceIncrement = v0*U*energyDerivative(sigma)*V.transpose()*F_e.transpose();
   }
@@ -531,13 +546,14 @@ MAT3 Particule::energyDerivative(VEC3 sigma) {
     for (uint i = 0; i < 3; ++i) {
       IS_DEF(alpha);
       der(i, i) = 2*mpm_conf::mu_*alpha*(sigma(i)-1) + mpm_conf::lambda_*alpha*sigma((i+1)%3)*sigma((i+2)%3)*(det -1);
-      if (std::isnan(der(i, i))) {
+      if (std::isnan(der(i, i)) || std::isinf(der(i, i))) {
 	der(i, i) = 0;
       }
       IS_DEF(der(i, i));
     }
     return der;
   }
+  return MAT3::Zero();
 }
 
 
@@ -737,6 +753,7 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
   //   }
   // }
 
+   IS_DEF(sigma(0));
    for (uint i = 0; i < 3; ++i) {
      // if (sigma(i) > 1) {
      //   T(i) = 1;
@@ -752,6 +769,7 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
        v(k) = v(k)*smin(k);
      }
      lim(i) = v.norm();
+     IS_DEF(lim(i));
    }
    FLOAT diff = T(1) - T(2) - lim(0);
    if (diff > 0) {

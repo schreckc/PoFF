@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
     }
     if (t%100==0) {
       INFO(1, "Simulation step : "<<t);
-      INFO(2, "Time per frame "<<Times::TIMES->getTime(Times::total_time_));
+      INFO(2, "Time per frame "<<Times::TIMES->getTime(Times::simu_time_));
     }
     
     Times::TIMES->tock(Times::total_time_);

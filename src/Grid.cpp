@@ -419,8 +419,11 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 			  velocities[ind] += w*p->getMass()*p->getVelocity();
 			}
 			 IS_DEF(velocities[ind](0));
-			f += p->getForceIncrement()*p->gradWeight(Vector3i(i, j, k));
-			IS_DEF(f(0));
+			 VEC3 incrf = p->getForceIncrement()*p->gradWeight(Vector3i(i, j, k));
+			 if (!std::isnan(incrf(0)) && !std::isinf(incrf(0))) {
+			   f += incrf;
+			 }
+			 IS_DEF(f(0));
 		      }
 		    }
 		  }
@@ -442,7 +445,10 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 	  //	  INFO(3,"masses " << masses[ind]<<" "<<f.norm()/masses[ind]);
 	   IS_DEF(velocities[ind](0));
 	  if (masses[ind] > 1e-8*mpm_conf::dt_) {
-	    IS_DEF(f(0));
+	    //  IS_DEF(f(0));
+	    if (std::isnan(f(0)) || std::isinf(f(0))) {
+	      f = VEC3(0, 0, 0);
+	    }
 	    velocities[ind] -= /*mpm_conf::cheat_damping_*/mpm_conf::dt_*f + mpm_conf::dt_*mpm_conf::damping_*velocities[ind];
 	    velocities[ind] /= masses[ind];
 	  } else {
