@@ -755,11 +755,11 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
 
    IS_DEF(sigma(0));
    for (uint i = 0; i < 3; ++i) {
-     // if (sigma(i) > 1) {
-     //   T(i) = 1;
-     // } else {
+      if (sigma(i) > 1) {
+        T(i) = 1;
+      } else {
        T(i) = sigma(i);
-       //}
+       }
    }
   
    VEC3 lim;// = 0.0005;

@@ -13,4 +13,4 @@ export OMP_PROC_BIND=true
 
 
 mkdir test_anis
-./poff_no_graph -l anisotropy.conf -s falling_cube_cylinder.sc -e test_anis/test -es 10 -stop 10000
+./poff_no_graph -l anisotropy.conf -s falling_cube_cylinder.sc -e test_anis/test -es 100 -stop 1000000
