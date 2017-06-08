@@ -602,7 +602,7 @@ void Simulation::loadScene() {
 	       if (random) {
 		 randomRotation(rotation);
 	       }
-	       p->setAnisotropyValues(0.5, 0.5, 2);
+	       p->setAnisotropyValues(1, 1, 0.1);
 	       p->setAnisotropyRotation(rotation);
 	     }
 	    
@@ -674,7 +674,7 @@ void Simulation::loadScene() {
 		 randomRotation(rotation);
 	       }
 	       
-	       p->setAnisotropyValues(0.5, 0.5, 2);
+	       p->setAnisotropyValues(1, 1, 0.1);
 	       p->setAnisotropyRotation(rotation);
 	      
 	     }
