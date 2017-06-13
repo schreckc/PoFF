@@ -48,6 +48,7 @@ Particule::Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n, VEC3 velo, int shade
     0, 0, 1;
 
   color = VEC3(1, 1, 1);
+
 }
 
 
@@ -297,6 +298,10 @@ const MAT3& Particule::getForceIncrement() const {
   return forceIncrement;
 }
 
+const Tensor& Particule::getSecondEnergyDer() const {
+  return energy_second_der;
+}
+
 FLOAT Particule::weight(Vector3i node) {
   FLOAT w = 1;
   //  INFO(3, cell<<"\n|\n"<<node<<"\n");
@@ -453,15 +458,18 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     
     //project(sigma, T);
      anisotropicProject(sigma, T, U);
-    //    INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
+
+     computeEnergyDerivative(T);
     
     MAT3 inv_T = MAT3::Zero();
     MAT3 T_m =  MAT3::Zero();
     MAT3 sigma_m = MAT3::Zero();
     double det_Fp = 1;
-  
+    MAT3 der = MAT3::Zero();
+    
     for (uint i = 0; i < 3; ++i) {
       T_m(i, i) = T(i);
+      der(i, i) = energy_der(i);
       TEST(T(i) != 0);
       if (T(i) != 0) {
   	inv_T(i, i) = 1.0/T(i);
@@ -490,17 +498,25 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     // // INFO(3, F_p);
     IS_DEF(rotation(0,0));
     IS_DEF(T(0));
-    IS_DEF(energyDerivative(T)(0, 0));
     IS_DEF(F_e(0, 0));
-    forceIncrement = v0*rotation*U*energyDerivative(T)*V.transpose()*F_e.transpose();
+        
+    forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
     if (std::isnan(forceIncrement(0, 0)) || std::isinf(forceIncrement(0, 0))) {
       forceIncrement = MAT3::Zero();
     }
+    computeEnergySecondDer(T, U, V);
+    
+    
     IS_DEF(forceIncrement(0, 0));
   } else {
-    forceIncrement = v0*U*energyDerivative(sigma)*V.transpose()*F_e.transpose();
+    computeEnergyDerivative(sigma);
+    MAT3 der = MAT3::Zero();
+    for (uint i = 0; i < 3; ++i) {
+      der(i, i) = energy_der(i);
+    }
+    forceIncrement = v0*U*der*V.transpose()*F_e.transpose();
+    computeEnergySecondDer(sigma, U, V);
   }
-  
   // INFO(3, "force incr\n "<<forceIncrement);
 }
 
@@ -511,25 +527,28 @@ void Particule::initVolume(FLOAT d) {
   //  INFO(3,"volume "<<v0<<" "<<d);
 }
 
-MAT3 Particule::energyDerivative(VEC3 sigma) {
+void Particule::computeEnergyDerivative(VEC3 sigma) {
   IS_DEF(sigma(0));
   IS_DEF(sigma(1));
   IS_DEF(sigma(2));
+  energy_der = VEC3(0, 0, 0);
   if (mpm_conf::mode_ == 0) {
-    MAT3 invSigma = MAT3::Zero();
-    MAT3 lnSigma = MAT3::Zero();
+    VEC3 invSigma(0, 0, 0);
+    VEC3 lnSigma(0, 0, 0);
     FLOAT tr = 0;
     for (uint i = 0; i < 3; ++i) {
       FLOAT ev = sigma(i);
       if (ev != 0) {
-	invSigma(i, i) = 1.0/ev;
-	lnSigma(i, i) = log(ev);
+	invSigma(i) = 1.0/ev;
+	lnSigma(i) = log(ev);
 	tr += log(ev);
-	IS_DEF(invSigma(i, i));
-	IS_DEF(lnSigma(i, i));
+	IS_DEF(invSigma(i));
+	IS_DEF(lnSigma(i));
       }
     }
-    return 2*mpm_conf::mu_*invSigma*lnSigma + mpm_conf::lambda_*tr*invSigma;
+    for (uint i = 0; i < 3; ++i) {
+      energy_der(i) = 2*mpm_conf::mu_*invSigma(i)*lnSigma(i) + mpm_conf::lambda_*tr*invSigma(i);
+    }
   } else if (mpm_conf::mode_ == 1) {
     //   INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
      for (uint i = 0; i < 3; ++i) {
@@ -542,19 +561,18 @@ MAT3 Particule::energyDerivative(VEC3 sigma) {
       det = 1;
     }
     IS_DEF(det);
-    MAT3 der = MAT3::Zero();
     for (uint i = 0; i < 3; ++i) {
       IS_DEF(alpha);
-      der(i, i) = 2*mpm_conf::mu_*alpha*(sigma(i)-1) + mpm_conf::lambda_*alpha*sigma((i+1)%3)*sigma((i+2)%3)*(det -1);
-      if (std::isnan(der(i, i)) || std::isinf(der(i, i))) {
-	der(i, i) = 0;
+      energy_der(i) = 2*mpm_conf::mu_*alpha*(sigma(i)-1) + mpm_conf::lambda_*alpha*sigma((i+1)%3)*sigma((i+2)%3)*(det -1);
+      if (std::isnan(energy_der(i)) || std::isinf(energy_der(i))) {
+	energy_der(i) = 0;
       }
-      IS_DEF(der(i, i));
+      IS_DEF(energy_der(i));
     }
-    return der;
   }
-  return MAT3::Zero();
 }
+
+
 
 
 void Particule::project(VEC3 sigma, VEC3 & T) {
@@ -832,3 +850,75 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
   //   }
 }
 
+
+// inline FLOAT Particule::energySecondDer(uint i, uint j, uint k, uint l) const {
+//   uint ind = 27*i+9*k+3*j+l;
+//   return energy_second_der[ind];
+// }
+
+// inline FLOAT & Particule::energySecondDer(uint i, uint j, uint k, uint l) {
+//   uint ind = 27*i+9*k+3*j+l;
+//   return energy_second_der[ind];
+// }
+
+void Particule::computeEnergySecondDer(VEC3 sigma, MAT3 U, MAT3 V) {
+  Tensor aux(3);
+  for (uint i = 0; i < 3; ++i) {
+    for (uint j = 0; j < 3; ++j) {
+      aux(i, i, j, j) = energySecondDer(sigma, i, j);
+      if (i != j) {
+	FLOAT dij = (energy_der(i) - energy_der(j))/(sigma(i) - sigma(j));
+	FLOAT sij = (energy_der(i) + energy_der(j))/(sigma(i) + sigma(j));
+	aux(i, j, i, j) = 0.5*(dij + sij);
+	aux(i, j, j, i) = 0.5*(dij - sij);
+      }
+    }
+  }
+
+   for (uint i = 0; i < 3; ++i) {
+    for (uint j = 0; j < 3; ++j) {
+      for (uint k = 0; k < 3; ++k) {
+	 for (uint l = 0; l < 3; ++l) {
+	   energy_second_der(i, j, k, l) = 0;
+	   
+	   for (uint r = 0; r < 3; ++r) {
+	     for (uint s = 0; s < 3; ++s) {
+	       for (uint u = 0; u < 3; ++u) {
+		 for (uint v = 0; v < 3; ++v) {
+		   energy_second_der(i, j, k, l) += v0*aux(r, s, u, v)*U(i, r)*V(j, s)*U(k, u)*V(l, v);
+		 }
+	       }
+	     }
+	   }
+
+	 }
+      }
+    }
+   }
+	   
+}
+
+// d Y_ii / d sigma_jj with Y = engergy derivarive 
+FLOAT Particule::energySecondDer(VEC3 sigma, uint i, uint j) {
+  FLOAT d = 0;
+  TEST(sigma(2) > 0);
+  if (mpm_conf::mode_ == 0) {
+    FLOAT det = sigma(0)*sigma(1)*sigma(2);
+    if (i == j) {
+      d = 2*mpm_conf::mu_ + mpm_conf::lambda_*pow(sigma((i+1)%3)*sigma((i+2)%3), 2);
+    } else if (i > j) {
+      d =  mpm_conf::lambda_*(sigma((i+1)%3)*sigma((i+2)%3)*sigma((j+1)%3)*sigma((j+2)%3) + (det - 1)*sigma((i+1)%3));
+    } else {
+      d =  mpm_conf::lambda_*(sigma((i+1)%3)*sigma((i+2)%3)*sigma((j+1)%3)*sigma((j+2)%3) + (det - 1)*sigma((j+1)%3));
+    }
+  } else  if (mpm_conf::mode_ == 1) {
+    if (i == j) {
+      d = 2 * mpm_conf::mu_*(1 - log(sigma(i))) + mpm_conf::lambda_*(sigma(i) - (log(sigma(0)) + log(sigma(1)) +log(sigma(2))));
+      d /= sigma(i)*sigma(i);
+    } else {
+      d = mpm_conf::lambda_/(sigma(i)*sigma(j));
+    }
+  }
+  return d;
+}
+    

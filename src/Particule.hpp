@@ -7,6 +7,24 @@
 #include "Eigen/Dense"
 #include "Eigen/Core"
 
+struct Tensor {
+  FLOAT dim;
+  std::vector<FLOAT> t;
+  Tensor(FLOAT d = 3): dim(d) {
+    t =  std::vector<FLOAT>(pow(d,4));
+    for (uint i = 0; i < t.size(); ++i) {
+      t[i] = 0;
+    }
+  };
+  FLOAT& operator() (int i, int j, int k, int l) {
+    int ind = pow(dim,3)*i+pow(dim,2)*k+dim*j+l;
+    return t[ind];
+  }
+  const FLOAT& operator()(int i, int j, int k, int l) const {
+    int ind = pow(dim,3)*i+pow(dim, 2)*k+dim*j+l;
+    return t[ind];
+  }
+};
 
 class Particule : public Object {
 
@@ -47,6 +65,8 @@ private :
   MAT3 rotation;
 
  mutable MAT3 forceIncrement;
+  VEC3 energy_der;
+  Tensor energy_second_der;
   
 public:
   Particule(int shader = -1);
@@ -79,6 +99,7 @@ public:
   MAT3 getDeformation() const;
 
   const MAT3& getForceIncrement() const;
+  const Tensor& getSecondEnergyDer() const;
  
   FLOAT weight(Vector3i node);
   VEC3 gradWeight(Vector3i node);
@@ -87,7 +108,7 @@ public:
 
   void initVolume(FLOAT d);
 
-  MAT3 energyDerivative(VEC3 sigma); // take a diag mat in entry
+  void computeEnergyDerivative(VEC3 sigma); // take a diag mat in entry
   void project(VEC3 sigma, VEC3 & T);
   
   //anisotropy
@@ -101,6 +122,9 @@ public:
   VEC3 getAnisotropy() const;
   
   void anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U);
+  
+  void computeEnergySecondDer(VEC3 sigma, MAT3 U, MAT3 V);
+  FLOAT energySecondDer(VEC3 sigma, uint i, uint j);
 };
 
 
