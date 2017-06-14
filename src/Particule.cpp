@@ -504,6 +504,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     if (std::isnan(forceIncrement(0, 0)) || std::isinf(forceIncrement(0, 0))) {
       forceIncrement = MAT3::Zero();
     }
+    
     computeEnergySecondDer(T, U, V);
     
     
@@ -863,12 +864,18 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
 
 void Particule::computeEnergySecondDer(VEC3 sigma, MAT3 U, MAT3 V) {
   Tensor aux(3);
+ 
   for (uint i = 0; i < 3; ++i) {
     for (uint j = 0; j < 3; ++j) {
       aux(i, i, j, j) = energySecondDer(sigma, i, j);
       if (i != j) {
 	FLOAT dij = (energy_der(i) - energy_der(j))/(sigma(i) - sigma(j));
 	FLOAT sij = (energy_der(i) + energy_der(j))/(sigma(i) + sigma(j));
+	if (sigma(i) == sigma(j)) {
+	  dij = 1;
+	}
+	IS_DEF(dij);
+	IS_DEF(sij);
 	aux(i, j, i, j) = 0.5*(dij + sij);
 	aux(i, j, j, i) = 0.5*(dij - sij);
       }
@@ -886,10 +893,12 @@ void Particule::computeEnergySecondDer(VEC3 sigma, MAT3 U, MAT3 V) {
 	       for (uint u = 0; u < 3; ++u) {
 		 for (uint v = 0; v < 3; ++v) {
 		   energy_second_der(i, j, k, l) += v0*aux(r, s, u, v)*U(i, r)*V(j, s)*U(k, u)*V(l, v);
+		   IS_DEF(aux(r, s, u, v));
 		 }
 	       }
 	     }
 	   }
+	   IS_DEF(energy_second_der(i, j, k, l));
 
 	 }
       }
@@ -919,6 +928,7 @@ FLOAT Particule::energySecondDer(VEC3 sigma, uint i, uint j) {
       d = mpm_conf::lambda_/(sigma(i)*sigma(j));
     }
   }
+  IS_DEF(d);
   return d;
 }
     

@@ -164,7 +164,7 @@ void Simulation::draw(glm::mat4 m, int s) {
 void Simulation::oneStep() {
   Times::TIMES->tick(Times::simu_time_);
   grid.nextStep();
-  grid.particulesToGrid(particules);
+  grid.particulesToGridImplicite(particules);
   if (mpm_conf::smooth_vel_) {
     for (uint i = 0; i < 1; ++i) {
       grid.smoothVelocity();

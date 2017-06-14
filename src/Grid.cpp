@@ -15,6 +15,16 @@ inline uint Grid::index(uint i, uint j, uint k) const {
   return i*(j_max+1)*(k_max+1) + j*(k_max+1) + k;
 }
 
+Vector3i Grid::nodeFromIndex(int ind) const {
+  int i, j, k;
+  i = (int) ind / (j_max+1)*(k_max+1);
+  int aux = ind - i*(j_max+1)*(k_max+1);
+  j = (int) aux / (k_max+1);
+  k = aux - j*(k_max+1);
+  TEST(ind == index(i, j, k));
+  return Vector3i(i, j, k);
+}
+
 Grid::Grid() : Object(), x_max(0),  y_max(0), z_max(0),  i_max(0),  j_max(0),  k_max(0) {
 }
 
@@ -44,8 +54,11 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, int shader)
   new_positions = std::vector<VEC3>(nb_nodes);
   cells = std::vector<std::list<Particule*> >(nb_cells);
   distance_collision = std::vector<FLOAT>(nb_nodes);
-  //second_der = std::vector<MAT3>(nb_nodes*nb_nodes);
+  //  second_der = std::vector<std::vector<MAT3> >(nb_nodes);
 
+  // for (uint i = 0; i <= nb_nodes; ++i) {
+  //   second_der[i] = std::vector<MAT3>(nb_nodes);
+  // }
  for (uint i = 0; i <= i_max; ++i) {
     for (uint j = 0; j <= j_max; ++j) {
       for (uint k = 0; k <= k_max; ++k) {
@@ -503,12 +516,11 @@ void Grid::particulesToGridImplicite(std::vector<Particule*> & particules) {
 		for (int n = k - 2; n < k + 2; ++n) {
 		  if (n >= 0 && n < (int)k_max) {
 		    uint indc = l*j_max*k_max + m*(k_max) + n;
-		    second_der[ind*nb_nodes+indc] = MAT3::Zero();
+		    //second_der[ind][index(m, n, l)] = MAT3::Zero();
 		    for (auto& p : cells[indc]) {
 
 		      FLOAT w = p->weight(Vector3i(i, j, k));
 		      if (w > 0) {
-			//  !!!!!!!!!!!!!!! TODO compute energy seconde derivative !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 			active_nodes[ind] = true;
 			masses[ind] += w*p->getMass();
 			if (mpm_conf::method_ == mpm_conf::apic_) {
@@ -523,22 +535,26 @@ void Grid::particulesToGridImplicite(std::vector<Particule*> & particules) {
 			 }
 			 IS_DEF(f(0));
 			 
-			 //second deriative energy for implicite scheme
-			 for (uint alpha = 0; alpha < 3; ++alpha) {
-			   for (uint beta = 0; beta < 3; ++beta) {
-			     VEC3 wip = p->gradWeight(Vector3i(i, j, k));
-			     VEC3 wjp = p->gradWeight(Vector3i(l, m, n));
-			     MAT3 F = p->getDeformationElastic();
-			     VEC3 wipF = wip.transpose()*F;
-			     VEC3 wjpF = wjp.transpose()*F;
-			     const Tensor T = p->getSecondEnergyDer();
-			     for (uint u = 0; u < 3; ++u) {
-			       for (uint v = 0; v < 3; ++v) {
-				 second_der[ind*nb_nodes + indc](alpha, beta) += T(alpha, u, beta, v)*wipF(u)*wjp(v);
-			       }
-			     }
-			   }
-			 }
+			 // //second deriative energy for implicite scheme
+			 // for (uint alpha = 0; alpha < 3; ++alpha) {
+			 //   for (uint beta = 0; beta < 3; ++beta) {
+			 //     VEC3 wip = p->gradWeight(Vector3i(i, j, k));
+			 //     VEC3 wjp = p->gradWeight(Vector3i(l, m, n));
+			 //     MAT3 F = p->getDeformationElastic();
+			 //     VEC3 wipF = wip.transpose()*F;
+			 //     VEC3 wjpF = wjp.transpose()*F;
+			 //     const Tensor T = p->getSecondEnergyDer();
+			 //     // INFO(3, "wipF\n"<<wipF);
+			 //     // INFO(3, "wjpF\n"<<wjpF);
+			 //     for (uint u = 0; u < 3; ++u) {
+			 //       for (uint v = 0; v < 3; ++v) {
+			 // 	 second_der[ind][index(m, n, l)](alpha, beta) += T(alpha, u, beta, v)*wipF(u)*wjpF(v);
+			 // 	 IS_DEF(T(alpha, u, beta, v));
+			 // 	 IS_DEF(second_der[ind][index(m, n, l)](alpha, beta));
+			 //       }
+			 //     }
+			 //   }
+			 // }
 
 		      }
 		    }
@@ -573,52 +589,87 @@ void Grid::particulesToGridImplicite(std::vector<Particule*> & particules) {
       }
     }
   }
-  MatrixXd K(3*nb_nodes, 3*nb_nodes);
-  FLOAT beta = 0.5;
-#pragma omp parallel for
-  for (uint i = 0; i < 3*nb_nodes; ++i) {
-    for (uint j = 0; j < 3*nb_nodes; ++j) {
-      K(i, j) = 0;
-    }
-  }
-  for (uint i = 0; i < nb_nodes; ++i) {
-    if (active_nodes[i] && masses[i] != 0) {
-      for (uint l = 0; l < 3; ++l) {
-	K(3*i + l, 3*i + l) = 1;
-      }
-      for (uint j = 0; j < nb_nodes; ++j) {
-	if (active_nodes[j]) {
-	  
-	  MAT3 Kij = beta* mpm_conf::dt_*mpm_conf::dt_/masses[i]*second_der[i*nb_nodes + j];
-	  for (uint l = 0; l < 3; ++l) {
-	    for (uint m = 0; m < 3; ++m) {
-	      K(3*i + l, 3*j + m) = Kij(l, m);
-	    }
-	  }
-	}
-      }
-    }
-  }
 
-  VectorXd V(3*nb_nodes);
-  for (uint i = 0; i < nb_nodes; ++i) {
-    for (uint l = 0; l < 3; ++l) {
-      V(3*i + l) = velocities[i](l);
-    }
-  }
-  ConjugateGradient<MatrixXd, Lower|Upper> cg;
-  cg.compute(K);
-  VectorXd new_V(3*nb_nodes);
-  new_V = cg.solve(V);
-  for (uint i = 0; i < nb_nodes; ++i) {
-    for (uint k = 0; k < 3; ++k) {
-      velocities[i](k) = new_V(3*i+k);
-    }
-    inter_velocities[i] = velocities[i];//particules.front()->gradWeight(Vector3i(i, j, k));
-    new_positions[i] = positions[i] + mpm_conf::dt_*velocities[i];
-    IS_DEF(velocities[i](0));
-  }
-//   //INFO(2, "END Part 2 Grid");
+ //  uint n = 0;
+//   for (uint i = 0; i < nb_nodes; ++i) {
+//     if (active_nodes[i]) {
+//       ++n;
+//     }
+//   }
+//   MATX K(3*n, 3*n);
+//   FLOAT beta = 1;
+//   uint index1 = 0;
+// #pragma omp parallel for
+//   for (uint i = 0; i < 3*n; ++i) {
+//     for (uint j = 0; j < 3*n; ++j) {
+//       K(i, j) = 0;
+//     }
+//   }
+//   for (uint i = 0; i < nb_nodes; ++i) {
+
+//     if (active_nodes[i]) {
+
+//       for (uint l = 0; l < 3; ++l) {
+// 	K(3*index1 + l, 3*index1 + l) = 1.0;
+// 	//INFO(3, K(3*index1 + l, 3*index1 + l));
+//       }
+      
+//       // uint index2 = 0;
+//       // for (uint j = 0; j < nb_nodes; ++j) {
+//       // 	if (active_nodes[j]) {
+//       // 	  if (masses[i] > 1e-8*mpm_conf::dt_*mpm_conf::dt_) {
+//       // 	    MAT3 second_der = secondDer(i, j);
+//       // 	    MAT3 Kij = beta* mpm_conf::dt_*mpm_conf::dt_/masses[i]*second_der;
+//       // 	    // if (second_der[i*nb_nodes + j](0, 0) != 0) {
+//       // 	    //   INFO(3, masses[i]);
+//       // 	    // }
+//       // 	    for (uint l = 0; l < 3; ++l) {
+//       // 	      for (uint m = 0; m < 3; ++m) {
+//       // 		K(3*index1 + l, 3*index2 + m) += Kij(l, m);
+//       // 		IS_DEF(K(3*index1 + l, 3*index2 + m));
+//       // 	      }
+//       // 	    }
+//       // 	  }
+//       // 	  //INFO(3, Kij);
+//       // 	  ++index2;
+//       // 	}
+//       // }
+
+//       ++index1;
+//     }
+    
+//   }
+//   //  INFO(3,K);
+//   VECX V(3*n);
+//   uint ind = 0;
+//     for (uint i = 0; i < nb_nodes; ++i) {
+//       if (active_nodes[i]) {
+// 	for (uint l = 0; l < 3; ++l) {
+// 	  IS_DEF(velocities[i](l));
+// 	  V(3*ind + l) = velocities[i](l);
+// 	}
+// 	++ind;
+//       }
+//     }
+//     ConjugateGradient<MATX, Lower|Upper> cg;
+//   cg.compute(K);
+//   VECX new_V(3*n);
+//   new_V = cg.solve(V);
+//   ind = 0;
+//   INFO(3, n);
+//   for (uint i = 0; i < nb_nodes; ++i) {
+//     if (active_nodes[i]) {
+//       for (uint k = 0; k < 3; ++k) {
+// 	velocities[i](k) = new_V(3*ind+k);
+// 	IS_DEF(velocities[i](k));
+//       }
+//       inter_velocities[i] = velocities[i];//particules.front()->gradWeight(Vector3i(i, j, k));
+//       new_positions[i] = positions[i] + mpm_conf::dt_*velocities[i];
+//       IS_DEF(velocities[i](0));
+//       ++ind;
+//     }
+//   }
+// //   //INFO(2, "END Part 2 Grid");
 }
 
 void Grid::gridToParticules(std::vector<Particule*> & particules) {
@@ -845,4 +896,52 @@ void Grid::collision(Obstacle *ob) {
     // }
   }
   //  INFO(2, "END Collision");
+}
+
+MAT3 Grid::secondDer(uint i, uint j) {
+  MAT3 second_der = MAT3::Zero();
+  Vector3i indi = nodeFromIndex(i);
+  Vector3i indj = nodeFromIndex(j);
+
+  for (int l = indi(0) - 2; l < indi(0) + 2; ++l) {
+    if (l >= 0 && l < (int)i_max) {
+      for (int m = indi(1) - 2; m < indi(1) + 2; ++m) {
+	if (m >= 0 && m < (int)j_max) {
+	  for (int n = indi(2) - 2; n < indi(2) + 2; ++n) {
+	    if (n >= 0 && n < (int)k_max) {
+	      uint indc = l*j_max*k_max + m*(k_max) + n;
+
+	      for (auto& p : cells[indc]) {
+		
+		//second deriative energy for implicite scheme
+		for (uint alpha = 0; alpha < 3; ++alpha) {
+		  for (uint beta = 0; beta < 3; ++beta) {
+		    VEC3 wip = p->gradWeight(indi);
+		    VEC3 wjp = p->gradWeight(indj);
+		    MAT3 F = p->getDeformationElastic();
+		    VEC3 wipF = wip.transpose()*F;
+		    VEC3 wjpF = wjp.transpose()*F;
+		    const Tensor T = p->getSecondEnergyDer();
+		    // INFO(3, "wipF\n"<<wipF);
+		    // INFO(3, "wjpF\n"<<wjpF);
+		    for (uint u = 0; u < 3; ++u) {
+		      for (uint v = 0; v < 3; ++v) {
+			second_der(alpha, beta) += T(alpha, u, beta, v)*wipF(u)*wjpF(v);
+			IS_DEF(T(alpha, u, beta, v));
+			IS_DEF(second_der(alpha, beta));
+		      }
+		    }
+		  }
+		}
+
+	      }
+
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+  return second_der;
 }

@@ -36,10 +36,10 @@ private :
   std::vector<VEC3> new_positions;
   std::vector<std::list<Particule*> > cells;
   std::vector<FLOAT> distance_collision;
-  std::vector<MAT3> second_der;
+  std::vector< std::vector<MAT3>> second_der;
    
   inline uint index(uint i, uint j, uint k) const;
-  
+  Vector3i nodeFromIndex(int ind) const;
 public :
   Grid();
   Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, int shader = -1);
@@ -67,6 +67,8 @@ public :
   void initCollision(Obstacle *ob);
   void collision(Obstacle *ob);
     
+  MAT3 secondDer(uint i, uint j);
+
 };
 
 #endif

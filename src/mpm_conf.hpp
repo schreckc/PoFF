@@ -7,6 +7,7 @@
 #define VEC2 Vector2d
 #define VEC3 Vector3d
 #define VEC4 Vector4d
+#define VECX VectorXd
 #define MAT2 Matrix2d
 #define MAT3 Matrix3d
 #define MAT4 Matrix4d
