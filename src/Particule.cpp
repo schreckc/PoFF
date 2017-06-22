@@ -454,12 +454,14 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     sigma = VEC3(1, 1, 1);
   }
   IS_DEF(sigma(0));
-  if (mpm_conf::plasticity_) {  
-    
-    //project(sigma, T);
-     anisotropicProject(sigma, T, U);
+  if (mpm_conf::plastic_mode_ != 3) {  
 
-     computeEnergyDerivative(T);
+    if (mpm_conf::plastic_anisotropy_) {
+     anisotropicProject(sigma, T, U);
+    } else {
+      project(sigma, T);
+    }
+    computeEnergyDerivative(T);
     
     MAT3 inv_T = MAT3::Zero();
     MAT3 T_m =  MAT3::Zero();
@@ -483,14 +485,14 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     F_p = rotation*V*inv_T*sigma_m*V.transpose()*F_p;
 
 
-    if (mpm_conf::mode_ == 0) {
+    if (mpm_conf::plastic_mode_ == 0) {
       // hardenning += plastic_def;
       // FLOAT h0 = 35, h1 = 0, h2 = 0.02, h3 = 10;
       FLOAT fric_angle = mpm_conf::hardenning_param_(0) + (mpm_conf::hardenning_param_(1)*hardenning - mpm_conf::hardenning_param_(3))*exp(-mpm_conf::hardenning_param_(2)*hardenning);
       fric_angle = fric_angle*M_PI/180; //convert radian
       alpha = sqrt(2.0/3.0)*(2*sin(fric_angle))/(3-sin(fric_angle));
-    } else if (mpm_conf::mode_ == 1) {
-      alpha = 1;//exp(mpm_conf::hardenning_param_(3)*(1-det_Fp));
+    } else if (mpm_conf::plastic_mode_ == 1) {
+      alpha = exp(mpm_conf::hardenning_param_(3)*(1-det_Fp));
     }
 
     //  INFO(3, "hardenning "<< alpha);
@@ -499,15 +501,19 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     IS_DEF(rotation(0,0));
     IS_DEF(T(0));
     IS_DEF(F_e(0, 0));
-        
-    //forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
-    forceIncrement = v0*linearElasticity();
+
+    if (mpm_conf::elastic_mode_ != 2) {
+    forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
+    } else {
+      forceIncrement = v0*linearElasticity();
+    }
     if (std::isnan(forceIncrement(0, 0)) || std::isinf(forceIncrement(0, 0))) {
       forceIncrement = MAT3::Zero();
     }
-    
-    //    computeEnergySecondDer(T, U, V);
-    
+
+    if (mpm_conf::implicit_) {
+      computeEnergySecondDer(T, U, V);
+    }
     
     IS_DEF(forceIncrement(0, 0));
   } else {
@@ -517,12 +523,17 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
       der(i, i) = energy_der(i);
     }
     //    INFO(3, "der\n"<<U*der*V.transpose()*F_e.transpose());
-    //forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
-    forceIncrement = v0*linearElasticity();
+     if (mpm_conf::elastic_mode_ != 2) {
+       forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
+     } else {
+       forceIncrement = v0*linearElasticity();
+     }
      if (std::isnan(forceIncrement(0, 0)) || std::isinf(forceIncrement(0, 0))) {
       forceIncrement = MAT3::Zero();
     }
-    // computeEnergySecondDer(sigma, U, V);
+     if (mpm_conf::implicit_) {
+       computeEnergySecondDer(sigma, U, V);
+     }
   }
   // INFO(3, "force incr\n "<<forceIncrement);
 }
@@ -539,7 +550,7 @@ void Particule::computeEnergyDerivative(VEC3 sigma) {
   IS_DEF(sigma(1));
   IS_DEF(sigma(2));
   energy_der = VEC3(0, 0, 0);
-  if (mpm_conf::mode_ == 0) {
+  if (mpm_conf::elastic_mode_ == 0) {
     VEC3 invSigma(0, 0, 0);
     VEC3 lnSigma(0, 0, 0);
     FLOAT tr = 0;
@@ -556,7 +567,7 @@ void Particule::computeEnergyDerivative(VEC3 sigma) {
     for (uint i = 0; i < 3; ++i) {
       energy_der(i) = 2*mpm_conf::mu_*invSigma(i)*lnSigma(i) + mpm_conf::lambda_*tr*invSigma(i);
     }
-  } else if (mpm_conf::mode_ == 1) {
+  } else if (mpm_conf::elastic_mode_ == 1) {
     // INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
      for (uint i = 0; i < 3; ++i) {
        if (sigma(i) < 1e-10) {
@@ -665,7 +676,7 @@ MAT3 Particule::linearElasticity() {
 
 
 void Particule::project(VEC3 sigma, VEC3 & T) {
-  if (mpm_conf::mode_ == 0) {
+  if (mpm_conf::plastic_mode_ == 0) {
     VEC3 ln_sigma(0, 0, 0);
     VEC3 dev_ln_sigma(0, 0, 0);
     FLOAT tr = 0;
@@ -705,7 +716,7 @@ void Particule::project(VEC3 sigma, VEC3 & T) {
       }
     }
     hardenning += plastic_def;
-  } else if (mpm_conf::mode_ == 1) {
+  } else if (mpm_conf::elastic_mode_ == 1) {
     double smax = mpm_conf::hardenning_param_(1);//1 + 7.5e-3;
     double smin = mpm_conf::hardenning_param_(2);//1 - 2.5e-2;
     //if (density > 0.9*mpm_conf::density_) {
@@ -828,7 +839,8 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
    // MAT3 V = svd.matrixV();
    // VEC3 sigma = svd.singularValues();
 
-   VEC3 smax = mpm_conf::stretch_max;
+  if (mpm_conf::plastic_mode_ == 1) {
+  VEC3 smax = mpm_conf::stretch_max;
    VEC3 smin = mpm_conf::stretch_min;
 
   // TEST(sigma(0) >= sigma(1));
@@ -860,63 +872,67 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
     }
   }
 
-
-  // VEC3 smax = mpm_conf::stretch_max;
+  } else if (mpm_conf::plastic_mode_ == 2) {
+    VEC3 smax = mpm_conf::stretch_max;
   //  VEC3 smin = Vector3d(1, 1, 1) - mpm_conf::stretch_min;
    // IS_DEF(sigma(0));
-   // for (uint i = 0; i < 3; ++i) {
-   //    // if (sigma(i) > 1) {
-   //    //   T(i) = 1;
-   //    // } else {
-   //     T(i) = sigma(i);
-   //     //}
-   // }
+    for (uint i = 0; i < 3; ++i) {
+      // if (sigma(i) > 1) {
+      //   T(i) = 1;
+      // } else {
+       T(i) = sigma(i);
+       //}
+   }
   
-   // VEC3 lim;// = 0.0005;
-   // for (uint i = 0; i < 3; ++i) {
-   //   VEC3 v = U.col(i);
-   //   for (uint k = 0; k < 3; ++k) {
-   //     v(k) = v(k)*smin(k);
-   //   }
-   //   lim(i) = v.norm();
-   //   IS_DEF(lim(i));
-   // }
-   // FLOAT diff = T(1) - T(2) - lim(0);
-   // if (diff > 0) {
-   //   //     //T(1) = sigma(1) - diff;
-   //   T(1) = T(1) - diff/2.0;
-   //   T(2) = T(2) + diff/2.0;
-   // }
+   VEC3 lim;// = 0.0005;
+   for (uint i = 0; i < 3; ++i) {
+     VEC3 v = U.col(i);
+     for (uint k = 0; k < 3; ++k) {
+       v(k) = v(k)*smax(k);
+     }
+     lim(i) = v.norm();
+     IS_DEF(lim(i));
+   }
+   FLOAT diff = T(1) - T(2) - lim(0);
+   if (diff > 0) {
+     //     //T(1) = sigma(1) - diff;
+     T(1) = T(1) - diff/2.0;
+     T(2) = T(2) + diff/2.0;
+   }
 
-   // // v = U.col(2);
-   // // for (uint k = 0; k < 3; ++k) {
-   // //   v(k) = v(k)*smin(k);
-   // // }
-   // // lim = v.norm();
-   
-   // diff = T(0) - T(1) - lim(2);
-   // if (diff > 0) {
-   //   //     //T(1) = sigma(1) - diff;
-   //   T(0) = T(0) - diff/2.0;
-   //   T(1) = T(1) + diff/2.0;
+   // v = U.col(2);
+   // for (uint k = 0; k < 3; ++k) {
+   //   v(k) = v(k)*smax(k);
    // }
+   // lim = v.norm();
+   
+   diff = T(0) - T(1) - lim(2);
+   if (diff > 0) {
+     //     //T(1) = sigma(1) - diff;
+     T(0) = T(0) - diff/2.0;
+     T(1) = T(1) + diff/2.0;
+   }
 
-   // // v = U.col(1);
-   // // for (uint k = 0; k < 3; ++k) {
-   // //   v(k) = v(k)*smin(k);
-   // // }
-   // //  lim = v.norm();
-   //   diff = T(0) - T(2) - lim(1);
-   // if (diff > 0) {
-   //   //     //T(1) = sigma(1) - diff;
-   //   T(0) = T(0) - diff/2.0;
-   //   T(2) = T(2) + diff/2.0;
+   // v = U.col(1);
+   // for (uint k = 0; k < 3; ++k) {
+   //   v(k) = v(k)*smax(k);
    // }
+   //  lim = v.norm();
+     diff = T(0) - T(2) - lim(1);
+   if (diff > 0) {
+     //     //T(1) = sigma(1) - diff;
+     T(0) = T(0) - diff/2.0;
+     T(2) = T(2) + diff/2.0;
+   }
    
-   //  // INFO(3, "sigma : "<< sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
-   //  // INFO(3, "T : "<< T(0)<<" "<<T(1)<<" "<<T(2));
-   //  // INFO(3, "lim : "<< lim(0)<<" "<<lim(1)<<" "<<lim(2));
-   //  IS_DEF(T(0, 0));
+    // INFO(3, "sigma : "<< sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
+    // INFO(3, "T : "<< T(0)<<" "<<T(1)<<" "<<T(2));
+    // INFO(3, "lim : "<< lim(0)<<" "<<lim(1)<<" "<<lim(2));
+    IS_DEF(T(0, 0));
+
+  } else {
+    TEST(false);
+  }
   
  
   // // //0.0005 wokrs well with falling_cube_cylinder
@@ -1004,7 +1020,7 @@ FLOAT Particule::energySecondDer(VEC3 sigma, uint i, uint j) {
   // TEST(sigma(i) > 0);
   //TEST(sigma(2) > 0);
   // TEST(sigma(j) > 0);
-  if (mpm_conf::mode_ == 1) {
+  if (mpm_conf::elastic_mode_ == 1) {
     FLOAT det = sigma(0)*sigma(1)*sigma(2);
     if (i == j) {
       d = 2*mpm_conf::mu_ + mpm_conf::lambda_*pow(sigma((i+1)%3)*sigma((i+2)%3), 2);
@@ -1013,13 +1029,15 @@ FLOAT Particule::energySecondDer(VEC3 sigma, uint i, uint j) {
     } else {
       d =  mpm_conf::lambda_*(sigma((i+1)%3)*sigma((i+2)%3)*sigma((j+1)%3)*sigma((j+2)%3) + (det - 1)*sigma((j+1)%3));
     }
-  } else  if (mpm_conf::mode_ == 0) {
+  } else  if (mpm_conf::elastic_mode_ == 0) {
     if (i == j) {
       d = 2 * mpm_conf::mu_*(1 - log(sigma(i))) + mpm_conf::lambda_*(sigma(i) - (log(sigma(0)) + log(sigma(1)) +log(sigma(2))));
       d /= sigma(i)*sigma(i);
     } else {
       d = mpm_conf::lambda_/(sigma(i)*sigma(j));
     }
+  } else {
+    TEST(false);
   }
   IS_DEF(d);
   return d;

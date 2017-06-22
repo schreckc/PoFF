@@ -35,15 +35,18 @@ namespace mpm_conf {
   bool display_sphere_ = false;
   int replay_speed_ = 1;
 
-  uint mode_ = 0;
-  bool plasticity_ = true;
+  uint plastic_mode_ = 0;
+  uint elastic_mode_ = 0;
+  bool plastic_anisotropy_ = true;
+  bool elastic_anisotropy_ = true;
 
   FLOAT damping_ = 0;
   FLOAT cheat_damping_ = 1;
   bool smooth_vel_ = 0;
 
   uint method_ = apic_;
-
+  bool implicit_ = false;
+  
   uint export_step_ = 1;
   
   void loadConf(std::string path_file) {
@@ -135,10 +138,15 @@ namespace mpm_conf {
 	  s >> display_sphere_;
 	}  else if (line.substr(0,6) == "<mode>") {
 	  std::istringstream s(line.substr(6));
-	  s >> mode_;
+	  s >> plastic_mode_;
+	  elastic_mode_ = plastic_mode_;
 	}  else if (line.substr(0,12) == "<plasticity>") {
 	  std::istringstream s(line.substr(12));
-	  s >> plasticity_;
+	  bool p;
+	  s >> p;
+	  if (!p) {
+	    plastic_mode_ = 3;
+	  }
 	}  else if (line.substr(0,9) == "<damping>") {
 	  std::istringstream s(line.substr(9));
 	  s >> damping_;

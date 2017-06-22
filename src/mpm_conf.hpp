@@ -51,8 +51,8 @@ namespace mpm_conf {
 
   extern unsigned int plastic_mode_; //0 drucker_prager (sand), 1 clamp eigenvalues (snow), 2 clamp diff between eigenvalues, 3 no plasticity
   extern unsigned int elastic_mode_; //0 sand, 1 snow, 2 linear
-  extern bool plastic_anisotropy;
-  extern bool elastic_anisotropy;
+  extern bool plastic_anisotropy_;
+  extern bool elastic_anisotropy_;
 
   // drucker-prager param
   extern Eigen::VEC4 hardenning_param_;
@@ -66,7 +66,8 @@ namespace mpm_conf {
   extern bool smooth_vel_;
 
   extern uint method_; //0 apic, 1 pic, 2 flip, 3 0.5*pic+0.95*flip
-
+  extern bool implicit_;
+  
   extern uint export_step_; //export particules every x steps 
   void loadConf(std::string file);
 };
