@@ -12,8 +12,8 @@
  <cuboid> 
   <x> 0.45 0.55
   <y> 0.45 0.55
-  <z> 0.45 0.55
-  <nb particules> 1000
+  <z> 0.20 0.40
+  <nb particules> 6000
   <velocity> 0 0 0
  </cuboid>
 </particules>

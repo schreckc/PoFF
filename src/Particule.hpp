@@ -109,6 +109,7 @@ public:
   void initVolume(FLOAT d);
 
   void computeEnergyDerivative(VEC3 sigma); // take a diag mat in entry
+  MAT3 linearElasticity();
   void project(VEC3 sigma, VEC3 & T);
   
   //anisotropy

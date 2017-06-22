@@ -36,6 +36,10 @@ namespace mpm_conf {
   extern FLOAT mu_, lambda_;
   extern FLOAT young_modulus_, poisson_;
   
+  extern Eigen::VEC3 young_vec_;
+  extern Eigen::VEC3 poisson_vec_;
+  extern Eigen::VEC3 shearing_vec_;
+  
   extern FLOAT dt_; // s
   extern Eigen::VEC3 gravity_; // m/s^2
 

@@ -590,85 +590,85 @@ void Grid::particulesToGridImplicite(std::vector<Particule*> & particules) {
     }
   }
 
- //  uint n = 0;
-//   for (uint i = 0; i < nb_nodes; ++i) {
-//     if (active_nodes[i]) {
-//       ++n;
-//     }
-//   }
-//   MATX K(3*n, 3*n);
-//   FLOAT beta = 1;
-//   uint index1 = 0;
-// #pragma omp parallel for
-//   for (uint i = 0; i < 3*n; ++i) {
-//     for (uint j = 0; j < 3*n; ++j) {
-//       K(i, j) = 0;
-//     }
-//   }
-//   for (uint i = 0; i < nb_nodes; ++i) {
+  uint n = 0;
+  for (uint i = 0; i < nb_nodes; ++i) {
+    if (active_nodes[i]) {
+      ++n;
+    }
+  }
+  MATX K(3*n, 3*n);
+  FLOAT beta = 1;
+  uint index1 = 0;
+#pragma omp parallel for
+  for (uint i = 0; i < 3*n; ++i) {
+    for (uint j = 0; j < 3*n; ++j) {
+      K(i, j) = 0;
+    }
+  }
+  for (uint i = 0; i < nb_nodes; ++i) {
 
-//     if (active_nodes[i]) {
+    if (active_nodes[i]) {
 
-//       for (uint l = 0; l < 3; ++l) {
-// 	K(3*index1 + l, 3*index1 + l) = 1.0;
-// 	//INFO(3, K(3*index1 + l, 3*index1 + l));
-//       }
+      for (uint l = 0; l < 3; ++l) {
+	K(3*index1 + l, 3*index1 + l) = 1.0;
+	//INFO(3, K(3*index1 + l, 3*index1 + l));
+      }
       
-//       // uint index2 = 0;
-//       // for (uint j = 0; j < nb_nodes; ++j) {
-//       // 	if (active_nodes[j]) {
-//       // 	  if (masses[i] > 1e-8*mpm_conf::dt_*mpm_conf::dt_) {
-//       // 	    MAT3 second_der = secondDer(i, j);
-//       // 	    MAT3 Kij = beta* mpm_conf::dt_*mpm_conf::dt_/masses[i]*second_der;
-//       // 	    // if (second_der[i*nb_nodes + j](0, 0) != 0) {
-//       // 	    //   INFO(3, masses[i]);
-//       // 	    // }
-//       // 	    for (uint l = 0; l < 3; ++l) {
-//       // 	      for (uint m = 0; m < 3; ++m) {
-//       // 		K(3*index1 + l, 3*index2 + m) += Kij(l, m);
-//       // 		IS_DEF(K(3*index1 + l, 3*index2 + m));
-//       // 	      }
-//       // 	    }
-//       // 	  }
-//       // 	  //INFO(3, Kij);
-//       // 	  ++index2;
-//       // 	}
-//       // }
+      uint index2 = 0;
+      for (uint j = 0; j < nb_nodes; ++j) {
+      	if (active_nodes[j]) {
+      	  if (masses[i] > 1e-8*mpm_conf::dt_*mpm_conf::dt_) {
+      	    MAT3 second_der = secondDer(i, j);
+      	    MAT3 Kij = beta* mpm_conf::dt_*mpm_conf::dt_/masses[i]*second_der;
+      	    // if (second_der[i*nb_nodes + j](0, 0) != 0) {
+      	    //   INFO(3, masses[i]);
+      	    // }
+      	    for (uint l = 0; l < 3; ++l) {
+      	      for (uint m = 0; m < 3; ++m) {
+      		K(3*index1 + l, 3*index2 + m) += Kij(l, m);
+      		IS_DEF(K(3*index1 + l, 3*index2 + m));
+      	      }
+      	    }
+      	  }
+      	  //INFO(3, Kij);
+      	  ++index2;
+      	}
+      }
 
-//       ++index1;
-//     }
+      ++index1;
+    }
     
-//   }
-//   //  INFO(3,K);
-//   VECX V(3*n);
-//   uint ind = 0;
-//     for (uint i = 0; i < nb_nodes; ++i) {
-//       if (active_nodes[i]) {
-// 	for (uint l = 0; l < 3; ++l) {
-// 	  IS_DEF(velocities[i](l));
-// 	  V(3*ind + l) = velocities[i](l);
-// 	}
-// 	++ind;
-//       }
-//     }
-//     ConjugateGradient<MATX, Lower|Upper> cg;
-//   cg.compute(K);
-//   VECX new_V(3*n);
-//   new_V = cg.solve(V);
-//   ind = 0;
-//   INFO(3, n);
-//   for (uint i = 0; i < nb_nodes; ++i) {
-//     if (active_nodes[i]) {
-//       for (uint k = 0; k < 3; ++k) {
-// 	velocities[i](k) = new_V(3*ind+k);
-// 	IS_DEF(velocities[i](k));
-//       }
-//       inter_velocities[i] = velocities[i];//particules.front()->gradWeight(Vector3i(i, j, k));
-//       new_positions[i] = positions[i] + mpm_conf::dt_*velocities[i];
-//       IS_DEF(velocities[i](0));
-//       ++ind;
-//     }
-//   }
+  }
+  //  INFO(3,K);
+  VECX V(3*n);
+  uint ind = 0;
+    for (uint i = 0; i < nb_nodes; ++i) {
+      if (active_nodes[i]) {
+	for (uint l = 0; l < 3; ++l) {
+	  IS_DEF(velocities[i](l));
+	  V(3*ind + l) = velocities[i](l);
+	}
+	++ind;
+      }
+    }
+    ConjugateGradient<MATX, Lower|Upper> cg;
+  cg.compute(K);
+  VECX new_V(3*n);
+  new_V = cg.solve(V);
+  ind = 0;
+  INFO(3, n);
+  for (uint i = 0; i < nb_nodes; ++i) {
+    if (active_nodes[i]) {
+      for (uint k = 0; k < 3; ++k) {
+	velocities[i](k) = new_V(3*ind+k);
+	IS_DEF(velocities[i](k));
+      }
+      inter_velocities[i] = velocities[i];//particules.front()->gradWeight(Vector3i(i, j, k));
+      new_positions[i] = positions[i] + mpm_conf::dt_*velocities[i];
+      IS_DEF(velocities[i](0));
+      ++ind;
+    }
+  }
 // //   //INFO(2, "END Part 2 Grid");
 }
 
@@ -739,17 +739,17 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
     	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
     	  if (j >= 0 && j <= (int)j_max) {
     	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
-	      if (k >= 0 && k <= (int)k_max) {
-		uint ind = index(i, j, k);
-		if (active_nodes[ind]) {
-		  FLOAT w = p->weight(Vector3i(i, j, k));
-		  sum += w;
-		  A += w * (new_positions[ind] - p->getPosition())*(positions[ind] - prev_pos).transpose();
-		}
-	      }
-	    }
-	  }
-	}
+    	      if (k >= 0 && k <= (int)k_max) {
+    		uint ind = index(i, j, k);
+    		if (active_nodes[ind]) {
+    		  FLOAT w = p->weight(Vector3i(i, j, k));
+    		  sum += w;
+    		  A += w * (new_positions[ind] - p->getPosition())*(positions[ind] - prev_pos).transpose();
+    		}
+    	      }
+    	    }
+    	  }
+    	}
       }
      }
      A /= sum;

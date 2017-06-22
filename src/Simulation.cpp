@@ -164,7 +164,7 @@ void Simulation::draw(glm::mat4 m, int s) {
 void Simulation::oneStep() {
   Times::TIMES->tick(Times::simu_time_);
   grid.nextStep();
-  grid.particulesToGridImplicite(particules);
+  grid.particulesToGrid(particules);
   if (mpm_conf::smooth_vel_) {
     for (uint i = 0; i < 1; ++i) {
       grid.smoothVelocity();
@@ -596,7 +596,7 @@ void Simulation::loadScene() {
 	    std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsR(nb_part, prng, 30, VEC3(w, l, h));
 	    nb_part = points.size();
 	    for (auto &v: points) {
-	      Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, v + VEC3(xmin, ymin, zmin), VEC3(0, 0, 1), vel);
+	      Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, v/*VEC3(0.05, 0.05, 0.05)*/ + VEC3(xmin, ymin, zmin), VEC3(0, 0, 1), vel);
 	       particules.push_back(p);
 
 	       if (random) {

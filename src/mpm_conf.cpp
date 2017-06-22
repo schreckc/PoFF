@@ -17,8 +17,12 @@ namespace mpm_conf {
 
   FLOAT young_modulus_ = 3.537e+7;
   FLOAT poisson_ = 0.3;
-  FLOAT mu_ = young_modulus_*poisson_/((1+poisson_)*(1-2*poisson_));
-  FLOAT lambda_ = young_modulus_/(2*(1+poisson_)); 
+  FLOAT lambda_ = young_modulus_*poisson_/((1+poisson_)*(1-2*poisson_));
+  FLOAT mu_ = young_modulus_/(2*(1+poisson_));
+
+  VEC3 young_vec_(young_modulus_, young_modulus_, young_modulus_);
+  VEC3 poisson_vec_(poisson_, poisson_, poisson_); // (nu_23, nu_13, nu_12)
+  VEC3 shearing_vec_(young_modulus_/(1+poisson_), young_modulus_/(1+poisson_),young_modulus_/(1+poisson_));// (G_23, G_13, G_12)
   
   FLOAT dt_ = 0.1; 
   VEC3 gravity_ = VEC3(0.0, 0.0, -0.01); 
@@ -45,7 +49,9 @@ namespace mpm_conf {
   void loadConf(std::string path_file) {
     std::ifstream file(path_file.c_str());
     bool young_mod_def = false;
+     bool young_vec_def = false;
     bool mu_def = false;
+    bool shearing_def = false;
     // bool size_grid_def = false;
     // bool size_grid_def_n = false;
     if (file.good()) {
@@ -74,17 +80,37 @@ namespace mpm_conf {
 	}  else if (line.substr(0,4) == "<mu>") {
 	  std::istringstream s(line.substr(4));
 	  s >> mu_;
+	  mu_def = true;
 	}  else if (line.substr(0,8) == "<lambda>") {
 	  std::istringstream s(line.substr(8));
 	  s >> lambda_;
+	  mu_def = true;
 	}  else if (line.substr(0,15) == "<young_modulus>") {
 	  std::istringstream s(line.substr(15));
 	  s >> young_modulus_;
 	  young_mod_def = true;
+	}  else if (line.substr(0,19) == "<young_modulus_vec>") {
+	  std::istringstream s(line.substr(19));
+	  for (uint i = 0; i < 3; ++i) {
+	    s >> young_vec_(i);
+	  }
+	  young_vec_def = true;
 	}  else if (line.substr(0,15) == "<poisson_ratio>") {
 	  std::istringstream s(line.substr(15));
 	  s >> poisson_;
 	  young_mod_def = true;
+	}  else if (line.substr(0,19) == "<poisson_ratio_vec>") {
+	  std::istringstream s(line.substr(19));
+	  for (uint i = 0; i < 3; ++i) {
+	    s >> poisson_vec_(i);
+	  }
+	  young_vec_def = true;
+	}  else if (line.substr(0,8) == "<mu_vec>") {
+	  std::istringstream s(line.substr(8));
+	  for (uint i = 0; i < 3; ++i) {
+	    s >> shearing_vec_(i);
+	  }
+	  shearing_def = true;
 	}  else if (line.substr(0,11) == "<time_step>") {
 	  std::istringstream s(line.substr(11));
 	  s >> dt_;
@@ -155,10 +181,16 @@ namespace mpm_conf {
       if (young_mod_def) {
 	lambda_ = young_modulus_*poisson_/((1+poisson_)*(1-2*poisson_));
 	mu_ = young_modulus_/(2*(1+poisson_));
-	WARNING(mu_def, "both Lame parameters and Young's modulus and/or Poisson ratio defined: using Young's modulus and Poisson ratio values",
+	WARNING(!mu_def, "both Lame parameters and Young's modulus and/or Poisson ratio defined: using Young's modulus and Poisson ratio values",
 		young_modulus_<<" "<<poisson_<<" "<<mu_<<" "<<lambda_);
       }
-      	
+      if ((young_mod_def || mu_def) && !young_vec_def) {
+	   young_vec_ = VEC3(young_modulus_, young_modulus_, young_modulus_);
+	   poisson_vec_ = VEC3(poisson_, poisson_, poisson_); // (nu_23, nu_13, nu_12)
+      }
+      if (!shearing_def) {
+	shearing_vec_ = VEC3(young_vec_(0)/(1+poisson_vec_(0)), young_vec_(1)/(1+poisson_vec_(1)),young_vec_(2)/(1+poisson_vec_(2)));// (G_23, G_13, G_12)
+      }
     } else {
       ERROR(false, "Cannot found file \""<<path_file<<"\"", "");
     }

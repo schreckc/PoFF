@@ -500,12 +500,13 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     IS_DEF(T(0));
     IS_DEF(F_e(0, 0));
         
-    forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
+   forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
+   // forceIncrement = v0*linearElasticity();
     if (std::isnan(forceIncrement(0, 0)) || std::isinf(forceIncrement(0, 0))) {
       forceIncrement = MAT3::Zero();
     }
     
-    computeEnergySecondDer(T, U, V);
+    //    computeEnergySecondDer(T, U, V);
     
     
     IS_DEF(forceIncrement(0, 0));
@@ -515,8 +516,13 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     for (uint i = 0; i < 3; ++i) {
       der(i, i) = energy_der(i);
     }
-    forceIncrement = v0*U*der*V.transpose()*F_e.transpose();
-    computeEnergySecondDer(sigma, U, V);
+    //    INFO(3, "der\n"<<U*der*V.transpose()*F_e.transpose());
+    forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
+    //forceIncrement = v0*linearElasticity();
+     if (std::isnan(forceIncrement(0, 0)) || std::isinf(forceIncrement(0, 0))) {
+      forceIncrement = MAT3::Zero();
+    }
+    // computeEnergySecondDer(sigma, U, V);
   }
   // INFO(3, "force incr\n "<<forceIncrement);
 }
@@ -551,7 +557,7 @@ void Particule::computeEnergyDerivative(VEC3 sigma) {
       energy_der(i) = 2*mpm_conf::mu_*invSigma(i)*lnSigma(i) + mpm_conf::lambda_*tr*invSigma(i);
     }
   } else if (mpm_conf::mode_ == 1) {
-    //   INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
+    // INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
      for (uint i = 0; i < 3; ++i) {
        if (sigma(i) < 1e-10) {
 	 sigma(i) = 0;
@@ -573,7 +579,89 @@ void Particule::computeEnergyDerivative(VEC3 sigma) {
   }
 }
 
+MAT3 Particule::linearElasticity() {
+  // MAT3 rot;
+  // rot << 1, 0, 0,
+  //   0, 0, -1,
+  //   0, 1, 0;
+  // INFO(3, "\nF\n"<<F_e);
+  MAT3 rotFx = rotation*(F_e-MAT3::Identity())*rotation.transpose();
+  MAT3 rotF = 0.5*(rotFx + rotFx.transpose());
+  // INFO(3, "\nrot F\n"<<rotF);
+  VECX strain(6);
+  VECX stress(6);
+  
+  FLOAT E1 = mpm_conf::young_vec_(0);
+  FLOAT E2 = mpm_conf::young_vec_(1);
+  FLOAT E3 = mpm_conf::young_vec_(2);
+  FLOAT nu12 = mpm_conf::poisson_vec_(2);
+  FLOAT nu13 = mpm_conf::poisson_vec_(1);
+  FLOAT nu23 = mpm_conf::poisson_vec_(0);
+  TEST(E1 !=0);
 
+  strain(0) = rotF(0, 0);
+  strain(1) = rotF(1, 1);
+  strain(2) = rotF(2, 2);
+  strain(3) = rotF(1, 2);
+  strain(4) = rotF(0, 2);
+  strain(5) = rotF(0, 1);
+ 
+  MAT3 stretch_stiff;
+  stretch_stiff << 1/E1, -nu12/E2, -nu13/E3,
+    -nu12/E2, 1/E2, -nu23/E3,
+    -nu13/E3, -nu23/E3, 1/E3;
+  MAT3 inv_stretch_stiff = stretch_stiff.inverse();
+  // INFO(3, "det "<<stretch_stiff.determinant());
+  TEST(stretch_stiff.determinant() != 0);
+  MATX inv_stiffness(6, 6);
+   for (uint i = 0; i < 3; ++i) {
+     for (uint j = 0; j < 3; ++j) {
+       if (fabs(inv_stretch_stiff(i, j)) > 1e-100) {
+	 inv_stiffness(i, j) = inv_stretch_stiff(i, j);
+       } else {
+	 inv_stiffness(i, j) = 0;
+       }
+       inv_stiffness(i, 3+j) = 0;
+       inv_stiffness(3+i, 3+j) = 0;
+       inv_stiffness(3+i, j) = 0;
+     }
+   }
+     //  inv_stiffness(0, 0) = E1;
+     // inv_stiffness(1, 1) = E2;
+     // inv_stiffness(2, 2) = E3;
+   inv_stiffness(3, 3) = 2*mpm_conf::shearing_vec_(0); //2*G23
+   inv_stiffness(4, 4) = 2*mpm_conf::shearing_vec_(1);;//2*G13;
+   inv_stiffness(5, 5) = 2*mpm_conf::shearing_vec_(2);//2*G12; 
+   
+  stress = inv_stiffness* strain;
+    // INFO(3,inv_stiffness);
+    // INFO(3, strain);
+    // INFO(3, stress);
+  
+
+  
+  MAT3 sigma;
+  sigma << stress(0), stress(5), stress(4),
+    stress(5), stress(1), stress(3),
+    stress(4), stress(3), stress(2);
+  // sigma << strain(0)*E1, 0, 0,
+  //   0, strain(1)*E2, 0,
+  //   0, 0, strain(2)*E3;
+  //  INFO(3, inv_stiffness);
+   for (uint i = 0; i < 3; ++i) {
+     for (uint j = 0; j < 3; ++j) {
+       IS_DEF(sigma(i, j));
+       if (fabs(sigma(i, j)) < 1e-100) {
+	 sigma(i, j) = 0;
+       }
+     }
+   }
+   //   sigma = sigma*rotF.transpose();
+   // INFO(3, "\nsigma\n"<<sigma);
+   // INFO(3, "\nsigma rotated back\n"<<rotation.transpose()*sigma*rotation);
+   
+   return rotation.transpose()*sigma*rotation;
+}
 
 
 void Particule::project(VEC3 sigma, VEC3 & T) {
@@ -741,91 +829,94 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
    // VEC3 sigma = svd.singularValues();
 
    VEC3 smax = mpm_conf::stretch_max;
-   VEC3 smin = Vector3d(1, 1, 1) - mpm_conf::stretch_min;
+   VEC3 smin = mpm_conf::stretch_min;
 
-  // // TEST(sigma(0) >= sigma(1));
-  // // TEST(sigma(1) >= sigma(2));
-  // //  INFO(3,sigma);
+  // TEST(sigma(0) >= sigma(1));
+  // TEST(sigma(1) >= sigma(2));
+  //  INFO(3,sigma);
   
-  // for (uint i = 0; i < 3; ++i) {
-  //   VEC3 v = sigma(i)*U.col(i);
-  //   VEC3 vmin;
-  //   VEC3 vmax;
-  //   for (uint k = 0; k < 3; ++k) {
-  //     vmax(k) = v(k) / smax(k);
-  //     vmin(k) = v(k) / smin(k);
-  //   }
-  //   if (vmax.squaredNorm() > 1) {
-  //     vmax.normalize();
-  //     for (uint k = 0; k < 3; ++k) {
-  // 	v(k) = vmax(k) * smax(k);
-  //     }
-  //     T(i) = v.norm();
-  //   } else if (vmin.squaredNorm() < 1) {
-  //     vmin.normalize();
-  //     for (uint k = 0; k < 3; ++k) {
-  // 	v(k) = vmin(k) * smin(k);
-  //     }
-  //     T(i) = v.norm();
-  //   } else {
-  //     T(i) = sigma(i);
-  //   }
-  // }
+  for (uint i = 0; i < 3; ++i) {
+    VEC3 v = sigma(i)*U.col(i);
+    VEC3 vmin;
+    VEC3 vmax;
+    for (uint k = 0; k < 3; ++k) {
+      vmax(k) = v(k) / smax(k);
+      vmin(k) = v(k) / smin(k);
+    }
+    if (vmax.squaredNorm() > 1) {
+      vmax.normalize();
+      for (uint k = 0; k < 3; ++k) {
+  	v(k) = vmax(k) * smax(k);
+      }
+      T(i) = v.norm();
+    } else if (vmin.squaredNorm() < 1) {
+      vmin.normalize();
+      for (uint k = 0; k < 3; ++k) {
+  	v(k) = vmin(k) * smin(k);
+      }
+      T(i) = v.norm();
+    } else {
+      T(i) = sigma(i);
+    }
+  }
 
-   IS_DEF(sigma(0));
-   for (uint i = 0; i < 3; ++i) {
-      // if (sigma(i) > 1) {
-      //   T(i) = 1;
-      // } else {
-       T(i) = sigma(i);
-       //}
-   }
+
+  // VEC3 smax = mpm_conf::stretch_max;
+  //  VEC3 smin = Vector3d(1, 1, 1) - mpm_conf::stretch_min;
+   // IS_DEF(sigma(0));
+   // for (uint i = 0; i < 3; ++i) {
+   //    // if (sigma(i) > 1) {
+   //    //   T(i) = 1;
+   //    // } else {
+   //     T(i) = sigma(i);
+   //     //}
+   // }
   
-   VEC3 lim;// = 0.0005;
-   for (uint i = 0; i < 3; ++i) {
-     VEC3 v = U.col(i);
-     for (uint k = 0; k < 3; ++k) {
-       v(k) = v(k)*smin(k);
-     }
-     lim(i) = v.norm();
-     IS_DEF(lim(i));
-   }
-   FLOAT diff = T(1) - T(2) - lim(0);
-   if (diff > 0) {
-     //     //T(1) = sigma(1) - diff;
-     T(1) = T(1) - diff/2.0;
-     T(2) = T(2) + diff/2.0;
-   }
-
-   // v = U.col(2);
-   // for (uint k = 0; k < 3; ++k) {
-   //   v(k) = v(k)*smin(k);
+   // VEC3 lim;// = 0.0005;
+   // for (uint i = 0; i < 3; ++i) {
+   //   VEC3 v = U.col(i);
+   //   for (uint k = 0; k < 3; ++k) {
+   //     v(k) = v(k)*smin(k);
+   //   }
+   //   lim(i) = v.norm();
+   //   IS_DEF(lim(i));
    // }
-   // lim = v.norm();
-   
-   diff = T(0) - T(1) - lim(2);
-   if (diff > 0) {
-     //     //T(1) = sigma(1) - diff;
-     T(0) = T(0) - diff/2.0;
-     T(1) = T(1) + diff/2.0;
-   }
-
-   // v = U.col(1);
-   // for (uint k = 0; k < 3; ++k) {
-   //   v(k) = v(k)*smin(k);
+   // FLOAT diff = T(1) - T(2) - lim(0);
+   // if (diff > 0) {
+   //   //     //T(1) = sigma(1) - diff;
+   //   T(1) = T(1) - diff/2.0;
+   //   T(2) = T(2) + diff/2.0;
    // }
-   //  lim = v.norm();
-     diff = T(0) - T(2) - lim(1);
-   if (diff > 0) {
-     //     //T(1) = sigma(1) - diff;
-     T(0) = T(0) - diff/2.0;
-     T(2) = T(2) + diff/2.0;
-   }
+
+   // // v = U.col(2);
+   // // for (uint k = 0; k < 3; ++k) {
+   // //   v(k) = v(k)*smin(k);
+   // // }
+   // // lim = v.norm();
    
-    // INFO(3, "sigma : "<< sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
-    // INFO(3, "T : "<< T(0)<<" "<<T(1)<<" "<<T(2));
-    // INFO(3, "lim : "<< lim(0)<<" "<<lim(1)<<" "<<lim(2));
-    IS_DEF(T(0, 0));
+   // diff = T(0) - T(1) - lim(2);
+   // if (diff > 0) {
+   //   //     //T(1) = sigma(1) - diff;
+   //   T(0) = T(0) - diff/2.0;
+   //   T(1) = T(1) + diff/2.0;
+   // }
+
+   // // v = U.col(1);
+   // // for (uint k = 0; k < 3; ++k) {
+   // //   v(k) = v(k)*smin(k);
+   // // }
+   // //  lim = v.norm();
+   //   diff = T(0) - T(2) - lim(1);
+   // if (diff > 0) {
+   //   //     //T(1) = sigma(1) - diff;
+   //   T(0) = T(0) - diff/2.0;
+   //   T(2) = T(2) + diff/2.0;
+   // }
+   
+   //  // INFO(3, "sigma : "<< sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
+   //  // INFO(3, "T : "<< T(0)<<" "<<T(1)<<" "<<T(2));
+   //  // INFO(3, "lim : "<< lim(0)<<" "<<lim(1)<<" "<<lim(2));
+   //  IS_DEF(T(0, 0));
   
  
   // // //0.0005 wokrs well with falling_cube_cylinder
@@ -910,8 +1001,10 @@ void Particule::computeEnergySecondDer(VEC3 sigma, MAT3 U, MAT3 V) {
 // d Y_ii / d sigma_jj with Y = engergy derivarive 
 FLOAT Particule::energySecondDer(VEC3 sigma, uint i, uint j) {
   FLOAT d = 0;
-  TEST(sigma(2) > 0);
-  if (mpm_conf::mode_ == 0) {
+  // TEST(sigma(i) > 0);
+  //TEST(sigma(2) > 0);
+  // TEST(sigma(j) > 0);
+  if (mpm_conf::mode_ == 1) {
     FLOAT det = sigma(0)*sigma(1)*sigma(2);
     if (i == j) {
       d = 2*mpm_conf::mu_ + mpm_conf::lambda_*pow(sigma((i+1)%3)*sigma((i+2)%3), 2);
@@ -920,7 +1013,7 @@ FLOAT Particule::energySecondDer(VEC3 sigma, uint i, uint j) {
     } else {
       d =  mpm_conf::lambda_*(sigma((i+1)%3)*sigma((i+2)%3)*sigma((j+1)%3)*sigma((j+2)%3) + (det - 1)*sigma((j+1)%3));
     }
-  } else  if (mpm_conf::mode_ == 1) {
+  } else  if (mpm_conf::mode_ == 0) {
     if (i == j) {
       d = 2 * mpm_conf::mu_*(1 - log(sigma(i))) + mpm_conf::lambda_*(sigma(i) - (log(sigma(0)) + log(sigma(1)) +log(sigma(2))));
       d /= sigma(i)*sigma(i);
