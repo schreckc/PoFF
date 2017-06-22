@@ -25,17 +25,16 @@ namespace mpm_conf {
 		 mix_,
 		 nMethods};
 
+  //Grid
   extern Eigen::VEC3 size_grid_; // meter
   extern Eigen::Vector3i size_grid_n_; // nb nodes per side
   extern FLOAT grid_spacing_; // m
-
-  extern Eigen::VEC4 hardenning_param_;
-  extern Eigen::VEC3 stretch_max;
-  extern Eigen::VEC3 stretch_min;
   
+  // isotropic elasticity
   extern FLOAT mu_, lambda_;
   extern FLOAT young_modulus_, poisson_;
-  
+
+  //anisotropic elasticity
   extern Eigen::VEC3 young_vec_;
   extern Eigen::VEC3 poisson_vec_;
   extern Eigen::VEC3 shearing_vec_;
@@ -50,9 +49,18 @@ namespace mpm_conf {
   extern bool display_sphere_;
   extern int replay_speed_;
 
-  extern unsigned int mode_; //0 sand, 1 snow
-  extern bool plasticity_;
+  extern unsigned int plastic_mode_; //0 drucker_prager (sand), 1 clamp eigenvalues (snow), 2 clamp diff between eigenvalues, 3 no plasticity
+  extern unsigned int elastic_mode_; //0 sand, 1 snow, 2 linear
+  extern bool plastic_anisotropy;
+  extern bool elastic_anisotropy;
 
+  // drucker-prager param
+  extern Eigen::VEC4 hardenning_param_;
+  // plastic_mode 2-3 param
+   extern Eigen::VEC3 stretch_max;
+  extern Eigen::VEC3 stretch_min;
+
+  // damping
   extern FLOAT damping_;
   extern FLOAT cheat_damping_;
   extern bool smooth_vel_;

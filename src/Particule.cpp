@@ -500,8 +500,8 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     IS_DEF(T(0));
     IS_DEF(F_e(0, 0));
         
-   forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
-   // forceIncrement = v0*linearElasticity();
+    //forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
+    forceIncrement = v0*linearElasticity();
     if (std::isnan(forceIncrement(0, 0)) || std::isinf(forceIncrement(0, 0))) {
       forceIncrement = MAT3::Zero();
     }
@@ -517,8 +517,8 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
       der(i, i) = energy_der(i);
     }
     //    INFO(3, "der\n"<<U*der*V.transpose()*F_e.transpose());
-    forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
-    //forceIncrement = v0*linearElasticity();
+    //forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
+    forceIncrement = v0*linearElasticity();
      if (std::isnan(forceIncrement(0, 0)) || std::isinf(forceIncrement(0, 0))) {
       forceIncrement = MAT3::Zero();
     }
