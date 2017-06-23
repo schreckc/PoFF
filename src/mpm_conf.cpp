@@ -107,6 +107,7 @@ namespace mpm_conf {
 	  for (uint i = 0; i < 3; ++i) {
 	    s >> poisson_vec_(i);
 	  }
+	  INFO(3, "poisson "<<poisson_vec_);
 	  young_vec_def = true;
 	}  else if (line.substr(0,8) == "<mu_vec>") {
 	  std::istringstream s(line.substr(8));
@@ -140,6 +141,9 @@ namespace mpm_conf {
 	  std::istringstream s(line.substr(6));
 	  s >> plastic_mode_;
 	  elastic_mode_ = plastic_mode_;
+	  if (elastic_mode_ == 2) {
+	    plastic_mode_ = 1;
+	  }
 	}  else if (line.substr(0,12) == "<plasticity>") {
 	  std::istringstream s(line.substr(12));
 	  bool p;

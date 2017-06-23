@@ -456,11 +456,11 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   IS_DEF(sigma(0));
   if (mpm_conf::plastic_mode_ != 3) {  
 
-    if (mpm_conf::plastic_anisotropy_) {
+    //if (mpm_conf::plastic_anisotropy_) {
      anisotropicProject(sigma, T, U);
-    } else {
-      project(sigma, T);
-    }
+    // } else {
+    //   project(sigma, T);
+    // }
     computeEnergyDerivative(T);
     
     MAT3 inv_T = MAT3::Zero();
@@ -645,7 +645,7 @@ MAT3 Particule::linearElasticity() {
    inv_stiffness(5, 5) = 2*mpm_conf::shearing_vec_(2);//2*G12; 
    
   stress = inv_stiffness* strain;
-    // INFO(3,inv_stiffness);
+  //  INFO(3,inv_stiffness);
     // INFO(3, strain);
     // INFO(3, stress);
   
@@ -871,7 +871,6 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
       T(i) = sigma(i);
     }
   }
-
   } else if (mpm_conf::plastic_mode_ == 2) {
     VEC3 smax = mpm_conf::stretch_max;
   //  VEC3 smin = Vector3d(1, 1, 1) - mpm_conf::stretch_min;
