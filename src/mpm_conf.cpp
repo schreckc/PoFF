@@ -60,6 +60,7 @@ namespace mpm_conf {
     if (file.good()) {
       std::string line;
       while (getline(file, line)) {
+	//INFO(2, line);
 	if (line.substr(0,1) == "#") {
 	  INFO(2, line);
 	} else if (line.substr(0,9) == "<nb_part>") {
@@ -186,6 +187,11 @@ namespace mpm_conf {
 	  for (uint i = 0; i < 3; ++i) {
 	    s >> stretch_min(i);
 	  }
+	}  else if (line.substr(0,11) == "<implicite>") {
+	  implicit_ = true;
+	  INFO(3, "IMPLICIT");
+	}  else if (line.substr(0,11) == "<explicite>") {
+	  implicit_ = false;
 	} else {
 	  ERROR(false, "Invalid configuration file \""<<path_file<<"\"", line);
 	}

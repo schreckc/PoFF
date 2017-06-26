@@ -1000,6 +1000,7 @@ void Particule::computeEnergySecondDer(VEC3 sigma, MAT3 U, MAT3 V) {
 		 for (uint v = 0; v < 3; ++v) {
 		   energy_second_der(i, j, k, l) += v0*aux(r, s, u, v)*U(i, r)*V(j, s)*U(k, u)*V(l, v);
 		   IS_DEF(aux(r, s, u, v));
+		   //  INFO(3, energy_second_der(i, j, k, l));
 		 }
 	       }
 	     }
@@ -1010,7 +1011,6 @@ void Particule::computeEnergySecondDer(VEC3 sigma, MAT3 U, MAT3 V) {
       }
     }
    }
-	   
 }
 
 // d Y_ii / d sigma_jj with Y = engergy derivarive 

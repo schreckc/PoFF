@@ -17,11 +17,12 @@ inline uint Grid::index(uint i, uint j, uint k) const {
 
 Vector3i Grid::nodeFromIndex(int ind) const {
   int i, j, k;
-  i = (int) ind / (j_max+1)*(k_max+1);
+  i = (int) ind / ((j_max+1)*(k_max+1));
   int aux = ind - i*(j_max+1)*(k_max+1);
   j = (int) aux / (k_max+1);
   k = aux - j*(k_max+1);
   TEST(ind == index(i, j, k));
+  //  INFO(3, "nide from index "<<ind<<" "<<aux<<" " << i<<" "<<j<<" "<<k);
   return Vector3i(i, j, k);
 }
 
@@ -590,33 +591,36 @@ void Grid::particulesToGridImplicite(std::vector<Particule*> & particules) {
     }
   }
 
-  uint n = 0;
+  uint n_active = 0;
   for (uint i = 0; i < nb_nodes; ++i) {
-    if (active_nodes[i]) {
-      ++n;
+    if (active_nodes[i] && masses[i] > 1e-8*mpm_conf::dt_*mpm_conf::dt_) {
+      ++n_active;
     }
   }
-  MATX K(3*n, 3*n);
+  MATX K(3*n_active, 3*n_active);
   FLOAT beta = 1;
   uint index1 = 0;
 #pragma omp parallel for
-  for (uint i = 0; i < 3*n; ++i) {
-    for (uint j = 0; j < 3*n; ++j) {
+  for (int i = 0; i < 3*n_active; ++i) {
+    for (int j = 0; j < 3*n_active; ++j) {
       K(i, j) = 0;
     }
   }
-  for (uint i = 0; i < nb_nodes; ++i) {
+  INFO(3, "nb ndoe" <<nb_nodes);
 
-    if (active_nodes[i]) {
+  for (int i = 0; i < nb_nodes; ++i) {
 
-      for (uint l = 0; l < 3; ++l) {
+    if (active_nodes[i] && masses[i] > 1e-8*mpm_conf::dt_*mpm_conf::dt_) {
+
+      for (int l = 0; l < 3; ++l) {
 	K(3*index1 + l, 3*index1 + l) = 1.0;
 	//INFO(3, K(3*index1 + l, 3*index1 + l));
       }
       
       uint index2 = 0;
-      for (uint j = 0; j < nb_nodes; ++j) {
-      	if (active_nodes[j]) {
+      for (int j = 0; j < nb_nodes; ++j) {
+	
+      	if (active_nodes[j] && masses[i] > 1e-8*mpm_conf::dt_*mpm_conf::dt_) {
       	  if (masses[i] > 1e-8*mpm_conf::dt_*mpm_conf::dt_) {
       	    MAT3 second_der = secondDer(i, j);
       	    MAT3 Kij = beta* mpm_conf::dt_*mpm_conf::dt_/masses[i]*second_der;
@@ -627,10 +631,12 @@ void Grid::particulesToGridImplicite(std::vector<Particule*> & particules) {
       	      for (uint m = 0; m < 3; ++m) {
       		K(3*index1 + l, 3*index2 + m) += Kij(l, m);
       		IS_DEF(K(3*index1 + l, 3*index2 + m));
+      		// if (Kij(l, m) != 0) {
+      		//   INFO(3, "second der\n"<<second_der);
+      		// }
       	      }
       	    }
       	  }
-      	  //INFO(3, Kij);
       	  ++index2;
       	}
       }
@@ -639,9 +645,16 @@ void Grid::particulesToGridImplicite(std::vector<Particule*> & particules) {
     }
     
   }
-  //  INFO(3,K);
-  VECX V(3*n);
+  //  INFO(3, "index "<<index1<<" "<<n_active);
+  TEST(index1 == n_active);
+  //   INFO(3,K);
+  for (int i = 0; i < 3*n_active; ++i) {
+    //    INFO(3, "Kii "<<K(i, i)<<" "<<i<<" "<<i/3);
+    TEST(K(i, i) != 0);
+  }
+  VECX V(3*n_active);
   uint ind = 0;
+  #pragma omp parallel for  
     for (uint i = 0; i < nb_nodes; ++i) {
       if (active_nodes[i]) {
 	for (uint l = 0; l < 3; ++l) {
@@ -653,10 +666,11 @@ void Grid::particulesToGridImplicite(std::vector<Particule*> & particules) {
     }
     ConjugateGradient<MATX, Lower|Upper> cg;
   cg.compute(K);
-  VECX new_V(3*n);
+  VECX new_V(3*n_active);
   new_V = cg.solve(V);
   ind = 0;
-  INFO(3, n);
+  INFO(3, "IMPLICIT: size of K "<<n_active);
+
   for (uint i = 0; i < nb_nodes; ++i) {
     if (active_nodes[i]) {
       for (uint k = 0; k < 3; ++k) {
@@ -669,7 +683,7 @@ void Grid::particulesToGridImplicite(std::vector<Particule*> & particules) {
       ++ind;
     }
   }
-// //   //INFO(2, "END Part 2 Grid");
+  INFO(2, "END Part 2 Grid");
 }
 
 void Grid::gridToParticules(std::vector<Particule*> & particules) {
@@ -903,6 +917,8 @@ MAT3 Grid::secondDer(uint i, uint j) {
   Vector3i indi = nodeFromIndex(i);
   Vector3i indj = nodeFromIndex(j);
 
+  // INFO(3, "second der indice \n"<<indi<<"\n\n "<<indj);
+  // INFO(3, i_max<<" "<<j_max<<" "<<k_max);
   for (int l = indi(0) - 2; l < indi(0) + 2; ++l) {
     if (l >= 0 && l < (int)i_max) {
       for (int m = indi(1) - 2; m < indi(1) + 2; ++m) {
@@ -910,7 +926,7 @@ MAT3 Grid::secondDer(uint i, uint j) {
 	  for (int n = indi(2) - 2; n < indi(2) + 2; ++n) {
 	    if (n >= 0 && n < (int)k_max) {
 	      uint indc = l*j_max*k_max + m*(k_max) + n;
-
+	      // INFO(3, "indc "<<indc);
 	      for (auto& p : cells[indc]) {
 		
 		//second deriative energy for implicite scheme
