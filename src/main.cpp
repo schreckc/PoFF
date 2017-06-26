@@ -179,7 +179,7 @@ int main(int argc, char **argv) {
     if (t > stop) {
       end_ = true;
     }
-    if (t%100==0) {
+    if (t%10==0) {
       INFO(1, "Simulation step : "<<t);
       INFO(2, "Time per frame "<<Times::TIMES->getTime(Times::simu_time_));
     }
