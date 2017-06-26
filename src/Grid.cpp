@@ -488,6 +488,7 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 }
 
 void Grid::particulesToGridImplicite(std::vector<Particule*> & particules) {
+  INFO(3, "IMPLICIT");
   for (auto &p : particules) {
     Vector3i c = p->getCell();
      uint ind = c(0)*j_max*k_max + c(1)*(k_max) + c(2);

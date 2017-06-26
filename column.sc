@@ -1,6 +1,6 @@
 <obstacles>
  <plane>
-  <pos> 0.15
+  <pos> 0.14
   <normal> 0 0 1
  </plane>
  <box>
