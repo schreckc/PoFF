@@ -145,6 +145,12 @@ namespace mpm_conf {
 	  if (elastic_mode_ == 2) {
 	    plastic_mode_ = 1;
 	  }
+	}  else if (line.substr(0,14) == "<elastic_mode>") {
+	  std::istringstream s(line.substr(14));
+	  s >> elastic_mode_;
+	}  else if (line.substr(0,14) == "<plastic_mode>") {
+	  std::istringstream s(line.substr(14));
+	  s >> plastic_mode_;
 	}  else if (line.substr(0,12) == "<plasticity>") {
 	  std::istringstream s(line.substr(12));
 	  bool p;

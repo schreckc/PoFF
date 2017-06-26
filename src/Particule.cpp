@@ -456,11 +456,11 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   IS_DEF(sigma(0));
   if (mpm_conf::plastic_mode_ != 3) {  
 
-    //if (mpm_conf::plastic_anisotropy_) {
+    if (mpm_conf::plastic_anisotropy_) {
      anisotropicProject(sigma, T, U);
-    // } else {
-    //   project(sigma, T);
-    // }
+     } else {
+       project(sigma, T);
+     }
     computeEnergyDerivative(T);
     
     MAT3 inv_T = MAT3::Zero();
@@ -720,7 +720,7 @@ void Particule::project(VEC3 sigma, VEC3 & T) {
     double smax = mpm_conf::hardenning_param_(1);//1 + 7.5e-3;
     double smin = mpm_conf::hardenning_param_(2);//1 - 2.5e-2;
     //if (density > 0.9*mpm_conf::density_) {
-      //      INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
+    //INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
     
       for (uint i = 0; i < 3; ++i) {
 	T(i) = sigma(i);
