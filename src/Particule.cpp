@@ -449,18 +449,19 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   MAT3 V = svd.matrixV();
   VEC3 T(0, 0, 0);
   VEC3 sigma = svd.singularValues();
-  // INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
+  
   if (std::isnan(sigma(0)) || std::isinf(sigma(0))) {
     sigma = VEC3(1, 1, 1);
   }
   IS_DEF(sigma(0));
   if (mpm_conf::plastic_mode_ != 3) {  
 
-    if (mpm_conf::plastic_anisotropy_) {
-     anisotropicProject(sigma, T, U);
-     } else {
-       project(sigma, T);
-     }
+    //    if (mpm_conf::plastic_anisotropy_) {
+    //   anisotropicProject(sigma, T, U);
+    //} else {
+      project(sigma, T);
+      //}
+      //    INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
     computeEnergyDerivative(T);
     
     MAT3 inv_T = MAT3::Zero();
@@ -676,6 +677,7 @@ MAT3 Particule::linearElasticity() {
 
 
 void Particule::project(VEC3 sigma, VEC3 & T) {
+  //INFO(3, "PROJECT");
   if (mpm_conf::plastic_mode_ == 0) {
     VEC3 ln_sigma(0, 0, 0);
     VEC3 dev_ln_sigma(0, 0, 0);
@@ -716,9 +718,9 @@ void Particule::project(VEC3 sigma, VEC3 & T) {
       }
     }
     hardenning += plastic_def;
-  } else if (mpm_conf::elastic_mode_ == 1) {
-    double smax = mpm_conf::hardenning_param_(1);//1 + 7.5e-3;
-    double smin = mpm_conf::hardenning_param_(2);//1 - 2.5e-2;
+  } else if (mpm_conf::plastic_mode_ == 1) {
+    double smax = mpm_conf::stretch_max(0);//1 + 7.5e-3;
+    double smin = mpm_conf::stretch_min(0);//1 - 2.5e-2;
     //if (density > 0.9*mpm_conf::density_) {
     //INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
     
@@ -726,12 +728,15 @@ void Particule::project(VEC3 sigma, VEC3 & T) {
 	T(i) = sigma(i);
 	if (sigma(i) < smin) {
 	  T(i) = smin;
+	  //	  INFO(3, "SIGMIN");
 	  //  T(i) = 1;
 	} else if (sigma(i) > smax) {
 	  T(i) = smax;
+	  
 	  //T(i) = 1;
 	}
       }
+      //     INFO(3, "T "<<T);
     //  } else {
     //   // INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
     //   color = VEC3(0.5, 0.5, 1);

@@ -219,6 +219,7 @@ namespace mpm_conf {
       ERROR(false, "Cannot found file \""<<path_file<<"\"", "");
     }
     file.close();
+    INFO(3, "plasticity: "<<plastic_mode_);
   }
     
 }
