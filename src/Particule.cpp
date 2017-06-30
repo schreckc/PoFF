@@ -441,7 +441,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   if (std::isnan(F_e(0, 0)) || std::isinf(F_e(0,0))) {
     F_e = MAT3::Identity();
   }
-  MAT3 rotF = rotation.transpose()*F_e;
+  MAT3 rotF = rotation.transpose()*F_e*rotation;
   // IS_DEF(F_e(0, 0));
   // IS_DEF(rotF(0, 0));
   JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
@@ -456,12 +456,12 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   IS_DEF(sigma(0));
   if (mpm_conf::plastic_mode_ != 3) {  
 
-    //    if (mpm_conf::plastic_anisotropy_) {
-    //   anisotropicProject(sigma, T, U);
-    //} else {
+    if (mpm_conf::plastic_anisotropy_) {
+      anisotropicProject(sigma, T, V);
+    } else {
       project(sigma, T);
-      //}
-      //    INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
+    }
+    //    INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2)<<"\n"<<T(0)<<" "<<T(1)<<" "<<T(2));
     computeEnergyDerivative(T);
     
     MAT3 inv_T = MAT3::Zero();
@@ -482,8 +482,8 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
       }
       sigma_m(i, i) = sigma(i);
     }
-    F_e = rotation*U*(T_m)*V.transpose();
-    F_p = rotation*V*inv_T*sigma_m*V.transpose()*F_p;
+    F_e = rotation*U*(T_m)*V.transpose()* rotation.transpose();
+    F_p = rotation*V*inv_T*sigma_m*V.transpose()* rotation.transpose()*F_p;
 
 
     if (mpm_conf::plastic_mode_ == 0) {
@@ -504,7 +504,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     IS_DEF(F_e(0, 0));
 
     if (mpm_conf::elastic_mode_ != 2) {
-    forceIncrement = v0*rotation*U*der*V.transpose()*F_e.transpose();
+    forceIncrement = v0*rotation*U*der*V.transpose()*rotation.transpose()*F_e.transpose();
     } else {
       forceIncrement = v0*linearElasticity();
     }
@@ -728,11 +728,11 @@ void Particule::project(VEC3 sigma, VEC3 & T) {
 	T(i) = sigma(i);
 	if (sigma(i) < smin) {
 	  T(i) = smin;
-	  //	  INFO(3, "SIGMIN");
+	  //INFO(3, "SIGMIN");
 	  //  T(i) = 1;
 	} else if (sigma(i) > smax) {
 	  T(i) = smax;
-	  
+	  //	  INFO(3, "SIGMAX");
 	  //T(i) = 1;
 	}
       }
@@ -836,131 +836,164 @@ VEC3 Particule::getAnisotropy() const {
   return VEC3(valx, valy, valz);
 }
 
-void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U) {
- 
-  // MAT3 rotF = rotation.transpose()*F_e;
-   // JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
-   // MAT3 U = svd.matrixU();
-   // MAT3 V = svd.matrixV();
-   // VEC3 sigma = svd.singularValues();
 
-  if (mpm_conf::plastic_mode_ == 1) {
-  VEC3 smax = mpm_conf::stretch_max;
-   VEC3 smin = mpm_conf::stretch_min;
-
-  // TEST(sigma(0) >= sigma(1));
-  // TEST(sigma(1) >= sigma(2));
-  //  INFO(3,sigma);
+void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 V) {
+  VEC3 mult = mpm_conf::anisotropy_values_;
+  VEC3 T_iso(0, 0, 0);
+  VEC3 sigma_iso;
+  VEC3 coef;
+  for (uint i = 0; i < 3; ++i) {
+    VEC3 v = V.col(i);
+    VEC3 v_iso;
+    for (uint k = 0; k < 3; ++k) {
+      v_iso(k) = v(k) * mult(k);
+    }
+    v_iso.normalize();
+    for (uint k = 0; k < 3; ++k) {
+      v(k) = v_iso(k) / mult(k);
+    }
+    coef(i)= v.norm();
+  }
   
   for (uint i = 0; i < 3; ++i) {
-    VEC3 v = sigma(i)*U.col(i);
-    VEC3 vmin;
-    VEC3 vmax;
-    for (uint k = 0; k < 3; ++k) {
-      vmax(k) = v(k) / smax(k);
-      vmin(k) = v(k) / smin(k);
-    }
-    if (vmax.squaredNorm() > 1) {
-      vmax.normalize();
-      for (uint k = 0; k < 3; ++k) {
-  	v(k) = vmax(k) * smax(k);
-      }
-      T(i) = v.norm();
-    } else if (vmin.squaredNorm() < 1) {
-      vmin.normalize();
-      for (uint k = 0; k < 3; ++k) {
-  	v(k) = vmin(k) * smin(k);
-      }
-      T(i) = v.norm();
-    } else {
-      T(i) = sigma(i);
-    }
+    sigma_iso(i) = sigma(i) * coef(i);
   }
-  } else if (mpm_conf::plastic_mode_ == 2) {
-    VEC3 smax = mpm_conf::stretch_max;
-  //  VEC3 smin = Vector3d(1, 1, 1) - mpm_conf::stretch_min;
-   // IS_DEF(sigma(0));
-    for (uint i = 0; i < 3; ++i) {
-      // if (sigma(i) > 1) {
-      //   T(i) = 1;
-      // } else {
-       T(i) = sigma(i);
-       //}
-   }
   
-   VEC3 lim;// = 0.0005;
-   for (uint i = 0; i < 3; ++i) {
-     VEC3 v = U.col(i);
-     for (uint k = 0; k < 3; ++k) {
-       v(k) = v(k)*smax(k);
-     }
-     lim(i) = v.norm();
-     IS_DEF(lim(i));
-   }
-   FLOAT diff = T(1) - T(2) - lim(0);
-   if (diff > 0) {
-     //     //T(1) = sigma(1) - diff;
-     T(1) = T(1) - diff/2.0;
-     T(2) = T(2) + diff/2.0;
-   }
+  project(sigma_iso, T_iso);
 
-   // v = U.col(2);
-   // for (uint k = 0; k < 3; ++k) {
-   //   v(k) = v(k)*smax(k);
-   // }
-   // lim = v.norm();
-   
-   diff = T(0) - T(1) - lim(2);
-   if (diff > 0) {
-     //     //T(1) = sigma(1) - diff;
-     T(0) = T(0) - diff/2.0;
-     T(1) = T(1) + diff/2.0;
-   }
-
-   // v = U.col(1);
-   // for (uint k = 0; k < 3; ++k) {
-   //   v(k) = v(k)*smax(k);
-   // }
-   //  lim = v.norm();
-     diff = T(0) - T(2) - lim(1);
-   if (diff > 0) {
-     //     //T(1) = sigma(1) - diff;
-     T(0) = T(0) - diff/2.0;
-     T(2) = T(2) + diff/2.0;
-   }
-   
-    // INFO(3, "sigma : "<< sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
-    // INFO(3, "T : "<< T(0)<<" "<<T(1)<<" "<<T(2));
-    // INFO(3, "lim : "<< lim(0)<<" "<<lim(1)<<" "<<lim(2));
-    IS_DEF(T(0, 0));
-
-  } else {
-    TEST(false);
+  for (uint i = 0; i < 3; ++i) {
+    T(i) = T_iso(i) / coef(i);
   }
+}
+
+
+
+
+// void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 V) {
+ 
+//   // MAT3 rotF = rotation.transpose()*F_e;
+//     // JacobiSVD<MATX> svd(rotF, ComputeThinU | ComputeThinV);
+//     // MAT3 U = svd.matrixU();
+//     // MAT3 V = svd.matrixV();
+//     // VEC3 sigma = svd.singularValues();
+
+//   if (mpm_conf::plastic_mode_ == 1) {
+//   VEC3 smax = mpm_conf::stretch_max;
+//    VEC3 smin = mpm_conf::stretch_min;
+
+//   // TEST(sigma(0) >= sigma(1));
+//   // TEST(sigma(1) >= sigma(2));
+//   //  INFO(3,sigma);
+  
+//   for (uint i = 0; i < 3; ++i) {
+//     VEC3 v = sigma(i)*V.col(i);
+//     VEC3 vmin;
+//     VEC3 vmax;
+//     for (uint k = 0; k < 3; ++k) {
+//       vmax(k) = v(k) / smax(k);
+//       vmin(k) = v(k) / smin(k);
+//     }
+//     if (vmax.squaredNorm() > 1) {
+//       vmax.normalize();
+//       for (uint k = 0; k < 3; ++k) {
+//   	v(k) = vmax(k) * smax(k);
+//       }
+//       T(i) = v.norm();
+//     } else if (vmin.squaredNorm() < 1) {
+//       vmin.normalize();
+//       for (uint k = 0; k < 3; ++k) {
+//   	v(k) = vmin(k) * smin(k);
+//       }
+//       T(i) = v.norm();
+//     } else {
+//       T(i) = sigma(i);
+//     }
+//   }
+//   } else if (mpm_conf::plastic_mode_ == 2) {
+//     VEC3 smax = mpm_conf::stretch_max;
+//   //  VEC3 smin = Vector3d(1, 1, 1) - mpm_conf::stretch_min;
+//    // IS_DEF(sigma(0));
+//     for (uint i = 0; i < 3; ++i) {
+//       // if (sigma(i) > 1) {
+//       //   T(i) = 1;
+//       // } else {
+//        T(i) = sigma(i);
+//        //}
+//    }
+  
+//    VEC3 lim;// = 0.0005;
+//    for (uint i = 0; i < 3; ++i) {
+//      VEC3 v = V.col(i);
+//      for (uint k = 0; k < 3; ++k) {
+//        v(k) = v(k)*smax(k);
+//      }
+//      lim(i) = v.norm();
+//      IS_DEF(lim(i));
+//    }
+//    FLOAT diff = T(1) - T(2) - lim(0);
+//    if (diff > 0) {
+//      //     //T(1) = sigma(1) - diff;
+//      T(1) = T(1) - diff/2.0;
+//      T(2) = T(2) + diff/2.0;
+//    }
+
+//    // v = U.col(2);
+//    // for (uint k = 0; k < 3; ++k) {
+//    //   v(k) = v(k)*smax(k);
+//    // }
+//    // lim = v.norm();
+   
+//    diff = T(0) - T(1) - lim(2);
+//    if (diff > 0) {
+//      //     //T(1) = sigma(1) - diff;
+//      T(0) = T(0) - diff/2.0;
+//      T(1) = T(1) + diff/2.0;
+//    }
+
+//    // v = U.col(1);
+//    // for (uint k = 0; k < 3; ++k) {
+//    //   v(k) = v(k)*smax(k);
+//    // }
+//    //  lim = v.norm();
+//      diff = T(0) - T(2) - lim(1);
+//    if (diff > 0) {
+//      //     //T(1) = sigma(1) - diff;
+//      T(0) = T(0) - diff/2.0;
+//      T(2) = T(2) + diff/2.0;
+//    }
+   
+//     // INFO(3, "sigma : "<< sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
+//     // INFO(3, "T : "<< T(0)<<" "<<T(1)<<" "<<T(2));
+//     // INFO(3, "lim : "<< lim(0)<<" "<<lim(1)<<" "<<lim(2));
+//     IS_DEF(T(0, 0));
+
+//   } else {
+//     TEST(false);
+//   }
   
  
-  // // //0.0005 wokrs well with falling_cube_cylinder
-  //   FLOAT diff = T(1) - T(2) - 0.0005;
-  //   if (diff > 0) {
-  //     //T(1) = sigma(1) - diff;
-  //     T(1) = T(1) - diff/2.0;
-  //     T(2) = T(2) + diff/2.0;
-  //   }
+//   // // //0.0005 wokrs well with falling_cube_cylinder
+//   //   FLOAT diff = T(1) - T(2) - 0.0005;
+//   //   if (diff > 0) {
+//   //     //T(1) = sigma(1) - diff;
+//   //     T(1) = T(1) - diff/2.0;
+//   //     T(2) = T(2) + diff/2.0;
+//   //   }
 
-  //   diff = T(0) - T(1) - 0.0005;
-  //   if (diff > 0) {
-  //     //T(0) = sigma(0) - diff;
-  //     T(0) = T(0) - diff/2.0;
-  //     T(1) = T(1) + diff/2.0;
-  //   }
+//   //   diff = T(0) - T(1) - 0.0005;
+//   //   if (diff > 0) {
+//   //     //T(0) = sigma(0) - diff;
+//   //     T(0) = T(0) - diff/2.0;
+//   //     T(1) = T(1) + diff/2.0;
+//   //   }
 
-  //   diff = T(0) - T(2) - 0.0005;
-  //   if (diff > 0) {
-  //     //T(0) = sigma(0) - diff;
-  //     T(0) = T(0) - diff/2.0;
-  //     T(2) = T(2) + diff/2.0;
-  //   }
-}
+//   //   diff = T(0) - T(2) - 0.0005;
+//   //   if (diff > 0) {
+//   //     //T(0) = sigma(0) - diff;
+//   //     T(0) = T(0) - diff/2.0;
+//   //     T(2) = T(2) + diff/2.0;
+//   //   }
+// }
 
 
 // inline FLOAT Particule::energySecondDer(uint i, uint j, uint k, uint l) const {

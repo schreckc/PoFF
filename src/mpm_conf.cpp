@@ -44,6 +44,8 @@ namespace mpm_conf {
   FLOAT cheat_damping_ = 1;
   bool smooth_vel_ = 0;
 
+  VEC3 anisotropy_values_(1, 1, 1);
+
   uint method_ = apic_;
   bool implicit_ = false;
   
@@ -198,6 +200,11 @@ namespace mpm_conf {
 	  INFO(3, "IMPLICIT");
 	}  else if (line.substr(0,11) == "<explicite>") {
 	  implicit_ = false;
+	}  else if (line.substr(0,12) == "<anisotropy>") {
+	  std::istringstream s(line.substr(12));
+	  for (uint i = 0; i < 3; ++i) {
+	    s >> anisotropy_values_(i);
+	  }
 	} else {
 	  ERROR(false, "Invalid configuration file \""<<path_file<<"\"", line);
 	}

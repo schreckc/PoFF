@@ -65,6 +65,9 @@ namespace mpm_conf {
   extern FLOAT cheat_damping_;
   extern bool smooth_vel_;
 
+  // generalized anis
+  extern Eigen::VEC3 anisotropy_values_;
+
   extern uint method_; //0 apic, 1 pic, 2 flip, 3 0.5*pic+0.95*flip
   extern bool implicit_;
   
