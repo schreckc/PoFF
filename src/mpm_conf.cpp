@@ -1,6 +1,8 @@
 #include "mpm_conf.hpp"
 #include <fstream>
 #include "error.hpp"
+#include "Tensor.hpp"
+#include "utils.hpp"
 
 using namespace Eigen;
 
@@ -45,6 +47,15 @@ namespace mpm_conf {
   bool smooth_vel_ = 0;
 
   VEC3 anisotropy_values_(1, 1, 1);
+  Tensor anisotropy_stress_;
+  Tensor inv_anisotropy_stress_;
+  Tensor anisotropy_strain_;
+  Tensor inv_anisotropy_strain_;
+
+  MATX tangent_stiffness(6, 6);
+  MATX inverse_tangent_stiffness(6, 6);
+  MATX tangent_stiffness_iso(6, 6);
+  MATX inverse_tangent_stiffness_iso(6, 6);
 
   uint method_ = apic_;
   bool implicit_ = false;
@@ -54,7 +65,7 @@ namespace mpm_conf {
   void loadConf(std::string path_file) {
     std::ifstream file(path_file.c_str());
     bool young_mod_def = false;
-     bool young_vec_def = false;
+    bool young_vec_def = false;
     bool mu_def = false;
     bool shearing_def = false;
     // bool size_grid_def = false;
@@ -100,7 +111,9 @@ namespace mpm_conf {
 	  for (uint i = 0; i < 3; ++i) {
 	    s >> young_vec_(i);
 	  }
+	  young_modulus_ =  young_vec_(0);
 	  young_vec_def = true;
+	  young_mod_def = true;
 	}  else if (line.substr(0,15) == "<poisson_ratio>") {
 	  std::istringstream s(line.substr(15));
 	  s >> poisson_;
@@ -110,8 +123,10 @@ namespace mpm_conf {
 	  for (uint i = 0; i < 3; ++i) {
 	    s >> poisson_vec_(i);
 	  }
+	  poisson_ = poisson_vec_(0);
 	  INFO(3, "poisson "<<poisson_vec_);
 	  young_vec_def = true;
+	   young_mod_def = true;
 	}  else if (line.substr(0,8) == "<mu_vec>") {
 	  std::istringstream s(line.substr(8));
 	  for (uint i = 0; i < 3; ++i) {
@@ -204,7 +219,9 @@ namespace mpm_conf {
 	  std::istringstream s(line.substr(12));
 	  for (uint i = 0; i < 3; ++i) {
 	    s >> anisotropy_values_(i);
+	    anisotropy_stress_(i, i, i, i) = anisotropy_values_(i);
 	  }
+	  
 	} else {
 	  ERROR(false, "Invalid configuration file \""<<path_file<<"\"", line);
 	}
@@ -220,13 +237,124 @@ namespace mpm_conf {
 	   poisson_vec_ = VEC3(poisson_, poisson_, poisson_); // (nu_23, nu_13, nu_12)
       }
       if (!shearing_def) {
-	shearing_vec_ = VEC3(young_vec_(0)/(1+poisson_vec_(0)), young_vec_(1)/(1+poisson_vec_(1)),young_vec_(2)/(1+poisson_vec_(2)));// (G_23, G_13, G_12)
+	shearing_vec_ = 0.5*VEC3(young_vec_(0)/(1+poisson_vec_(0)), young_vec_(1)/(1+poisson_vec_(1)),young_vec_(2)/(1+poisson_vec_(2)));// (G_23, G_13, G_12)
       }
     } else {
       ERROR(false, "Cannot found file \""<<path_file<<"\"", "");
     }
     file.close();
     INFO(3, "plasticity: "<<plastic_mode_);
-  }
     
-}
+  // constitutive elasticity tensor
+  FLOAT E1 = young_vec_(0);
+  FLOAT E2 = young_vec_(1);
+  FLOAT E3 = young_vec_(2);
+  FLOAT nu12 = poisson_vec_(2);
+  FLOAT nu13 = poisson_vec_(1);
+  FLOAT nu23 = poisson_vec_(0);
+
+  FLOAT E = young_modulus_;
+  FLOAT nu = poisson_;
+  FLOAT G = E/(2*(1+nu));
+  
+  TEST(E1 != 0);
+
+  // in the isotropic space
+  for (uint i = 0; i < 3; ++i) {
+    inverse_tangent_stiffness_iso(i, i) = 1/E;
+    inverse_tangent_stiffness_iso((i+1)%3, i) = -nu/E;
+    inverse_tangent_stiffness_iso((i+2)%3, i) = -nu/E;
+    inverse_tangent_stiffness_iso(i+3, i+3) = 1/(2*G);
+  }
+ 
+  MAT3 inv_stretch_stiff_iso;
+  inv_stretch_stiff_iso << 1/E, -nu/E, -nu/E,
+    -nu/E, 1/E, -nu/E,
+    -nu/E, -nu/E, 1/E;
+  MAT3 stretch_stiff_iso = inv_stretch_stiff_iso.inverse();
+
+  for (uint i = 0; i < 3; ++i) {
+    for (uint j = 0; j < 3; ++j) {
+      if (fabs(stretch_stiff_iso(i, j)) > 1e-100) {
+  	tangent_stiffness_iso(i, j) = stretch_stiff_iso(i, j);
+      } else {
+  	tangent_stiffness_iso(i, j) = 0;
+      }
+      tangent_stiffness_iso(i, 3+j) = 0;
+      tangent_stiffness_iso(3+i, 3+j) = 0;
+      tangent_stiffness_iso(3+i, j) = 0;
+    }
+  }
+  tangent_stiffness_iso(3, 3) = 2*G;
+  tangent_stiffness_iso(4, 4) = 2*G;
+  tangent_stiffness_iso(5, 5) = 2*G;
+
+
+  // in the anisostropic space
+ for (uint i = 0; i < 3; ++i) {
+   inverse_tangent_stiffness(i, i) = 1/young_vec_(i);
+   inverse_tangent_stiffness(i+3, i+3) = 1/(2*shearing_vec_(i));
+  }
+ inverse_tangent_stiffness(0, 1) = -nu12/E2;
+ inverse_tangent_stiffness(0, 2) = -nu13/E3;
+ inverse_tangent_stiffness(1, 0) = -nu12/E2;
+ inverse_tangent_stiffness(1, 2) = -nu23/E3;
+ inverse_tangent_stiffness(2, 0) = -nu13/E3;
+ inverse_tangent_stiffness(2, 1) = -nu23/E3;
+ 
+ MAT3 inv_stretch_stiff;
+ inv_stretch_stiff << 1/E1, -nu12/E1, -nu13/E1,
+   -nu12/E1, 1/E2, -nu23/E2,
+   -nu13/E1, -nu23/E2, 1/E3;
+ MAT3 stretch_stiff = inv_stretch_stiff.inverse();
+  
+  for (uint i = 0; i < 3; ++i) {
+    for (uint j = 0; j < 3; ++j) {
+      if (fabs(stretch_stiff(i, j)) > 1e-100) {
+  	tangent_stiffness(i, j) = stretch_stiff(i, j);
+      } else {
+  	tangent_stiffness(i, j) = 0;
+      }
+      tangent_stiffness(i, 3+j) = 0;
+      tangent_stiffness(3+i, 3+j) = 0;
+      tangent_stiffness(3+i, j) = 0;
+    }
+  }
+   tangent_stiffness(3, 3) = 2*shearing_vec_(0); //2*G23
+   tangent_stiffness(4, 4) = 2*shearing_vec_(1);;//2*G13;
+   tangent_stiffness(5, 5) = 2*shearing_vec_(2);//2*G12;
+
+   // map from anisotropic to isotropc space
+   for (uint i = 0; i < 3; ++i) {
+     for (uint j = 0; j < 3; ++j) {
+       // anisotropy_stress_(i, j, i, j) = 1;
+       // inv_anisotropy_stress_(i, j, i, j) = 1;
+       anisotropy_stress_(i, j, i, j) = anisotropy_values_(i);
+       inv_anisotropy_stress_(i, j, i, j) = 1.0/anisotropy_values_(i);
+     }
+
+   }
+   Tensor C_iso = mat2TensorOrtho(tangent_stiffness_iso);
+   Tensor inv_C_iso = mat2TensorOrtho(inverse_tangent_stiffness_iso);
+   Tensor C = mat2TensorOrtho(tangent_stiffness);
+   Tensor inv_C = mat2TensorOrtho(inverse_tangent_stiffness);
+   
+   Tensor aux = innerProduct(anisotropy_stress_, C);
+   anisotropy_strain_ = innerProduct(inv_C_iso, aux);
+
+   aux = innerProduct(inv_anisotropy_stress_, C_iso);
+   inv_anisotropy_strain_ = innerProduct(inv_C, aux);
+
+   aux = innerProduct(inv_anisotropy_stress_, anisotropy_strain_);
+   INFO(3, "ani strain\n"<<tensor2MatOrtho(aux));
+   FLOAT angle = 0;//M_PI/4.0;
+    VEC3 axe(1, 0, 0);
+    MAT3 rot = utils::rotation(angle, axe);
+   // INFO(3, "rot\n"<<rot);
+    //    INFO(3, "ani strain\n"<<innerProduct(anisotropy_strain_, rot));
+  
+ }
+
+  
+  
+} //end namespace mpm_conf

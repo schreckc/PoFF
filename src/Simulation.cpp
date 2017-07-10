@@ -34,40 +34,14 @@ Simulation::~Simulation() {
 void Simulation::init() {
   nb_file_i = 0;
   nb_file_e = 0;
-  //  grid = Grid(mpm_conf::size_grid_(0), mpm_conf::size_grid_(1), mpm_conf::size_grid_(2), mpm_conf::grid_spacing_, Scene::SCENE->getShader(2));
+
   if (!import_) {
     if (load_conf_) {
       mpm_conf::loadConf(conf_file);
     }
-       //grid = Grid(mpm_conf::size_grid_(0), mpm_conf::size_grid_(1), mpm_conf::size_grid_(2), mpm_conf::grid_spacing_, Scene::SCENE->getShader(2));
-    // for(uint i = 0; i < mpm_conf::nb_particules_; ++i) {
-    //   float h = 0.1, w = 0.1, l = 0.1;
-    //   FLOAT volume = h*l*w; 
-    //   VEC3 r(0.35 + w*rand()/RAND_MAX, 0.35 + l*rand()/RAND_MAX, 0.65 + h*rand()/RAND_MAX);
-    //   //  VEC3 r(1.2, 1.3, 1.4);
-    //   Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)mpm_conf::nb_particules_, volume/(FLOAT)mpm_conf::nb_particules_, r);
-    //   //p->setVelocity(VEC3(0.5, 0.5, 0.5));
-    //   //  p->setVelocity(VEC3(1.0*rand()/RAND_MAX -0.5, 1.0*rand()/RAND_MAX-0.5, 1.0*rand()/RAND_MAX-0.5));
-    //   particules.push_back(p);
-    // }
-    // grid.nextStep();
-    // grid.particulesToGrid(particules);
-    // grid.initVolumes(particules);
-
-    // //   PlaneObstacle *ob = new PlaneObstacle(0.1, VEC3(0, 0, 1));
-      
-    // PlaneObstacle *po = new PlaneObstacle(0.1, VEC3(0, 0, 1));
-    // obstacles.push_back(po);
-
-     // SphereObstacle *ob = new SphereObstacle(VEC3(0.5, 0.5, 0.8), 0.25, 0.2, VEC3(0, 0, -1), Scene::SCENE->getShader(2)); 
-     // obstacles.push_back(ob);
-    // ob->setFriction(0);
-
-         
     grid = Grid(mpm_conf::size_grid_(0), mpm_conf::size_grid_(1), mpm_conf::size_grid_(2), mpm_conf::grid_spacing_, 2);
     loadScene();
-    // grid.nextStep();
-    // grid.particulesToGrid(particules);
+
     grid.init(particules);
 
     for (auto & o : obstacles) {

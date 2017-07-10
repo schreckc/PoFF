@@ -2,29 +2,26 @@
 #define PARTICULE_HPP
 
 #include "Object.hpp"
+#include "Tensor.hpp"
 
-#include "mpm_conf.hpp"
-#include "Eigen/Dense"
-#include "Eigen/Core"
-
-struct Tensor {
-  FLOAT dim;
-  std::vector<FLOAT> t;
-  Tensor(FLOAT d = 3): dim(d) {
-    t =  std::vector<FLOAT>(pow(d,4));
-    for (uint i = 0; i < t.size(); ++i) {
-      t[i] = 0;
-    }
-  };
-  FLOAT& operator() (int i, int j, int k, int l) {
-    int ind = pow(dim,3)*i+pow(dim,2)*k+dim*j+l;
-    return t[ind];
-  }
-  const FLOAT& operator()(int i, int j, int k, int l) const {
-    int ind = pow(dim,3)*i+pow(dim, 2)*k+dim*j+l;
-    return t[ind];
-  }
-};
+// struct Tensor {
+//   FLOAT dim;
+//   std::vector<FLOAT> t;
+//   Tensor(FLOAT d = 3): dim(d) {
+//     t =  std::vector<FLOAT>(pow(d,4));
+//     for (uint i = 0; i < t.size(); ++i) {
+//       t[i] = 0;
+//     }
+//   };
+//   FLOAT& operator() (int i, int j, int k, int l) {
+//     int ind = pow(dim,3)*i+pow(dim,2)*k+dim*j+l;
+//     return t[ind];
+//   }
+//   const FLOAT& operator()(int i, int j, int k, int l) const {
+//     int ind = pow(dim,3)*i+pow(dim, 2)*k+dim*j+l;
+//     return t[ind];
+//   }
+// };
 
 class Particule : public Object {
 
@@ -43,6 +40,7 @@ private :
   
   MAT3 F_p; //plastic deformation
   MAT3 F_e; //elastic deformation
+  MAT3 F; //F_e*F_p
 
   MAT3 B;
   FLOAT alpha; //parametrize the yield surface

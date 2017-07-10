@@ -16,6 +16,8 @@
 
 using namespace Eigen;
 
+class Tensor;
+
 namespace mpm_conf {
   //  extern unsigned int nb_particules_;
 
@@ -67,6 +69,15 @@ namespace mpm_conf {
 
   // generalized anis
   extern Eigen::VEC3 anisotropy_values_;
+  extern Tensor anisotropy_stress_;
+  extern Tensor inv_anisotropy_stress_;
+  extern Tensor anisotropy_strain_;
+  extern Tensor inv_anisotropy_strain_;
+
+  extern MATX tangent_stiffness;
+  extern MATX inverse_tangent_stiffness;
+  extern MATX tangent_stiffness_iso;
+  extern MATX inverse_tangent_stiffness_iso;
 
   extern uint method_; //0 apic, 1 pic, 2 flip, 3 0.5*pic+0.95*flip
   extern bool implicit_;
