@@ -430,7 +430,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   }
   MAT3 rotF = rotation.transpose()*(F_e)*rotation;
   MAT3 isoF = /*rotF  + MAT3::Identity();;*/innerProduct(mpm_conf::anisotropy_strain_, rotF) - innerProduct(mpm_conf::anisotropy_strain_,  MAT3::Identity()) + MAT3::Identity();
-
+  //isoF = 0.5*(isoF + isoF.transpose());
   //INFO(3, "iso\n"<<F_e);
   
   JacobiSVD<MATX> svd(isoF, ComputeThinU | ComputeThinV);

@@ -275,7 +275,7 @@ namespace mpm_conf {
 
   for (uint i = 0; i < 3; ++i) {
     for (uint j = 0; j < 3; ++j) {
-      if (fabs(stretch_stiff_iso(i, j)) > 1e-100) {
+      if (fabs(stretch_stiff_iso(i, j)) > 1e-15) {
   	tangent_stiffness_iso(i, j) = stretch_stiff_iso(i, j);
       } else {
   	tangent_stiffness_iso(i, j) = 0;
@@ -295,12 +295,12 @@ namespace mpm_conf {
    inverse_tangent_stiffness(i, i) = 1/young_vec_(i);
    inverse_tangent_stiffness(i+3, i+3) = 1/(2*shearing_vec_(i));
   }
- inverse_tangent_stiffness(0, 1) = -nu12/E2;
- inverse_tangent_stiffness(0, 2) = -nu13/E3;
- inverse_tangent_stiffness(1, 0) = -nu12/E2;
- inverse_tangent_stiffness(1, 2) = -nu23/E3;
- inverse_tangent_stiffness(2, 0) = -nu13/E3;
- inverse_tangent_stiffness(2, 1) = -nu23/E3;
+ inverse_tangent_stiffness(0, 1) = -nu12/E1;
+ inverse_tangent_stiffness(0, 2) = -nu13/E1;
+ inverse_tangent_stiffness(1, 0) = -nu12/E1;
+ inverse_tangent_stiffness(1, 2) = -nu23/E2;
+ inverse_tangent_stiffness(2, 0) = -nu13/E1;
+ inverse_tangent_stiffness(2, 1) = -nu23/E2;
  
  MAT3 inv_stretch_stiff;
  inv_stretch_stiff << 1/E1, -nu12/E1, -nu13/E1,
@@ -310,7 +310,7 @@ namespace mpm_conf {
   
   for (uint i = 0; i < 3; ++i) {
     for (uint j = 0; j < 3; ++j) {
-      if (fabs(stretch_stiff(i, j)) > 1e-100) {
+      if (fabs(stretch_stiff(i, j)) > 1e-15) {
   	tangent_stiffness(i, j) = stretch_stiff(i, j);
       } else {
   	tangent_stiffness(i, j) = 0;
@@ -327,11 +327,16 @@ namespace mpm_conf {
    // map from anisotropic to isotropc space
    for (uint i = 0; i < 3; ++i) {
      for (uint j = 0; j < 3; ++j) {
-       // anisotropy_stress_(i, j, i, j) = 1;
-       // inv_anisotropy_stress_(i, j, i, j) = 1;
-       anisotropy_stress_(i, j, i, j) = anisotropy_values_(i);
-       inv_anisotropy_stress_(i, j, i, j) = 1.0/anisotropy_values_(i);
-     }
+     //   anisotropy_stress_(i, j, i, j) = anisotropy_values_(i);
+     //   inv_anisotropy_stress_(i, j, i, j) = 1.0/anisotropy_values_(i);
+     // }
+        anisotropy_stress_(i, j, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
+        anisotropy_stress_(i, j, j, i) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
+	inv_anisotropy_stress_(i, j, i, j) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
+	inv_anisotropy_stress_(j, i, i, j) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
+      }
+      anisotropy_stress_(i, i, i, i) = anisotropy_values_(i)*anisotropy_values_(i);
+      inv_anisotropy_stress_(i, i, i, i) = 1.0/anisotropy_values_(i)/anisotropy_values_(i);
 
    }
    Tensor C_iso = mat2TensorOrtho(tangent_stiffness_iso);
@@ -341,18 +346,61 @@ namespace mpm_conf {
    
    Tensor aux = innerProduct(anisotropy_stress_, C);
    anisotropy_strain_ = innerProduct(inv_C_iso, aux);
+   // INFO(3, "I"<< Tensor());
+   // INFO(3, "C"<< C);
+   // INFO(3, "A:C"<< aux);
 
+   // INFO(3, "inv_C:C\n"<< tensor2MatOrtho(innerProduct(inv_C, C)));
+   
+   
    aux = innerProduct(inv_anisotropy_stress_, C_iso);
    inv_anisotropy_strain_ = innerProduct(inv_C, aux);
 
-   aux = innerProduct(inv_anisotropy_stress_, anisotropy_strain_);
-   INFO(3, "ani strain\n"<<tensor2MatOrtho(aux));
-   FLOAT angle = 0;//M_PI/4.0;
-    VEC3 axe(1, 0, 0);
-    MAT3 rot = utils::rotation(angle, axe);
-   // INFO(3, "rot\n"<<rot);
-    //    INFO(3, "ani strain\n"<<innerProduct(anisotropy_strain_, rot));
-  
+   //   aux = innerProduct(inv_anisotropy_stress_, anisotropy_stress_);
+   //aux = innerProduct(aux, aux);
+   //    MATX test(6, 6);
+    // test << 1, 2, 3, 4, 5, 6,
+    //   2, 7, 8, 9, 10, 11,
+    //   3, 8, 12, 13, 14, 15,
+    //   4, 9, 13, 16, 17, 18,
+    //   5, 10, 14, 17, 19, 20,
+    //   6, 11, 15, 18, 20, 21;
+    // test << 1, 2, 3, 0, 0, 0,
+    //   2, 7, 8, 0, 0, 0,
+    //   3, 8, 12, 0, 0, 0,
+    //   0, 0, 0, 16, 0, 0,
+    //   0, 0, 0, 0, 19, 0,
+    //   0, 0, 0, 0, 0, 21;
+    //  Tensor test_tensor = mat2TensorOrtho(test);
+     // INFO(3, "test tensor\n"<<test_tensor);
+     // INFO(3, "test\n"<<tensor2MatOrtho(test_tensor));
+     // INFO(3, "test tensor\n"<<tensor2MatOrtho(innerProduct(test_tensor, test_tensor)));
+     // INFO(3, "test test\n"<<test*test);
+
+   //     INFO(3, "aux"<<aux);
+   
+     //     INFO(3, "ani strain\n"<<tensor2MatOrtho(anisotropy_strain_));
+   //      INFO(3, "ani strain\n"<<inverse_tangent_stiffness*tangent_stiffness_iso);
+   //   INFO(3, "ani strain\n"<<tensor2Mat(anisotropy_stress_));
+   // FLOAT angle = 0;//M_PI/2.0;
+   // VEC3 axe(1, 0, 0);
+   // MAT3 rot = utils::rotation(angle, axe);
+   //   rot << 1, 2, 3,
+   //     2, 5, 6,
+   //     3, 6, 9;
+     // rot << 1, 2, 3,
+     //   4, 5, 6,
+     //   7, 8, 9;
+      // INFO(3, "rot\n"<<rot);
+     // INFO(3, "rotation ani strain\n"<<innerProduct(aux, rot));
+     // INFO(3, "tang stiff iso\n"<< inverse_tangent_stiffness_iso);
+   INFO(3, "tang stiff\n"<< tangent_stiffness);
+     //  INFO(3, "inv_tan * tang stiff\n"<< inverse_tangent_stiffness*tangent_stiffness);
+     
+     //   INFO(3, "inv tang stiff\n"<< inverse_tangent_stiffness);
+
+     INFO(2, "stress anisotropy map"<< anisotropy_stress_);
+     INFO(2, "strain anisotropy map"<< anisotropy_strain_); 
  }
 
   
