@@ -10,7 +10,9 @@ BallObstacle::BallObstacle(VEC3 p, FLOAT r, int shader) : Obstacle(shader){
 BallObstacle::~BallObstacle() {
 }
 
-void BallObstacle::animate() {
+void BallObstacle::apply(Motion m) {
+  pos += m.translation;
+  ray *= m.scale;
   //  ray -= 0.0005;
   //  INFO(3, "ray "<<ray);
 }

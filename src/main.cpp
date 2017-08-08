@@ -23,41 +23,41 @@ void help() {
 int main(int argc, char **argv) {
 	
   //  Scene scene("test", 2400, 1800);
-  if(Scene::SCENE->initialiserFenetre() == false)
-    return -1;  
-  Scene::SCENE->init();
+   if(Scene::SCENE->initialiserFenetre() == false)
+     return -1;  
+    Scene::SCENE->init();
 
   for (int i = 1;  i < argc; ++i) {
     std::string s(argv[i]);
     //    INFO(3, s);
     if (s == "-l" || s == "-load") {
       if (argc < i + 2) {
-	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
-	help();
+  	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+  	help();
       }
       std::cout<<"Loading configuration file:"<<" "<<argv[i+1]<<std::endl;
       Scene::SCENE->setLoad(argv[i+1]);
       ++i;
     } else if (s == "-i" || s == "-import") {
       if (argc < i + 2) {
-	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
-	help();
+  	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+  	help();
       }
       std::cout<<"Importing"<<" "<<argv[i+1]<<std::endl;
       Scene::SCENE->setImport(argv[i+1]);
       ++i;
     } else if (s == "-e") {
       if (argc < i + 2) {
-	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
-	help();
+  	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+  	help();
       }
       std::cout<<"Exporting"<<" "<<argv[i+1]<<std::endl;
       Scene::SCENE->setExport(argv[i+1]);
       ++i;
     } else if (s == "-s" || s == "-scene") {
       if (argc < i + 2) {
-	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
-	help();
+  	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+  	help();
       }
       std::cout<<"Loading scene"<<" "<<argv[i+1]<<std::endl;
       Scene::SCENE->setScene(argv[i+1]);
@@ -66,16 +66,16 @@ int main(int argc, char **argv) {
       Scene::SCENE->setRun(true);
     } else if (s == "-stop") {
       if (argc < i + 2) {
-	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
-	help();
+  	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+  	help();
       }
       std::cout<<"Stop at t = "<<argv[i+1]<<std::endl;
       Scene::SCENE->setStop(atoi(argv[i+1]));
       ++i;
     } else if (s == "-export_step" || s == "-es") {
       if (argc < i + 2) {
-	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
-	help();
+  	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+  	help();
       }
       std::cout<<"Export every "<<argv[i+1]<<" steps"<<std::endl;
       mpm_conf::export_step_ = atoi(argv[i+1]);

@@ -316,10 +316,61 @@ void Simulation::loadScene() {
     while (getline(file, line)) {
       
       if (line.substr(0,11) == "<obstacles>") {
-	getline(file, line);	
+	getline(file, line);
+	std::list<Motion> motions;
 	while (line.substr(0,12) != "</obstacles>") {
 	  // INFO(3, "Obsctacle "<<line);
-	  if (line.substr(0,9) == " <sphere>") {
+	  if (line.substr(0,9) == " <motion>") {
+	    getline(file, line);
+	    Motion m;
+	    while (line.substr(0,10) != " </motion>") {
+	      if (line.substr(0,9) == "  <begin>") {
+		std::istringstream s(line.substr(9));
+		s >> m.begin_time;
+	      } else if (line.substr(0,7) == "  <end>") {
+		std::istringstream s(line.substr(7));
+		s >> m.end_time;
+	      } else if (line.substr(0,9) == "  <scale>") {
+		std::istringstream s(line.substr(9));
+		s >> m.scale;
+		m.scale *= mpm_conf::dt_;
+	      } else if (line.substr(0,15) == "  <translation>") {
+		std::istringstream s(line.substr(15));
+		for (uint i = 0; i < 3; ++i) {
+		  s >> m.translation(i);
+		}
+		m.translation *= mpm_conf::dt_;
+	      } else if (line.substr(0,12) == "  <rotation>") {
+		 getline(file, line);
+		 MAT3 rotation = MAT3::Identity();
+		 FLOAT angle = 0;
+		 VEC3 axe;
+		 while (line.substr(0,13) != "  </rotation>") {
+		   if (line.substr(0,8) == "   <axe>") {
+		     std::istringstream s(line.substr(8));
+		     for (uint i = 0; i < 3; ++i) {
+		       s >> axe(i);
+		     }
+		     INFO(3, "AXE \n"<<axe);
+		   } else  if (line.substr(0,10) == "   <angle>") {
+		     std::istringstream s(line.substr(10));
+		     s >> angle;
+		   } else {
+		     std::cerr<<"Line not recognized in file \""<<scene_path<<"\": "<<line<<std::endl;
+		     exit(-1);
+		   }
+		   getline(file, line);
+		 }
+		 rotation = utils::rotation(angle*mpm_conf::dt_, axe);
+		 m.rotation = rotation;
+	      } else {
+		std::cerr<<"Line not recognized in file \""<<scene_path<<"\": "<<line<<std::endl;
+		exit(-1);
+	      }
+	      getline(file, line);
+	    }
+	    motions.push_back(m);
+	  } else if (line.substr(0,9) == " <sphere>") {
 	     VEC3 center(0, 0, 0);
 	      FLOAT ray = 0;
 	      FLOAT hr = 0.0;
@@ -356,6 +407,7 @@ void Simulation::loadScene() {
 	    SphereObstacle *o = new SphereObstacle(center, ray, hr, hn);
 	    obstacles.push_back(o);
 	    o->setFriction(fric);
+	    o->setMotions(motions);
 	    //INFO(3, "obstacles = "<<center<<"\n"<<ray);
 	    // end sphere
 	    
@@ -387,18 +439,25 @@ void Simulation::loadScene() {
 	    BoxObstacle *o = new BoxObstacle(min, max);
 	    obstacles.push_back(o);
 	    o->setFriction(fric);
+	    o->setMotions(motions);
 	    //INFO(3, "obstacles = "<<min<<"\n"<<max);
 	  // end box
 
 	  }  else if (line.substr(0,8) == " <plane>") {
-	    FLOAT pos = 0;
+	    VEC3 pos(0, 0, 0);
 	    VEC3 n(0, 0, 0);
+	    FLOAT l = 0, w = 0;
 	    FLOAT fric = mpm_conf::friction_coef_;
 	    getline(file, line);
 	    while (line.substr(0,9) != " </plane>") {
 	      if (line.substr(0,7) == "  <pos>") {
 		std::istringstream s(line.substr(7));
-		s >> pos;
+		s >> pos(2);
+	      } else if (line.substr(0,12) == "  <position>") {
+		std::istringstream s(line.substr(12));
+		for (uint i = 0; i < 3; ++i) {
+		  s >> pos(i);
+		}
 	      } else if (line.substr(0,10) == "  <normal>") {
 		std::istringstream s(line.substr(10));
 		for (uint i = 0; i < 3; ++i) {
@@ -407,15 +466,22 @@ void Simulation::loadScene() {
 	      } else if (line.substr(0,12) == "  <friction>") {
 		std::istringstream s(line.substr(12));
 		s >> fric;
+	      } else if (line.substr(0,10) == "  <length>") {
+		std::istringstream s(line.substr(10));
+		s >> l;
+	      } else if (line.substr(0,9) == "  <width>") {
+		std::istringstream s(line.substr(9));
+		s >> w;
 	      } else {
 		std::cerr<<"Line not recognized in file \""<<scene_path<<"\": "<<line<<std::endl;
 		exit(-1);
 	      }
 	      getline(file, line);
 	    }
-	    PlaneObstacle *o = new PlaneObstacle(pos, n);
+	    PlaneObstacle *o = new PlaneObstacle(pos, n, l, w);
 	    obstacles.push_back(o);
 	    o->setFriction(fric);
+	    o->setMotions(motions);
 	    //INFO(3, "obstacles = "<<pos<<"\n"<<n);
 	    // end plane
 	  } else if (line.substr(0,11) == " <cylinder>") {
@@ -450,6 +516,7 @@ void Simulation::loadScene() {
 	    CylinderObstacle *o = new CylinderObstacle(pos, dir, r, 0);
 	    obstacles.push_back(o);
 	    o->setFriction(fric);
+	    o->setMotions(motions);
 	    //INFO(3, "obstacles = "<<pos<<"\n"<<n);
 	    // end cylinder
 	  } else if (line.substr(0,7) == " <ball>") {
@@ -478,6 +545,7 @@ void Simulation::loadScene() {
 	    BallObstacle *o = new BallObstacle(pos, r, 0);
 	    obstacles.push_back(o);
 	    o->setFriction(fric);
+	    o->setMotions(motions);
 	    //INFO(3, "obstacles = "<<pos<<"\n"<<n);
 	    // end cylinder
 	  } else {

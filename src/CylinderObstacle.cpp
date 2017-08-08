@@ -16,9 +16,16 @@ CylinderObstacle::CylinderObstacle(VEC3 p, VEC3 d, FLOAT r, int shader) : Obstac
 CylinderObstacle::~CylinderObstacle() {
 }
 
-void CylinderObstacle::animate() {
-  //  ray -= 0.0005;
-  //  INFO(3, "ray "<<ray);
+// void CylinderObstacle::animate() {
+//   //  ray -= 0.0005;
+//   //  INFO(3, "ray "<<ray);
+// }
+
+void CylinderObstacle::apply(Motion m) {
+  pos += m.translation;
+  dir = m.rotation*dir;
+  ray *= m.scale;
+
 }
 
 #ifndef NO_GRAPHICS_ 

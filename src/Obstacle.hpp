@@ -2,16 +2,31 @@
 #define OBSTACLE_HPP
 
 #include "Particule.hpp"
+#include <list>
+
+struct Motion {
+  VEC3 translation;
+  FLOAT scale;
+  MAT3 rotation;
+  FLOAT begin_time, end_time;
+  Motion(VEC3 trans = VEC3(0, 0, 0), FLOAT sc = 1, MAT3 rot = MAT3::Identity()) :
+    translation(trans), scale(sc), rotation(rot), begin_time(0), end_time(0) {}
+  Motion(MAT3 rot) : translation(VEC3(0, 0, 0)), scale(1), rotation(rot), begin_time(0), end_time(0) {}
+  bool isRunning(FLOAT time) {return time >= begin_time && (end_time == 0 || time < end_time);}
+};    
+
 
 class Obstacle : public Object {
 
 private :
   FLOAT friction;
+  std::list<Motion> motions;
   
 public :
   Obstacle(int shader = -1);
-  virtual void animate() = 0;
-
+  void animate();
+  virtual void apply(Motion m) = 0;
+  
 #ifndef NO_GRAPHICS_ 
   virtual void draw(glm::mat4 m = glm::mat4(1.0f), int s = -1) = 0;
 #endif
@@ -22,6 +37,9 @@ public :
 
   FLOAT getFriction() const;
   void setFriction(FLOAT f);
+
+  void setMotions(std::list<Motion> lm);
+  void addMotion(Motion m);
 };
 
 #endif

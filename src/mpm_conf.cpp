@@ -393,7 +393,7 @@ namespace mpm_conf {
      //   7, 8, 9;
       // INFO(3, "rot\n"<<rot);
      // INFO(3, "rotation ani strain\n"<<innerProduct(aux, rot));
-     // INFO(3, "tang stiff iso\n"<< inverse_tangent_stiffness_iso);
+   INFO(3, "tang stiff iso\n"<< tangent_stiffness_iso);
    INFO(3, "tang stiff\n"<< tangent_stiffness);
      //  INFO(3, "inv_tan * tang stiff\n"<< inverse_tangent_stiffness*tangent_stiffness);
      

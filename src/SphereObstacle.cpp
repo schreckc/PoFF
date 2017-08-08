@@ -13,9 +13,15 @@ SphereObstacle::SphereObstacle(VEC3 p, FLOAT r, FLOAT ha, VEC3 hn, int shader) :
 SphereObstacle::~SphereObstacle() {
 }
 
-void SphereObstacle::animate() {
-  //  ray -= 0.0005;
-  //  INFO(3, "ray "<<ray);
+// void SphereObstacle::animate() {
+//   //  ray -= 0.0005;
+//   //  INFO(3, "ray "<<ray);
+// }
+
+void SphereObstacle::apply(Motion m) {
+  pos += m.translation;
+  ray *= m.scale;
+  hole_normal = m.rotation*hole_normal;
 }
 
 #ifndef NO_GRAPHICS_ 

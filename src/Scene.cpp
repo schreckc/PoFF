@@ -74,24 +74,24 @@ bool Scene::initialiserFenetre() {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     std::cout<<"init buffer"<< std::endl;
     
-    // Création de la fenêtre
-    m_fenetre = SDL_CreateWindow(m_titreFenetre.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_largeurFenetre, m_hauteurFenetre, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
-    m_renderer = SDL_CreateRenderer( m_fenetre, -1, SDL_RENDERER_ACCELERATED);
+     // Création de la fenêtre
+     m_fenetre = SDL_CreateWindow(m_titreFenetre.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_largeurFenetre, m_hauteurFenetre, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL);
+     m_renderer = SDL_CreateRenderer( m_fenetre, -1, SDL_RENDERER_ACCELERATED);
 
-    if (m_fenetre == 0) {
-        std::cout << "Erreur lors de la creation de la fenetre : " << SDL_GetError() << std::endl;
-        SDL_Quit();
-        return false;
-    }
+     if (m_fenetre == 0) {
+         std::cout << "Erreur lors de la creation de la fenetre : " << SDL_GetError() << std::endl;
+         SDL_Quit();
+         return false;
+     }
 
-    // Création du contexte OpenGL
-    m_contexteOpenGL = SDL_GL_CreateContext(m_fenetre);
-    if (m_contexteOpenGL == 0) {
-        std::cout << SDL_GetError() << std::endl;
-        SDL_DestroyWindow(m_fenetre);
-        SDL_Quit();
-        return false;
-    }
+     // Création du contexte OpenGL
+     m_contexteOpenGL = SDL_GL_CreateContext(m_fenetre);
+     if (m_contexteOpenGL == 0) {
+         std::cout << SDL_GetError() << std::endl;
+         SDL_DestroyWindow(m_fenetre);
+         SDL_Quit();
+         return false;
+     }
     return true;
 }
 
@@ -397,6 +397,10 @@ void Scene::setRun(bool run) {
 
 void Scene::setStop(uint t_end) {
   stop = t_end;
+}
+
+FLOAT Scene::getTime() {
+  return t*mpm_conf::dt_;
 }
 
 bool saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_Renderer* SDLRenderer) {

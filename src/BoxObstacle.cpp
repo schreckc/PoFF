@@ -7,7 +7,18 @@ BoxObstacle::BoxObstacle(VEC3 min_p, VEC3 max_p, int shader) : Obstacle(shader),
 
 BoxObstacle::~BoxObstacle() {}
 
-void BoxObstacle::animate() {}
+//void BoxObstacle::animate() {}
+void BoxObstacle::apply(Motion m) {
+  min_pos += m.translation;
+  max_pos += m.translation;
+
+  VEC3 half = 0.5*(max_pos - min_pos);
+  VEC3 middle = min_pos + 0.5*half;
+  half *= m.scale;
+  min_pos = middle - half;
+  max_pos = middle + half;
+}
+  
 #ifndef NO_GRAPHICS_ 
 void BoxObstacle::draw(glm::mat4 m, int s) {
   

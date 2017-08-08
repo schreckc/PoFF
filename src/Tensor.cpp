@@ -188,3 +188,33 @@ std::ostream& operator<<(std::ostream& os, const Tensor& T) {
   }
   return os;
 }
+
+
+Tensor rotateTensor(const Tensor & T, const MAT3 & R) {
+  uint d = T.dim;
+  Tensor rotT(d);
+  for (uint i = 0; i < d; ++i) {
+    for (uint j = 0; j < d; ++j) {
+      for (uint k = 0; k < d; ++k) {
+	for (uint l = 0; l < d; ++l) {
+	  FLOAT rotT_ijkl = 0;
+	  for (uint m = 0; m < d; ++m) {
+	    for (uint n = 0; n < d; ++n) {
+	      for (uint o = 0; o < d; ++o) {
+		for (uint p = 0; p < d; ++p) {
+		  rotT_ijkl += R(i, m)*R(j, n)*R(k, o)*R(l, p)*T(m, n, o, p);
+		}
+	      }
+	    }
+	  }
+	  if (std::fabs(rotT_ijkl) > 10e-12) {
+	    rotT(i, j, k, l) = rotT_ijkl;
+	  } else {
+	    rotT(i, j, k, l) = 0;
+	  }
+	}
+      }
+    }
+  }
+  return rotT;
+}

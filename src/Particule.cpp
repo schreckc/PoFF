@@ -231,7 +231,7 @@ FLOAT Particule::getMass() const {
 }
 
 FLOAT Particule::getVolume() const {
-  return v;
+  return v0;
 }
 
 const MAT3 & Particule::getB() const {
@@ -419,19 +419,31 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   IS_DEF(pos(0));
   IS_DEF(pos(1));
   IS_DEF(pos(2));
+  // INFO(3, "vel prev\n"<<vel);
+  // INFO(3, "vel new\n"<<v);
   vel = v;
    FLOAT h = mpm_conf::grid_spacing_;
   cell = Vector3i((int)(pos(0)/h), (int)(pos(1)/h), (int)(pos(2)/h));
   B = b;
   F_e *= (MAT3::Identity() + mpm_conf::dt_*t);
 
+  
   if (std::isnan(F_e(0, 0)) || std::isinf(F_e(0,0))) {
     F_e = MAT3::Identity();
   }
   MAT3 rotF = rotation.transpose()*(F_e)*rotation;
-  MAT3 isoF = /*rotF  + MAT3::Identity();;*/innerProduct(mpm_conf::anisotropy_strain_, rotF) - innerProduct(mpm_conf::anisotropy_strain_,  MAT3::Identity()) + MAT3::Identity();
-  //isoF = 0.5*(isoF + isoF.transpose());
-  //INFO(3, "iso\n"<<F_e);
+  MAT3 rotFx = 0.5*(rotF + rotF.transpose());
+  MAT3 skewF = 0.5*(rotF - rotF.transpose());
+  MAT3 isoF = /*rotF  + MAT3::Identity();;*/innerProduct(mpm_conf::anisotropy_strain_, rotFx) - innerProduct(mpm_conf::anisotropy_strain_,  MAT3::Identity()) + MAT3::Identity();
+  //  isoF = 0.5*(isoF + isoF.transpose());
+
+  // MAT3 isoF2 = innerProduct(mpm_conf::anisotropy_strain_, rotF) - innerProduct(mpm_conf::anisotropy_strain_,  MAT3::Identity()) + MAT3::Identity();
+  // isoF2 = 0.5*(isoF2 + isoF2.transpose());
+  // if ((isoF - isoF2).maxCoeff() > 1e-15 ||(isoF - isoF2).minCoeff() < -1e-15 ) {
+  //   INFO(3, "iso\n"<<isoF - isoF2);
+  // }
+  //  INFO(3, "iso 2\n"<<isoF2);
+  // TEST(isoF == isoF2);
   
   JacobiSVD<MATX> svd(isoF, ComputeThinU | ComputeThinV);
   MAT3 U = svd.matrixU();
@@ -479,7 +491,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     MAT3 anisF = /*isoF +  MAT3::Identity();*/innerProduct(mpm_conf::inv_anisotropy_strain_, isoF) +  MAT3::Identity();
     // INFO(3, "isoF\n"<<isoF  +  MAT3::Identity());
     // INFO(3, "anisoF\n"<<anisF);
-    F_e = rotation*anisF*rotation.transpose();
+    F_e = rotation*(anisF + skewF)*rotation.transpose();
     F_p = F_e.inverse()*F;//rotation*V*inv_T*sigma_m*V.transpose()* rotation.transpose()*F_p;
     F = F_e*F_p;
 
@@ -510,7 +522,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     //forceIncrement = v0*rotation*U*der*V.transpose()*rotation.transpose()*F_e.transpose();
     forceIncrement = v0*rotation*anis_sigma*rotation.transpose();
   } else {
-    forceIncrement = v0*linearElasticity();
+    forceIncrement = v0*F_e.determinant()*linearElasticity();
   }
   if (std::isnan(forceIncrement(0, 0)) || std::isinf(forceIncrement(0, 0))) {
     forceIncrement = MAT3::Zero();
@@ -576,9 +588,9 @@ MAT3 Particule::linearElasticity() {
 
   MAT3 rotFx = rotation.transpose()*(F_e)*rotation;
   //MAT3 rotF = 0.5*(isoF + isoF.transpose());
-  //  MAT3 rotF = 0.5*(rotFx + rotFx.transpose());
-  MAT3 isoF = innerProduct(mpm_conf::anisotropy_strain_, rotFx) - innerProduct(mpm_conf::anisotropy_strain_,  MAT3::Identity());
-  MAT3 rotF = 0.5*(isoF + isoF.transpose());
+  MAT3 rotF = 0.5*(rotFx + rotFx.transpose());
+  MAT3 isoF = innerProduct(mpm_conf::anisotropy_strain_, rotF) - innerProduct(mpm_conf::anisotropy_strain_,  MAT3::Identity());
+  rotF = isoF;//0.5*(isoF + isoF.transpose());
   
   //INFO(3, "\nrot F\n"<<rotF<<"\n\n"<<isoF);
   VECX strain(6);
@@ -610,13 +622,13 @@ MAT3 Particule::linearElasticity() {
   //   sigma = sigma*rotF.transpose();
   // INFO(3, "\nsigma\n"<<sigma);
   // INFO(3, "\nsigma rotated back\n"<<rotation.transpose()*sigma*rotation);
-  Tensor inv_anisotropy_stress;
-  for (uint i = 0; i < 3; ++i) {
-    for (uint j = 0; j < 3; ++j) {
-      inv_anisotropy_stress(i, j, i, j) = 1.0/mpm_conf::anisotropy_values_(i);
-    }
-  }
-  MAT3 anis_sigma = innerProduct(inv_anisotropy_stress, sigma);
+  // Tensor inv_anisotropy_stress;
+  // for (uint i = 0; i < 3; ++i) {
+  //   for (uint j = 0; j < 3; ++j) {
+  //     inv_anisotropy_stress(i, j, i, j) = 1.0/mpm_conf::anisotropy_values_(i);
+  //   }
+  // }
+  MAT3 anis_sigma = innerProduct(mpm_conf::inv_anisotropy_stress_, sigma);
   return rotation*anis_sigma*rotation.transpose();
 }
 
@@ -952,52 +964,56 @@ void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 V) {
 // }
 
 void Particule::computeEnergySecondDer(VEC3 sigma, MAT3 U, MAT3 V) {
-  Tensor aux(3);
+  // Tensor aux(3);
  
-  for (uint i = 0; i < 3; ++i) {
-    for (uint j = 0; j < 3; ++j) {
-      aux(i, i, j, j) = energySecondDer(sigma, i, j);
-      if (i != j) {
-	FLOAT dij = (energy_der(i) - energy_der(j))/(sigma(i) - sigma(j));
-	FLOAT sij = (energy_der(i) + energy_der(j))/(sigma(i) + sigma(j));
-	if (sigma(i) == sigma(j)) {
-	  dij = 1;
-	}
-	IS_DEF(dij);
-	IS_DEF(sij);
-	aux(i, j, i, j) = 0.5*(dij + sij);
-	aux(i, j, j, i) = 0.5*(dij - sij);
-      }
-    }
-  }
+  // for (uint i = 0; i < 3; ++i) {
+  //   for (uint j = 0; j < 3; ++j) {
+  //     aux(i, i, j, j) = energySecondDer(sigma, i, j);
+  //     if (i != j) {
+  // 	FLOAT dij = (energy_der(i) - energy_der(j))/(sigma(i) - sigma(j));
+  // 	FLOAT sij = (energy_der(i) + energy_der(j))/(sigma(i) + sigma(j));
+  // 	if (sigma(i) == sigma(j)) {
+  // 	  dij = 1;
+  // 	}
+  // 	IS_DEF(dij);
+  // 	IS_DEF(sij);
+  // 	aux(i, j, i, j) = 0.5*(dij + sij);
+  // 	aux(i, j, j, i) = 0.5*(dij - sij);
+  //     }
+  //   }
+  // }
 
-   for (uint i = 0; i < 3; ++i) {
-    for (uint j = 0; j < 3; ++j) {
-      for (uint k = 0; k < 3; ++k) {
-	 for (uint l = 0; l < 3; ++l) {
-	   energy_second_der(i, j, k, l) = 0;
+  //  for (uint i = 0; i < 3; ++i) {
+  //   for (uint j = 0; j < 3; ++j) {
+  //     for (uint k = 0; k < 3; ++k) {
+  // 	 for (uint l = 0; l < 3; ++l) {
+  // 	   energy_second_der(i, j, k, l) = 0;
 	   
-	   for (uint r = 0; r < 3; ++r) {
-	     for (uint s = 0; s < 3; ++s) {
-	       for (uint u = 0; u < 3; ++u) {
-		 for (uint v = 0; v < 3; ++v) {
-		   energy_second_der(i, j, k, l) += v0*aux(r, s, u, v)*U(i, r)*V(j, s)*U(k, u)*V(l, v);
-		   IS_DEF(aux(r, s, u, v));
-		   //  INFO(3, energy_second_der(i, j, k, l));
-		 }
-	       }
-	     }
-	   }
-	   IS_DEF(energy_second_der(i, j, k, l));
+  // 	   for (uint r = 0; r < 3; ++r) {
+  // 	     for (uint s = 0; s < 3; ++s) {
+  // 	       for (uint u = 0; u < 3; ++u) {
+  // 		 for (uint v = 0; v < 3; ++v) {
+  // 		   energy_second_der(i, j, k, l) += v0*aux(r, s, u, v)*U(i, r)*V(j, s)*U(k, u)*V(l, v);
+  // 		   IS_DEF(aux(r, s, u, v));
+  // 		   //  INFO(3, energy_second_der(i, j, k, l));
+  // 		 }
+  // 	       }
+  // 	     }
+  // 	   }
+  // 	   IS_DEF(energy_second_der(i, j, k, l));
 
-	 }
-      }
-    }
-   }
+  // 	 }
+  //     }
+  //   }
+  //  }
+  Tensor C = mat2TensorOrtho(mpm_conf::tangent_stiffness);
+  energy_second_der = rotateTensor(C, rotation);
+  //  INFO(3, "energy second der "<<energy_second_der);
 }
 
 // d Y_ii / d sigma_jj with Y = engergy derivarive 
 FLOAT Particule::energySecondDer(VEC3 sigma, uint i, uint j) {
+  TEST(false);
   FLOAT d = 0;
   // TEST(sigma(i) > 0);
   //TEST(sigma(2) > 0);

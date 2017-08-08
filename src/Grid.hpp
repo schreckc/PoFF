@@ -67,7 +67,7 @@ public :
   void initCollision(Obstacle *ob);
   void collision(Obstacle *ob);
     
-  MAT3 secondDer(uint i, uint j);
+  MAT3 secondDer(uint i, uint j, std::vector<Particule*> & particules);
 
 };
 

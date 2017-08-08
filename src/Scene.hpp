@@ -56,6 +56,7 @@ public:
   void setRun(bool run);
   void setStop(uint t_end);
 
+  FLOAT getTime();
     bool running;
 private:
   uint step_by_step;

@@ -27,6 +27,8 @@ public:
   friend Tensor innerProduct(const Tensor & A, const Tensor & B);
 
   friend std::ostream& operator<<(std::ostream& os, const Tensor& T);
+
+  friend Tensor rotateTensor(const Tensor & T, const MAT3 & R);
 };
 
 MATX tensor2Mat(const Tensor & T);
@@ -43,5 +45,6 @@ MAT3 vec2Mat(const VECX & v);
 
 std::ostream& operator<<(std::ostream& os, const Tensor& T);
 
+Tensor rotateTensor(const Tensor & T, const MAT3 & R);
 #endif
   
