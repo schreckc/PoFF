@@ -16,6 +16,8 @@ Particule::Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n, VEC3 velo, int shade
   FLOAT h = mpm_conf::grid_spacing_;
   cell = Vector3i((int)(p(0)/h), (int)(p(1)/h), (int)(p(2)/h));
 
+    F_e *= 0.9;
+  
   //  INFO(3, velo);//((int)(p(0)/Grid::spacing))<<", "<< ((int)(p(1)/Grid::spacing))<<", "<< ((int)(p(2)/Grid::spacing)));
   // m_model_view = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)));
   B = MAT3::Zero();
@@ -416,9 +418,16 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   } else {
     pos += mpm_conf::dt_*v;
   }
+
   IS_DEF(pos(0));
   IS_DEF(pos(1));
   IS_DEF(pos(2));
+
+   // /***** TEST ****/
+   // rotation = MAT3::Identity();
+
+   INFO(3, F_e);
+  
   // INFO(3, "vel prev\n"<<vel);
   // INFO(3, "vel new\n"<<v);
   vel = v;
@@ -509,7 +518,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     IS_DEF(rotation(0,0));
     IS_DEF(T(0));
     IS_DEF(F_e(0, 0));
-  } else { //plastic
+  } else { // no plastic
     computeEnergyDerivative(sigma);
     MAT3 der = MAT3::Zero();
     for (uint i = 0; i < 3; ++i) {
@@ -585,7 +594,6 @@ void Particule::computeEnergyDerivative(VEC3 sigma) {
 }
 
 MAT3 Particule::linearElasticity() {
-
   MAT3 rotFx = rotation.transpose()*(F_e)*rotation;
   //MAT3 rotF = 0.5*(isoF + isoF.transpose());
   MAT3 rotF = 0.5*(rotFx + rotFx.transpose());
@@ -1007,7 +1015,7 @@ void Particule::computeEnergySecondDer(VEC3 sigma, MAT3 U, MAT3 V) {
   //   }
   //  }
   Tensor C = mat2TensorOrtho(mpm_conf::tangent_stiffness);
-  energy_second_der = rotateTensor(C, rotation);
+   energy_second_der = rotateTensor(C, rotation);
   //  INFO(3, "energy second der "<<energy_second_der);
 }
 

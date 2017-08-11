@@ -182,13 +182,13 @@ void Scene::init() {
 void Scene::animate() {
   m_camera.lookAt(m_view);
   m_vp = m_projection * m_view;
-  
+
   if (running || step_by_step > 0) {
-    ++t;
-  std::list<Object*>::iterator it;
-  for (it = l_objects.begin(); it != l_objects.end(); ++it) {
-    (*it)->animate();
-  }
+    t += mpm_conf::replay_speed_;
+    std::list<Object*>::iterator it;
+    for (it = l_objects.begin(); it != l_objects.end(); ++it) {
+      (*it)->animate();
+    }
   }
   if (step_by_step > 0) {
     --step_by_step;

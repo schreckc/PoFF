@@ -8,10 +8,12 @@ struct Motion {
   VEC3 translation;
   FLOAT scale;
   MAT3 rotation;
+  VEC3 center;
+  float rotation_center_def;
   FLOAT begin_time, end_time;
   Motion(VEC3 trans = VEC3(0, 0, 0), FLOAT sc = 1, MAT3 rot = MAT3::Identity()) :
-    translation(trans), scale(sc), rotation(rot), begin_time(0), end_time(0) {}
-  Motion(MAT3 rot) : translation(VEC3(0, 0, 0)), scale(1), rotation(rot), begin_time(0), end_time(0) {}
+    translation(trans), scale(sc), rotation(rot), begin_time(0), end_time(0), rotation_center_def(false) {}
+  Motion(MAT3 rot) : translation(VEC3(0, 0, 0)), scale(1), rotation(rot), begin_time(0), end_time(0), rotation_center_def(false) {}
   bool isRunning(FLOAT time) {return time >= begin_time && (end_time == 0 || time < end_time);}
 };    
 

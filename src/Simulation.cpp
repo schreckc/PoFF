@@ -35,10 +35,12 @@ void Simulation::init() {
   nb_file_i = 0;
   nb_file_e = 0;
 
-  if (!import_) {
     if (load_conf_) {
       mpm_conf::loadConf(conf_file);
     }
+  
+  if (!import_) {
+
     grid = Grid(mpm_conf::size_grid_(0), mpm_conf::size_grid_(1), mpm_conf::size_grid_(2), mpm_conf::grid_spacing_, 2);
     loadScene();
 
@@ -87,12 +89,17 @@ void Simulation::animate() {
     if (export_) {
       exportSim();
     }
+      for (auto &ob : obstacles) {
+	 ob->animate();
+      }
   } else {
     importSim();
     INFO(3, particules.front()->getVolume());
-  }
-  for (auto &ob : obstacles) {
-    ob->animate();
+    for (uint s = 0; s < mpm_conf::replay_speed_; ++s) {
+      for (auto &ob : obstacles) {
+	ob->animate();
+      }
+    } 
   }
 }
 
@@ -355,6 +362,12 @@ void Simulation::loadScene() {
 		   } else  if (line.substr(0,10) == "   <angle>") {
 		     std::istringstream s(line.substr(10));
 		     s >> angle;
+		   } else if (line.substr(0,11) == "   <center>") {
+		     std::istringstream s(line.substr(11));
+		     for (uint i = 0; i < 3; ++i) {
+		       s >> m.center(i);
+		     }
+		     m.rotation_center_def = true;
 		   } else {
 		     std::cerr<<"Line not recognized in file \""<<scene_path<<"\": "<<line<<std::endl;
 		     exit(-1);
@@ -444,7 +457,7 @@ void Simulation::loadScene() {
 	  // end box
 
 	  }  else if (line.substr(0,8) == " <plane>") {
-	    VEC3 pos(0, 0, 0);
+	    VEC3 pos(0.5, 0.5, 0);
 	    VEC3 n(0, 0, 0);
 	    FLOAT l = 0, w = 0;
 	    FLOAT fric = mpm_conf::friction_coef_;
@@ -642,7 +655,7 @@ void Simulation::loadScene() {
 	    std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsR(nb_part, prng, 30, VEC3(w, l, h));
 	    nb_part = points.size();
 	    for (auto &v: points) {
-	      Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, v/*VEC3(0.05, 0.05, 0.05)*/ + VEC3(xmin, ymin, zmin), VEC3(0, 0, 1), vel);
+	      Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, v/*VEC3(0.05, 0.05, 0.052)*/ + VEC3(xmin, ymin, zmin), VEC3(0, 0, 1), vel);
 	       particules.push_back(p);
 
 	       if (random) {

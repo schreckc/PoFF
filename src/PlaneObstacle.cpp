@@ -8,6 +8,15 @@ PlaneObstacle::PlaneObstacle(VEC3 p, VEC3 n, FLOAT l, FLOAT w, int shader) : Obs
   normal.normalize();
   length = l;
   width = w;
+
+  v1 = VEC3(1, 0, 0);
+  v2 = VEC3(0, 1, 0);
+  if (normal(0) != 0 || normal(1) != 0) {
+    v1 = normal.cross(VEC3(0, 0, 1));
+    v2 = normal.cross(v1);
+    v2.normalize();
+    v1.normalize();
+  }
 }
 
 // void PlaneObstacle::animate() {
@@ -15,26 +24,35 @@ PlaneObstacle::PlaneObstacle(VEC3 p, VEC3 n, FLOAT l, FLOAT w, int shader) : Obs
 // }
 
 void PlaneObstacle::apply(Motion m) {
-  pos += m.translation;
+  if (m.rotation_center_def) {
+    //INFO(3, "center\n"<<m.center);
+    VEC3 diff = pos - m.center;
+    diff = m.rotation*diff;
+    pos = m.center + diff;
+      } else {
+    pos += m.translation;
+    length *= m.scale;
+    width *= m.scale;
+  }
   normal = m.rotation*normal;
-  length *= m.scale;
-   width *= m.scale;
+  v1 = m.rotation*v1;
+  v2 = m.rotation*v2;
    //   INFO(3, "scale "<<scale);
 }
   
 #ifndef NO_GRAPHICS_ 
 void PlaneObstacle::draw(glm::mat4 m, int s) {
   FLOAT size = 1;
-  VEC3 v1 = VEC3(1, 0, 0);
-  VEC3 v2 = VEC3(0, 1, 0);
-  if (normal(0) != 0 || normal(1) != 0) {
-    v1 = normal.cross(VEC3(0, 0, 1));
-    v2 = normal.cross(v1);
-    v2.normalize();
-    v1.normalize();
-    // INFO(3, v1);
-    // INFO(3, v2);
-  }
+  // VEC3 v1 = VEC3(1, 0, 0);
+  // VEC3 v2 = VEC3(0, 1, 0);
+  // if (normal(0) != 0 || normal(1) != 0) {
+  //   v1 = normal.cross(VEC3(0, 0, 1));
+  //   v2 = normal.cross(v1);
+  //   v2.normalize();
+  //   v1.normalize();
+  //   // INFO(3, v1);
+  //   // INFO(3, v2);
+  // }
   FLOAT l = 1, w = 1;
   if (length != 0) {
     l = length;
@@ -92,14 +110,14 @@ VEC3 PlaneObstacle::getNormal() const {
 }
 
 FLOAT PlaneObstacle::distance(VEC3 v) const {
-  VEC3 v1 = VEC3(1, 0, 0);
-  VEC3 v2 = VEC3(0, 1, 0);
-  if (normal(0) != 0 || normal(1) != 0) {
-    v1 = normal.cross(VEC3(0, 0, 1));
-    v2 = normal.cross(v1);
-    v2.normalize();
-    v1.normalize();
-  }
+  // VEC3 v1 = VEC3(1, 0, 0);
+  // VEC3 v2 = VEC3(0, 1, 0);
+  // if (normal(0) != 0 || normal(1) != 0) {
+  //   v1 = normal.cross(VEC3(0, 0, 1));
+  //   v2 = normal.cross(v1);
+  //   v2.normalize();
+  //   v1.normalize();
+  // }
   VEC3 proj = utils::projectionOrtho(v, pos, v1, v2);
   FLOAT dist = 10;
   if (length == 0 || (fabs(v1.dot(proj-pos)) < 0.5*length && fabs(v2.dot(proj-pos)) < 0.5*width)) {
@@ -129,14 +147,14 @@ void PlaneObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &n) const {
   //  if (nv != 0 && costheta != 0) {
   //    dist = nv*costheta - pos;
   //  }
-   VEC3 v1 = VEC3(1, 0, 0);
-  VEC3 v2 = VEC3(0, 1, 0);
-  if (normal(0) != 0 || normal(1) != 0) {
-    v1 = normal.cross(VEC3(0, 0, 1));
-    v2 = normal.cross(v1);
-    v2.normalize();
-    v1.normalize();
-  }
+  //  VEC3 v1 = VEC3(1, 0, 0);
+  // VEC3 v2 = VEC3(0, 1, 0);
+  // if (normal(0) != 0 || normal(1) != 0) {
+  //   v1 = normal.cross(VEC3(0, 0, 1));
+  //   v2 = normal.cross(v1);
+  //   v2.normalize();
+  //   v1.normalize();
+  // }
   VEC3 proj = utils::projectionOrtho(p, pos, v1, v2);
   dist = 10;
   if (length == 0 || (fabs(v1.dot(proj-pos)) < 0.5*length && fabs(v2.dot(proj-pos)) < 0.5*width)) {
