@@ -27,7 +27,7 @@ namespace mpm_conf {
   VEC3 shearing_vec_(young_modulus_/(1+poisson_), young_modulus_/(1+poisson_),young_modulus_/(1+poisson_));// (G_23, G_13, G_12)
   
   FLOAT dt_ = 0.1; 
-  VEC3 gravity_ = VEC3(0.0, 0.0, -0.01); 
+  VEC3 gravity_ = VEC3(0.0, 0.0, -9.81); 
 
   FLOAT density_ = 150.0; //sable 1530 kg/m^3
   FLOAT lim_density_ = density_/2.0;
@@ -39,9 +39,8 @@ namespace mpm_conf {
 
   uint plastic_mode_ = 0;
   uint elastic_mode_ = 0;
-  bool plastic_anisotropy_ = true;
-  bool elastic_anisotropy_ = true;
-
+  bool anisotropy_on = false;
+  
   FLOAT damping_ = 0;
   FLOAT cheat_damping_ = 1;
   bool smooth_vel_ = 0;
@@ -136,10 +135,15 @@ namespace mpm_conf {
 	}  else if (line.substr(0,11) == "<time_step>") {
 	  std::istringstream s(line.substr(11));
 	  s >> dt_;
+
+	  // //***** DON'T FORGET TO REMOVE
+	  // dt_ = 0.0001;
+	  
 	}  else if (line.substr(0,9) == "<gravity>") {
 	  std::istringstream s(line.substr(9));
 	  for (uint i = 0; i < 3; ++i) {
 	    s >> gravity_(i);
+	    //	    INFO(3, "GRAVTY "<<gravity_);
 	  }
 	}  else if (line.substr(0,9) == "<density>") {
 	  std::istringstream s(line.substr(9));
@@ -221,7 +225,7 @@ namespace mpm_conf {
 	    s >> anisotropy_values_(i);
 	    anisotropy_stress_(i, i, i, i) = anisotropy_values_(i);
 	  }
-	  
+	  anisotropy_on = true;
 	} else {
 	  ERROR(false, "Invalid configuration file \""<<path_file<<"\"", line);
 	}
@@ -244,6 +248,9 @@ namespace mpm_conf {
     }
     file.close();
     INFO(3, "plasticity: "<<plastic_mode_);
+
+
+
     
   // constitutive elasticity tensor
   FLOAT E1 = young_vec_(0);
@@ -252,6 +259,9 @@ namespace mpm_conf {
   FLOAT nu12 = poisson_vec_(2);
   FLOAT nu13 = poisson_vec_(1);
   FLOAT nu23 = poisson_vec_(0);
+
+  INFO(3, "YOUNG "<<E1<<" "<<E2<<" "<<E3);
+  INFO(3, "poisson "<<nu23<<" "<<nu13<<" "<<nu12);
 
   FLOAT E = young_modulus_;
   FLOAT nu = poisson_;
@@ -301,6 +311,8 @@ namespace mpm_conf {
  inverse_tangent_stiffness(1, 2) = -nu23/E2;
  inverse_tangent_stiffness(2, 0) = -nu13/E1;
  inverse_tangent_stiffness(2, 1) = -nu23/E2;
+
+ INFO(3, "nu31 "<<E3/E1*nu13);
  
  MAT3 inv_stretch_stiff;
  inv_stretch_stiff << 1/E1, -nu12/E1, -nu13/E1,
@@ -327,16 +339,16 @@ namespace mpm_conf {
    // map from anisotropic to isotropc space
    for (uint i = 0; i < 3; ++i) {
      for (uint j = 0; j < 3; ++j) {
-     //   anisotropy_stress_(i, j, i, j) = anisotropy_values_(i);
-     //   inv_anisotropy_stress_(i, j, i, j) = 1.0/anisotropy_values_(i);
-     // }
-        anisotropy_stress_(i, j, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
-        anisotropy_stress_(i, j, j, i) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
-	inv_anisotropy_stress_(i, j, i, j) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
-	inv_anisotropy_stress_(j, i, i, j) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
+        anisotropy_stress_(i, j, i, j) = anisotropy_values_(i);
+        inv_anisotropy_stress_(i, j, i, j) = 1.0/anisotropy_values_(i);
       }
-      anisotropy_stress_(i, i, i, i) = anisotropy_values_(i)*anisotropy_values_(i);
-      inv_anisotropy_stress_(i, i, i, i) = 1.0/anisotropy_values_(i)/anisotropy_values_(i);
+     //   anisotropy_stress_(i, j, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
+     //   anisotropy_stress_(j, i, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
+     //   inv_anisotropy_stress_(i, j, i, j) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
+     //   inv_anisotropy_stress_(i, j, j, i) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
+     //  }
+     // anisotropy_stress_(i, i, i, i) = anisotropy_values_(i)*anisotropy_values_(i);
+     // inv_anisotropy_stress_(i, i, i, i) = 1.0/anisotropy_values_(i)/anisotropy_values_(i);
 
    }
    Tensor C_iso = mat2TensorOrtho(tangent_stiffness_iso);
@@ -393,14 +405,17 @@ namespace mpm_conf {
      //   7, 8, 9;
       // INFO(3, "rot\n"<<rot);
      // INFO(3, "rotation ani strain\n"<<innerProduct(aux, rot));
-   INFO(3, "tang stiff iso\n"<< tangent_stiffness_iso);
-   INFO(3, "tang stiff\n"<< tangent_stiffness);
-     //  INFO(3, "inv_tan * tang stiff\n"<< inverse_tangent_stiffness*tangent_stiffness);
-     
-     //   INFO(3, "inv tang stiff\n"<< inverse_tangent_stiffness);
-
-     INFO(2, "stress anisotropy map"<< anisotropy_stress_);
-     INFO(2, "strain anisotropy map"<< anisotropy_strain_); 
+   // INFO(3, "tang stiff iso\n"<< tangent_stiffness_iso);
+   // INFO(3, "tang stiff\n"<< tangent_stiffness);
+   // INFO(3, "inv_tan * tang stiff\n"<< inverse_tangent_stiffness*tangent_stiffness);
+   
+   // INFO(3, "inv tang stiff\n"<< inverse_tangent_stiffness);
+   // INFO(3, "inv tang stiff iso \n"<< inverse_tangent_stiffness_iso);
+    
+    // INFO(2, "stress anisotropy map"<< anisotropy_stress_);
+    // INFO(2, "strain anisotropy map"<< anisotropy_strain_);
+     INFO(3, "ANIS "<< innerProduct(inv_anisotropy_stress_,anisotropy_stress_));
+    
  }
 
   

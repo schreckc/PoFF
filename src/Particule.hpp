@@ -51,9 +51,12 @@ private :
   //anisotropy
   VEC3 normal;
   
-  VEC3 axex;
-  VEC3 axey;
-  VEC3 axez;
+  // VEC3 axex;
+  // VEC3 axey;
+  // VEC3 axez;
+
+  MAT3 axes;
+  
   FLOAT valx;
   FLOAT valy;
   FLOAT valz;
@@ -62,9 +65,20 @@ private :
 
   MAT3 rotation;
 
+  MAT3 orientation;
+
+  MAT3 prevD;
  mutable MAT3 forceIncrement;
   VEC3 energy_der;
   Tensor energy_second_der;
+
+  Tensor anisotropy_strain;
+  Tensor inv_anisotropy_strain;
+  Tensor anisotropy_stress;
+  Tensor inv_anisotropy_stress;
+
+  // volume correction
+  FLOAT vp; //plastic volume change 
   
 public:
   Particule(int shader = -1);
@@ -81,19 +95,27 @@ public:
   void setPosition(VEC3 p);
   VEC3 getVelocity() const;
   void setVelocity(VEC3 velo);
-
+  
   FLOAT getMass() const;
+  void setMass(FLOAT mass);
   FLOAT getVolume() const;
+  void setVolume(FLOAT v);
+  FLOAT getDensity() const;
+  void setDensity(FLOAT d);
+  FLOAT getVolumeCorrection() const;
+  void setVolumeCorrection(FLOAT corr);
   const MAT3& getB() const;
   void setB(const MAT3 & b);
   Vector3i getCell() const;
 
-  void setDensity(FLOAT d);
+ 
   void setColor(FLOAT r, FLOAT g, FLOAT b);
   
   MAT3 getDeformationElastic() const;
   void addDeformationElastic(MAT3 Ddef); //F_e^n+1 = (I + Ddef)F_e^n
+  void setDeformationElastic(MAT3 F); 
   MAT3 getDeformationPlastic() const;
+  void setDeformationPlastic(MAT3 F); 
   MAT3 getDeformation() const;
 
   const MAT3& getForceIncrement() const;
@@ -102,7 +124,10 @@ public:
   FLOAT weight(Vector3i node);
   VEC3 gradWeight(Vector3i node);
   void updateForceIncrement();
-  void update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t); //TODO : include plactity
+  
+  void setAnisotropyTensor(VEC3 a);
+  void setAnisotropyTensor(MAT3 a);
+  void update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t); 
 
   void initVolume(FLOAT d);
 
@@ -124,6 +149,8 @@ public:
   
   void computeEnergySecondDer(VEC3 sigma, MAT3 U, MAT3 V);
   FLOAT energySecondDer(VEC3 sigma, uint i, uint j);
+
+  MAT3 getOrientation();
 };
 
 

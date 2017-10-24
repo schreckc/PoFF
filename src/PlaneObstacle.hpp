@@ -12,6 +12,7 @@ private :
   
 public :
   PlaneObstacle(VEC3 p = VEC3(0, 0, 0), VEC3 n = VEC3(0, 0, 1), FLOAT l = 0, FLOAT w = 0, int shader = -1);
+  PlaneObstacle(VEC3 p, VEC3 n, FLOAT l, FLOAT w, VEC3 d1, VEC3 d2, int shader = -1);
   ~PlaneObstacle();
 
   //  void animate();

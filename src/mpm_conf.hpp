@@ -53,8 +53,9 @@ namespace mpm_conf {
 
   extern unsigned int plastic_mode_; //0 drucker_prager (sand), 1 clamp eigenvalues (snow), 2 clamp diff between eigenvalues, 3 no plasticity
   extern unsigned int elastic_mode_; //0 sand, 1 snow, 2 linear
-  extern bool plastic_anisotropy_;
-  extern bool elastic_anisotropy_;
+  // extern bool plastic_anisotropy_;
+  // extern bool elastic_anisotropy_;
+  extern bool anisotropy_on;
 
   // drucker-prager param
   extern Eigen::VEC4 hardenning_param_;

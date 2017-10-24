@@ -9,6 +9,7 @@
 #include "error.hpp"
 #include "Times.hpp"
 #include "mpm_conf.hpp"
+//#include "Skybox.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
@@ -87,7 +88,7 @@ bool Scene::initialiserFenetre() {
      // Création du contexte OpenGL
      m_contexteOpenGL = SDL_GL_CreateContext(m_fenetre);
      if (m_contexteOpenGL == 0) {
-         std::cout << SDL_GetError() << std::endl;
+       std::cout << SDL_GetError() <<"AAAAAAAAAAAAAAA"<< std::endl;
          SDL_DestroyWindow(m_fenetre);
          SDL_Quit();
          return false;
@@ -107,9 +108,12 @@ bool Scene::initGL() {
     return false;
   }
 #endif
+  glEnable (GL_BLEND);
+  // glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable( GL_DEPTH_TEST );
   glDepthFunc(GL_LESS);
 
+   
   /* Init TTF. */
   if (TTF_Init()) {
      fprintf(stderr, "error: cannot init ttf\n");
@@ -134,11 +138,19 @@ void Scene::init() {
   l_shaders[2] = new Shader("shaders/point.vert", "shaders/point.frag");
   l_shaders[3] = new Shader("shaders/toon.vert", "shaders/toon.frag");
 
-  l_textures = std::vector<Texture*>(1);
+  l_textures = std::vector<Texture*>(6);
   l_textures[0] = new Texture("Textures/boulet.jpg");
   l_textures[0]->charger();
-  
-     
+  l_textures[1] = new Texture("Textures/leaf.png");
+  l_textures[1]->charger();
+  l_textures[2] = new Texture("Textures/square.png");
+  l_textures[2]->charger();
+  l_textures[3] = new Texture("Textures/full_square.png");
+  l_textures[3]->charger();
+  l_textures[4] = new Texture("Textures/skybox4.png");
+  l_textures[4]->charger();
+  l_textures[5] = new Texture("Textures/skybox.png");
+  l_textures[5]->charger();
     // // Camera matrix
     // glm::mat4 view = glm::lookAt(glm::vec3(-10, -10, 0), // Camera is at (4,3,3), in World Space
     // 				 glm::vec3(0, 0, 0), // and looks at the origin
@@ -151,6 +163,7 @@ void Scene::init() {
     // // Model matrix : an identity matrix (model will be at the origin)
   //  m_model = glm::mat4(1.0f);
   m_projection = glm::perspective(glm::radians(45.0f), (float) m_largeurFenetre/ (float) m_hauteurFenetre, 0.1f, 100.0f);
+ 
     // // Our ModelViewProjection : multiplication of our 3 matrices
     // glm::mat4 mvp = projection * view * model; 
   m_frameRate = 1000 / 50;
@@ -177,11 +190,15 @@ void Scene::init() {
   sim = new Simulation(0);
   l_objects.push_back(sim);
 
+  skybox = new Skybox(10);
+  skybox->setPosition(m_camera.getPosition());
+  //l_objects.push_back(skybox);
 }
 
 void Scene::animate() {
   m_camera.lookAt(m_view);
   m_vp = m_projection * m_view;
+  skybox->setPosition(m_camera.getPosition());
 
   if (running || step_by_step > 0) {
     t += mpm_conf::replay_speed_;
@@ -226,6 +243,7 @@ void Scene::draw() {
   for (it = l_objects.begin(); it != l_objects.end(); ++it) {
       (*it)->draw();
   }
+  skybox->draw();
 }
 
 
@@ -257,6 +275,9 @@ void Scene::animationLoop() {
     if(m_input.getTouche(SDL_SCANCODE_B) ) {
       ++step_by_step;
       ++back;
+    }
+    if(m_input.getTouche(SDL_SCANCODE_C) ) {
+      printCameraPos();
     }
     if(m_input.getTouche(SDL_SCANCODE_S) ) {
           mpm_conf::display_sphere_ = !mpm_conf::display_sphere_;
@@ -299,6 +320,7 @@ void Scene::animationLoop() {
 	 // displayMessage(text); 
     }
     m_camera.deplacer(m_input);
+
 
     m_input_loop1 = SDL_GetTicks();
     m_input_loop_time = m_input_loop1 - m_input_loop0;
@@ -370,6 +392,14 @@ glm::vec3 Scene::getCameraPosition() const {
   return m_camera.getPosition();
 }
 
+void Scene::setCameraPosition(glm::vec3 pos) {
+  return m_camera.setPosition(pos);
+}
+
+void Scene::setCameraOrientation(glm::vec3 pos) {
+  return m_camera.setOrientation(pos);
+}
+
 void Scene::setLoad(std::string s) {
   sim->setLoad(s);
 }
@@ -402,6 +432,14 @@ void Scene::setStop(uint t_end) {
 FLOAT Scene::getTime() {
   return t*mpm_conf::dt_;
 }
+
+
+void Scene::printCameraPos() {
+  INFO(1, "<camera>\n <position> "<<m_camera.getPosition()[0]<<" "<<m_camera.getPosition()[1]<<" "<<m_camera.getPosition()[2]<<
+       "\n <orientation> "<<m_camera.getOrientation()[0]<<" "<<m_camera.getOrientation()[1]<<" "<<m_camera.getOrientation()[2]<<
+       "\n</camera>");
+}
+
 
 bool saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_Renderer* SDLRenderer) {
     SDL_Surface* saveSurface = NULL;
@@ -469,4 +507,8 @@ void render_text(
     SDL_DestroyTexture(texture);
 }
 
+
+
+
 #endif
+

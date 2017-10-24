@@ -8,11 +8,14 @@ Obstacle::Obstacle(int shader) : Object(shader) {
 }
 
 void Obstacle::animate() {
+  //  #ifndef NO_GRAPHICS_
   for (auto& m : motions) {
-    if (m.isRunning(Scene::SCENE->getTime())) {
+  // if (m.isRunning(Scene::SCENE->getTime())) {
       apply(m);
-    }
+      // }
   }
+  //  INFO(3, "animate obs "<<Scene::SCENE->getTime());
+  // #endif
 }
 
 FLOAT Obstacle::getFriction() const {
@@ -29,4 +32,8 @@ void Obstacle::setMotions(std::list<Motion> lm) {
 
 void Obstacle::addMotion(Motion m) {
   motions.push_back(m);
+}
+
+bool Obstacle::isMoving() const {
+  return !motions.empty();
 }

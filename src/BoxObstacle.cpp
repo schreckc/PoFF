@@ -133,6 +133,47 @@ void BoxObstacle::draw(glm::mat4 m, int s) {
   glDisableVertexAttribArray(1);
 
   disableShader();
+
+   VEC3 c0 = min_pos;
+   VEC3 c1(min_pos(0), max_pos(1), min_pos(2));
+   VEC3 c2(max_pos(0), max_pos(1), min_pos(2));
+   VEC3 c3(max_pos(0), min_pos(1), min_pos(2));
+   GLfloat vertices[18] = {c0(0), c0(1), c0(2), c1(0), c1(1), c1(2), c2(0), c2(1), c2(2),
+			  c2(0), c2(1), c2(2), c3(0), c3(1), c3(2), c0(0), c0(1), c0(2)};
+   GLfloat normals[18] = {0, 0, 1, 0, 0, 1, 0, 0, 1,
+			  0, 0, 1, 0, 0, 1, 0, 0, 1};
+    GLfloat colors[18] = {1.0, 1.0, 1.0,   1.0, 1.0, 1.0,  1.0, 1.0, 1.0,
+			1.0, 1.0, 1.0,   1.0, 1.0, 1.0,  1.0, 1.0, 1.0};
+
+  float coordTexture[12] =  {0, 0,   1, 0,   1, 1,
+    			     1, 1,   0, 1,   0, 0};
+
+    m_shader = 1;
+   m_texture = 4;
+  enableShader();
+   setMVP(m, s);
+  
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+    glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, colors);
+    glEnableVertexAttribArray(1);
+    
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, vertices);
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, coordTexture);
+    glEnableVertexAttribArray(3);
+    
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    
+    glDisableVertexAttribArray(3);
+    glDisableVertexAttribArray(2);
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
+
+    disableShader();
+  
   //  INFO(3, "BOX\n"<<min_pos<<"\n\n"<<max_pos);
 }
 #endif

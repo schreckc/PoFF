@@ -55,6 +55,7 @@ void Sphere::draw(glm::mat4 m, int s) {
   }
   //  std::cout<<"draw sph"<<std::endl;
   //  m_shader = Scene::SCENE->getShader(3);
+ 
   enableShader();
   setMVP(m, s);
   // glm::vec3 pos_camera = Scene::SCENE->getCameraPosition();

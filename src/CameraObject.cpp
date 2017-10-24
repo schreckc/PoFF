@@ -147,7 +147,9 @@ void CameraObject::setPointcible(glm::vec3 pointCible) {
 }
 
 void CameraObject::setPosition(glm::vec3 position) {
-
+  //  INFO(3, "pos cma "<<position[0]<<" "<<position[1]<<" "<<position[2]);
+  m_position = position;
+  m_pointCible = m_position + m_orientation;
 }
 
 void CameraObject::alignAxis() {

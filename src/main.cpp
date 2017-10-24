@@ -88,8 +88,10 @@ int main(int argc, char **argv) {
     }
   }
   
-  if(Scene::SCENE->initGL() == false)
+  if(Scene::SCENE->initGL() == false) {
+    std::cerr<<"\nERROR: cannot init GL\n"<<std::endl;
     return -1;
+  }
   
   Scene::SCENE->bouclePrincipale();
   return 0;

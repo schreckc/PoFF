@@ -15,7 +15,23 @@ Tensor::Tensor(FLOAT d): dim(d) {
   }
 }
 
-  
+Tensor::Tensor(MAT3 M): dim(3) {
+   t =  std::vector<FLOAT>(pow(dim,4));
+  for (uint i = 0; i < t.size(); ++i) {
+    t[i] = 0;
+  }
+  for (uint i = 0; i < 3; ++i) {
+    for (uint j = 0; j < 3; ++j) {
+      for (uint k = 0; k < 3; ++k) {
+	(*this)(i, j, k, j) += M(i, k);
+	  // (*this)(i, j, k, j) += 0.5*M(i, k)*M(j, j);
+	  // (*this)(i, j, j, k) += 0.5*M(i, k)*M(j, j);
+      }
+      //      (*this)(i, j, j, j) = M(i, j);
+    }
+  }
+
+}
 
 FLOAT& Tensor::operator() (int i, int j, int k, int l) {
   int ind = pow(dim,3)*i+pow(dim,2)*k+dim*j+l;
@@ -121,6 +137,24 @@ MAT3 innerProduct(const Tensor & T, const MAT3 & M) {
   }
   return P;
 }
+
+MAT3 innerProduct(const MAT3 & M, const Tensor & T) {
+  MAT3 P;
+  uint d = T.dim;
+  for (uint i = 0; i < d; ++i) {
+    for (uint j = 0; j < d; ++j) {
+
+      P(i, j) = 0;
+      for (uint k = 0; k < d; ++k) {
+	for (uint l = 0; l < d; ++l) {
+	  P(i, j) += M(k, l)*T(k, l, i, j);
+	}
+      }
+
+    }
+  }
+  return P;
+}
   
 Tensor innerProduct(const Tensor & A, const Tensor & B) {
   uint d = A.dim;
@@ -207,14 +241,73 @@ Tensor rotateTensor(const Tensor & T, const MAT3 & R) {
 	      }
 	    }
 	  }
-	  if (std::fabs(rotT_ijkl) > 10e-12) {
+	  //if (std::fabs(rotT_ijkl) > 10e-12) {
 	    rotT(i, j, k, l) = rotT_ijkl;
-	  } else {
-	    rotT(i, j, k, l) = 0;
-	  }
+	  // } else {
+	  //   rotT(i, j, k, l) = 0;
+	  // }
 	}
       }
     }
   }
   return rotT;
 }
+
+
+Tensor transformTensor(const Tensor & T, const MAT3 & M) {
+  uint d = T.dim;
+  Tensor rotT(d);
+  MAT3 Minv = M.inverse();
+  for (uint i = 0; i < d; ++i) {
+    for (uint j = 0; j < d; ++j) {
+      for (uint k = 0; k < d; ++k) {
+	for (uint l = 0; l < d; ++l) {
+	  FLOAT rotT_ijkl = 0;
+	  // for (uint m = 0; m < d; ++m) {
+	  //   for (uint n = 0; n < d; ++n) {
+	  //     for (uint o = 0; o < d; ++o) {
+	  // 	for (uint p = 0; p < d; ++p) {
+	  // 	  rotT_ijkl += M(i, m)*M(j, n)*Minv(o, k)*Minv(p, l)*T(m, j, o, l);
+	  // 	}
+	  //     }
+	  //   }
+	  // }
+
+   for (uint m = 0; m < d; ++m) {
+     //	     for (uint n = 0; n < d; ++n) {
+	  //     for (uint o = 0; o < d; ++o) {
+	  // 	for (uint p = 0; p < d; ++p) {
+	   	  rotT_ijkl += M(i, m)*T(m, j, k, l);
+	  // 	}
+	  //     }
+		  //	     }
+	   }
+
+	  
+	  //if (std::fabs(rotT_ijkl) > 10e-12) {
+	    rotT(i, j, k, l) = rotT_ijkl;
+	  // } else {
+	  //   rotT(i, j, k, l) = 0;
+	  // }
+	}
+      }
+    }
+  }
+  return rotT;
+}
+
+Tensor outerProduct(const MAT3 & M1, const MAT3 & M2) {
+  Tensor T(3);
+    for (uint i = 0; i < 3; ++i) {
+    for (uint j = 0; j < 3; ++j) {
+      for (uint k = 0; k < 3; ++k) {
+	for (uint l = 0; l < 3; ++l) {
+	  T(i, j, k, l) = M1(i, j)*M2(k, l);
+	}
+      }
+    }
+    }
+    return T;
+}
+
+

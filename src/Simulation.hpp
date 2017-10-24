@@ -44,7 +44,9 @@ public :
   void oneStep();
 
   void importParticules(std::ifstream & file);
+  void importParticulesAll(std::ifstream & file);
   void exportParticules(std::ofstream & file) const;
+  void exportParticulesAll(std::ofstream & file) const;
   void importSim();
   void exportSim() const;
 
@@ -58,6 +60,14 @@ public :
   void initPoissonSampling(uint i1, uint i2, uint j1, uint j2, uint k1, uint k2);
 
   void loadScene();
+
+  void saveState(std::string save_file);
+  
+  void addRotatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT angular_speed);
+  void addExtendingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed);
+  void addSimpleShearingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed);
+  void addPurShearingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed);
+  void addTranslatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed);
 };
 
 

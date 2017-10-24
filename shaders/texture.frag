@@ -13,6 +13,9 @@ void main(){
    vec4 col;
    col.brg = color.brg;
    col.a = 0;
-   col = col * texture2D(myTexture, textpos).bgra;
-   out_color = (0.5 + c)*col;
+   vec4 texel = texture2D(myTexture, textpos);
+  if(texel.a < 0.5)
+    discard;
+   col = col * texel.rgba;
+   out_color = col;
 }

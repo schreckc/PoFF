@@ -22,6 +22,7 @@ public:
 
   virtual void setPointcible(glm::vec3 pointCible) = 0;
   virtual void setPosition(glm::vec3 position) = 0;
+  void setOrientation(glm::vec3 orientation);
 
   float getSensibilite() const;
   float getVitesse() const;
@@ -29,6 +30,7 @@ public:
   void setVitesse(float vitesse);
 
   glm::vec3 getPosition() const;
+  glm::vec3 getOrientation() const;
 
 protected:
   glm::vec3 m_orientation;

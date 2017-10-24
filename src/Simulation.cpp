@@ -5,6 +5,7 @@
 #include "SphereObstacle.hpp"
 #include "CylinderObstacle.hpp"
 #include "BoxObstacle.hpp"
+#include "OpenBoxObstacle.hpp"
 #include "BallObstacle.hpp"
 #include "Times.hpp"
 #include "mpm_conf.hpp"
@@ -46,9 +47,10 @@ void Simulation::init() {
 
     grid.init(particules);
 
-    for (auto & o : obstacles) {
-      grid.initCollision(o);
-    }
+    // for (auto & o : obstacles) {
+    //   grid.initCollision(o);
+    // }
+    grid.initCollision(obstacles);
     
     INFO(1, "Lame Parameters : lambda = "<<mpm_conf::lambda_<<"    mu = "<<mpm_conf::mu_<<"\n");
     INFO(1, "dt = "<<mpm_conf::dt_<<"\n");
@@ -86,12 +88,13 @@ void Simulation::animate() {
   //  INFO(1, "Simulation step : "<<t);
   if (!import_) {
     oneStep();
+    //        mpm_conf::anisotropy_values_(2) += 0.01;
     if (export_) {
       exportSim();
     }
-      for (auto &ob : obstacles) {
-	 ob->animate();
-      }
+    for (auto &ob : obstacles) {
+      ob->animate();
+    }
   } else {
     importSim();
     INFO(3, particules.front()->getVolume());
@@ -156,18 +159,99 @@ void Simulation::oneStep() {
     }
     INFO(3, "SMOOTH");
   }
-  for (auto & ob : obstacles) {
-     //INFO(3, "collision "<<obstacles.size() );
-    grid.collision(ob);
-   }
-   
-
+  // for (auto & ob : obstacles) {
+  //    //INFO(3, "collision "<<obstacles.size() );
+  //   grid.collision(ob);
+  //  }
+  grid.collision(obstacles);
   grid.gridToParticules(particules);
 
-   for (auto & ob : obstacles) {
-     grid.initCollision(ob); //set for each node previous distance to the closest obstacle
-   }
+   // for (auto & ob : obstacles) {
+   //   grid.initCollision(ob); //set for each node previous distance to the closest obstacle
+   // }
+  grid.initCollision(obstacles);
    Times::TIMES->tock(Times::simu_time_);
+}
+
+void Simulation::importParticulesAll(std::ifstream & file) {
+  // particules.clear();
+  // std::string line;
+  // uint ir = 0, ia = 0, im = 0, is = 0, ife = 0, ic = 0;
+  // while (getline(file, line)) {
+  //    // if (i == 10) {
+  //   //   i = 0;
+  //     if (line.substr(0,2) == "v ") {
+  // 	std::istringstream s(line.substr(2));
+  // 	VEC3 v;
+  // 	s >> v(0); 
+  // 	s >> v(1); 
+  // 	s >> v(2);
+  // 	Particule *p = new Particule(1, 0.000005, v);
+  // 	p->setColor(1, 0.5, 0.5);
+  // 	particules.push_back(p);
+  // 	// INFO(3, p->getPosition());
+  //     } else if (line.substr(0,2) == "r ") {
+  // 	std::istringstream s(line.substr(2));
+  // 	//INFO(3, line);
+  // 	MAT3 r;
+  // 	for (uint i = 0; i < 9; ++i) {
+  // 	  s >> r(i);
+  // 	}
+  // 	particules[ir]->setAnisotropyRotation(r);//setAnisotropyAxes(VEC3(r(0), r(3), r(6)), VEC3(r(1), r(4), r(7)), VEC3(r(2), r(5), r(8)));
+  // 	++ir;
+  // 	//INFO(3, r);
+  //     } else if (line.substr(0,2) == "a ") {
+  // 	std::istringstream s(line.substr(2));
+  // 	//INFO(3, line);
+  // 	FLOAT vx, vy, vz;
+  // 	s >> vx >> vy >> vz;
+  // 	particules[ia]->setAnisotropyValues(vx, vy, vz);
+  // 	++ia;
+  //     } else if (line.substr(0,2) == "m ") {
+  // 	std::istringstream s(line.substr(2));
+  // 	//INFO(3, line);
+  // 	FLOAT m, v, d;
+  // 	s >> m >> v >> d;
+  // 	particules[im]->setMass(m);
+  // 	particules[im]->setVolume(v);
+  // 	particules[im]->setDensity(d);
+  // 	++im;
+  //     } else if (line.substr(0,2) == "s ") {
+  // 	std::istringstream s(line.substr(2));
+  // 	//INFO(3, line);
+  // 	VEC3 v;
+  // 	s >> v(0) >> v(1) >> v(2);
+  // 	particules[is]->setVelocity(v);
+  // 	++is;
+  //     } else if (line.substr(0,2) == "f ") {
+  // 	std::istringstream s(line.substr(2));
+  // 	//INFO(3, line);
+  // 	MAT3 Fp, Fe;
+  // 	for (uint i = 0; i < 9; ++i) {
+  // 	  s >> Fe(i);
+  // 	}
+  // 	for (uint i = 0; i < 9; ++i) {
+  // 	  s >> Fp(i);
+  // 	}
+  // 	particules[ife]->setDeformationElastic(Fe);
+  // 	particules[ife]->setDeformationPlastic(Fp);
+  // 	++ife;
+  //     } else if (line.substr(0,2) == "c ") {
+  // 	std::istringstream s(line.substr(2));
+  // 	//INFO(3, line);
+  // 	FLOAT vp;
+  // 	s >> vp;
+  // 	particules[ic]->setVolumeCorrection(vp);
+  // 	++ic;
+  //     } else if (line[0] == '#') {
+  // 	//INFO(3, "COMMENT "<<line);
+  //     } else {
+  // 	WARNING(false, "Imported file possibly corrupted", line);
+  //     }
+  //   // } else {
+  //   //   ++i;
+  //   // }
+  // }
 }
 
 void Simulation::importParticules(std::ifstream & file) {
@@ -175,8 +259,6 @@ void Simulation::importParticules(std::ifstream & file) {
   std::string line;
   uint ir = 0, ia = 0;
   while (getline(file, line)) {
-     // if (i == 10) {
-    //   i = 0;
       if (line.substr(0,2) == "v ") {
 	std::istringstream s(line.substr(2));
 	VEC3 v;
@@ -224,15 +306,62 @@ void Simulation::exportParticules(std::ofstream & file) const {
   for (auto &p : particules) {
     MAT3 r = p->getRotation();
     file<<"r ";
+    //    std::cout<<"r ";
     for (uint i = 0; i < 9; ++i) {
       file<<r(i)<<" ";
+      //std::cout<<r(i)<<" ";
     }
     file<<"\n";
+    //std::cout<<"\n";
   }
    for (auto &p : particules) {
     VEC3 a = p->getAnisotropy();
     file<<"a "<<a(0)<<" "<<a(1)<<" "<<a(2)<<"\n";
   }
+  
+}
+
+void Simulation::exportParticulesAll(std::ofstream & file) const {
+  // file << "# Recorded simulation (conf: "<<conf_file<<", scene: "<<scene_path<<", step: "<<t<< ")\n";
+  // for (auto &p : particules) {
+  //   VEC3 v = p->getPosition();
+  //   file<<"v "<<v(0)<<" "<<v(1)<<" "<<v(2)<<"\n";
+  // }
+  // for (auto &p : particules) {
+  //   MAT3 r = p->getRotation();
+  //   file<<"r ";
+  //   //    std::cout<<"r ";
+  //   for (uint i = 0; i < 9; ++i) {
+  //     file<<r(i)<<" ";
+  //     //std::cout<<r(i)<<" ";
+  //   }
+  //   file<<"\n";
+  // }
+  // for (auto &p : particules) {
+  //   VEC3 a = p->getAnisotropy();
+  //   file<<"a "<<a(0)<<" "<<a(1)<<" "<<a(2)<<"\n";
+  // }
+  // for (auto &p : particules) {
+  //   file<<"m "<<p->getMass()<<" "<<p->getVolume()<<" "<<p->getDensity()<<"\n";
+  // }
+  // for (auto &p : particules) {
+  //   VEC3 s = p->getVelocity();
+  //   file<<"s "<<s(0)<<" "<<s(1)<<" "<<s(2)<<"\n";
+  // }
+  // for (auto &p : particules) {
+  //   file<<"f ";
+  //   MAT3 Fe = p->getDeformationElastic();
+  //   MAT3 Fp = p->getDeformationPlastic();
+  //    for (uint i = 0; i < 9; ++i) {
+  //     file<<Fe(i)<<" ";
+  //    }
+  //    for (uint i = 0; i < 9; ++i) {
+  //      file<<Fp(i)<<" ";
+  //    }
+  // }
+  // for (auto &p : particules) {
+  //   file<<"c "<<p->getVolumeCorrection()<<"\n";
+  // }
   
 }
 
@@ -320,6 +449,7 @@ void Simulation::loadScene() {
     std::ifstream file(scene_path.c_str());
       std::string line;
       INFO(3, "load SCENE");
+
     while (getline(file, line)) {
       
       if (line.substr(0,11) == "<obstacles>") {
@@ -450,6 +580,37 @@ void Simulation::loadScene() {
 	      getline(file, line);
 	    }
 	    BoxObstacle *o = new BoxObstacle(min, max);
+	    obstacles.push_back(o);
+	    o->setFriction(fric);
+	    o->setMotions(motions);
+	    //INFO(3, "obstacles = "<<min<<"\n"<<max);
+	  // end box
+	     } else if (line.substr(0,11) == " <open box>") {
+	    VEC3 min(0, 0, 0);
+	    VEC3 max(0, 0, 0);
+	    FLOAT fric = mpm_conf::friction_coef_;
+	    getline(file, line);
+	    while (line.substr(0,12) != " </open box>") {
+	      if (line.substr(0,11) == "  <min pos>") {
+		std::istringstream s(line.substr(11));
+		for (uint i = 0; i < 3; ++i) {
+		  s >> min(i);
+		}
+	      } else if (line.substr(0,11) == "  <max pos>") {
+		std::istringstream s(line.substr(11));
+		for (uint i = 0; i < 3; ++i) {
+		  s >> max(i);
+		}
+	      } else if (line.substr(0,12) == "  <friction>") {
+		std::istringstream s(line.substr(12));
+		s >> fric;
+	      } else {
+		std::cerr<<"Line not recognized in file \""<<scene_path<<"\": "<<line<<std::endl;
+		exit(-1);
+	      }
+	      getline(file, line);
+	    }
+	    OpenBoxObstacle *o = new OpenBoxObstacle(min, max);
 	    obstacles.push_back(o);
 	    o->setFriction(fric);
 	    o->setMotions(motions);
@@ -595,7 +756,7 @@ void Simulation::loadScene() {
 		}
 		getline(file, line);
 	      }
-	      rotation = utils::rotation(angle, axe)*rotation;
+	      rotation = utils::rotation(angle, axe);//*rotation;
 		// rotation << 1, 0, 0,
 	      // 	0, sqrt(2.0)*0.5, sqrt(2.0)*0.5,
 	      // 	0, -sqrt(2.0)*0.5, sqrt(2.0)*0.5;
@@ -653,6 +814,7 @@ void Simulation::loadScene() {
 	    // }
 	    PoissonGenerator::PRNG prng;
 	    std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsR(nb_part, prng, 30, VEC3(w, l, h));
+	    uint i;
 	    nb_part = points.size();
 	    for (auto &v: points) {
 	      Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, v/*VEC3(0.05, 0.05, 0.052)*/ + VEC3(xmin, ymin, zmin), VEC3(0, 0, 1), vel);
@@ -661,7 +823,13 @@ void Simulation::loadScene() {
 	       if (random) {
 		 randomRotation(rotation);
 	       }
-	       p->setAnisotropyValues(1, 1, 0.1);
+	         if (i % 2 == 0) {
+		 p->setAnisotropyValues(1, 1, 0.1);
+	       } else {
+		 p->setAnisotropyValues(1, 1, 0.2);
+	       }
+	       ++i;
+	       //	       p->setAnisotropyValues(1, 1, 0.1);
 	       p->setAnisotropyRotation(rotation);
 	     }
 	    
@@ -716,6 +884,7 @@ void Simulation::loadScene() {
 	    PoissonGenerator::PRNG prng;
 	    std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsC(nb_part, prng, 30);
 	    nb_part = points.size();
+	    //	    uint i = 0;
 	    for (auto &v: points) {
 	      Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*v + center, VEC3(0, 0, 1), vel);
 	       particules.push_back(p);
@@ -732,8 +901,12 @@ void Simulation::loadScene() {
 	       if (random) {
 		 randomRotation(rotation);
 	       }
-	       
-	       p->setAnisotropyValues(1, 1, 0.1);
+	       // if (i % 2 == 0) {
+		 p->setAnisotropyValues(1, 1, 0.1);
+	       // } else {
+	       // 	 p->setAnisotropyValues(1, 1, 0.2);
+	       // }
+	       // ++i;
 	       p->setAnisotropyRotation(rotation);
 	      
 	     }
@@ -747,20 +920,206 @@ void Simulation::loadScene() {
 	  getline(file, line);	
 	}
 	 //end particules
+
+      } else if (line.substr(0,8) == "<camera>") {
+	getline(file, line);	
+	while (line.substr(0,9) != "</camera>") {
+	  if (line.substr(0,11) == " <position>") {
+	  std::istringstream s(line.substr(11));
+	  glm::vec3 pos;
+	  for (uint i = 0; i < 3; ++i) {
+	    s >> pos[i];
+	  }
+	  Scene::SCENE->setCameraPosition(pos);
+	  } else if (line.substr(0,14) == " <orientation>") {
+	    std::istringstream s(line.substr(14));
+	    glm::vec3 ori;
+	    for (uint i = 0; i < 3; ++i) {
+	      s >> ori[i];
+	    }
+	    Scene::SCENE->setCameraOrientation(ori);
+	  } else {
+	    std::cerr<<"Line not recognized in file (<camera>)\""<<scene_path<<"\": "<<line<<std::endl;
+	    exit(-1);
+	  }
+	  getline(file, line);	
+	}
+	// end camera
       } else {
 	std::cerr<<"Line not recognized in file \""<<scene_path<<"\": "<<line<<std::endl;
 	exit(-1);
       }
       
     } //end main loop
+
+    // DO NOT FORGET TO REMOVE
+    //mpm_conf::dt_ = 0.0001;
+    // addRotatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
+    //     addExtendingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
+    // addSimpleShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
+    //  addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
+    //addTranslatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
+
+
+    // // // TEST 
+    //  MAT3 I = MAT3::Identity();
+    //  MAT3 R = utils::rotation(0.007, VEC3(0, 1, 0));
+    //  MAT3 L ;
+    //  L << 0, 0, 7,
+    //    0, 0, 0,
+    //    -7, 0, 0;
+
+    // // INFO(3, "R*I\n"<< R*I);
+    // // INFO(3, "D + h(L*D + D*L)\n"<< I + 0.001*(L*I));
     
+    //   MAT3 D = MAT3::Identity();
+    //   D(0, 0) = 2;
+    //   D(1, 1) = 0.1;
+    //   D(2, 2) = 0.9;
+
+    //   INFO(3, "R*I\n"<< R*D*R.transpose());
+    //   INFO(3, "I + h(L*I + I*L)\n"<< D + 0.001*(L*D + D*L.transpose()));
+
+    //   MAT3 D1 = R*D*R.transpose();
+    //   MAT3 D1b =  D + 0.001*(L*D + D*L.transpose());
+    //   INFO(3, "R*I\n"<< R*D1*R.transpose());
+    //   INFO(3, "I + h(L*I + I*L)\n"<< D1b + 0.001*(L*D1b + D1b*L.transpose()));
+
+
+    
+    
+    // MAT3 M = R*D;//*R.transpose();
+    // M = 0.5*(M*M.transpose() - MAT3::Identity());
+    // M = M -  1.0/3.0*M.trace()* MAT3::Identity();
+    //  INFO(3, "M \n"<<M);
+    //  //INFO(3, "R \n"<<M);
+    
+    //  EigenSolver<MatrixXd> es(M);
+    //  INFO(3, "eigen values \n"<<es.eigenvalues()(0).real()<<" "<<es.eigenvalues()(1).real()<<" "<<es.eigenvalues()(2).real());
+    //  INFO(3, "eigen values \n"<<es.eigenvalues()(0).imag()<<" "<<es.eigenvalues()(1).imag()<<" "<<es.eigenvalues()(2).imag());
+    //  INFO(3, "eigen vec \n"<<es.eigenvectors().real());
+    //  INFO(3, "eigen vec \n"<<es.eigenvectors().imag());
+
+     // es.compute(R*R.transpose());
+     // INFO(3, "eigen values R\n"<<es.eigenvalues()(0).real()<<" "<<es.eigenvalues()(1).real()<<" "<<es.eigenvalues()(2).real());
+     // INFO(3, "eigen values R\n"<<es.eigenvalues()(0).imag()<<" "<<es.eigenvalues()(1).imag()<<" "<<es.eigenvalues()(2).imag());
+     // INFO(3, "eigen vec R\n"<<es.eigenvectors().real());
+     // INFO(3, "eigen vec R\n"<<es.eigenvectors().imag());
+   
 } // end loadScene
 
 
-// void Simulation::saveState(std::string save_file) {
-//     std::ofstream file(save_file);
-//     ERROR(file.good(), "cannot open file \""<<save_file<<"\"", "");
-//     INFO(1, "Save simulation state in file \""<<str<<"\"");
-//     exportParticules(file);
-//     file.close();
-//  }
+ void Simulation::saveState(std::string save_file) {
+     std::ofstream file(save_file);
+     ERROR(file.good(), "cannot open file \""<<save_file<<"\"", "");
+     INFO(1, "Save simulation state in file \""<<save_file<<"\"");
+     exportParticulesAll(file);
+     file.close();
+ }
+
+
+void Simulation::addRotatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT angular_speed) { 
+     PoissonGenerator::PRNG prng;
+     uint nb_part = 10000;
+     std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsC(nb_part, prng, 30);
+     FLOAT volume = 4.0/3.0*M_PI*pow(ray, 3);
+     nb_part = points.size();
+     VEC3 n(-1, 0, 0);
+     //	    uint i = 0;
+     for (auto &v: points) {
+       VEC3 dir = ray*(v-VEC3(0.5, 0.5, 0.5));
+       //dir.normalize();
+       VEC3 vel = angular_speed*dir.cross(n);
+       Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), vel);
+       particules.push_back(p);
+        p->setAnisotropyValues(1, 1, 1);
+	// p->setAnisotropyRotation(utils::rotation(1.5708, VEC3(1, 0, 0)));
+     }
+     
+}
+
+void Simulation::addExtendingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed) { 
+     PoissonGenerator::PRNG prng;
+     uint nb_part = 10000;
+     std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsC(nb_part, prng, 30);
+     FLOAT volume = 4.0/3.0*M_PI*pow(ray, 3);
+     nb_part = points.size();
+     VEC3 n(-1, 0, 0);
+     //	    uint i = 0;
+     for (auto &v: points) {
+       VEC3 dir = (v-VEC3(0.5, 0.5, 0.5));
+       //dir.normalize();
+       VEC3 vel = VEC3(0, speed*(v(1) - 0.5), 0);
+       Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), vel);
+       particules.push_back(p);
+        p->setAnisotropyValues(1, 1, 0.1);
+	//	p->setAnisotropyRotation(utils::rotation(1.5708, VEC3(1, 0, 0)));
+     }
+     
+}
+
+
+void Simulation::addSimpleShearingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed) { 
+     PoissonGenerator::PRNG prng;
+     uint nb_part = 10000;
+     std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsC(nb_part, prng, 30);
+     FLOAT volume = 4.0/3.0*M_PI*pow(ray, 3);
+     nb_part = points.size();
+     VEC3 n(-1, 0, 0);
+     //	    uint i = 0;
+     for (auto &v: points) {
+       VEC3 dir = (v-VEC3(0.5, 0.5, 0.5));
+       //dir.normalize();
+       VEC3 vel = VEC3(0, speed*(v(2) - 0.5), 0);
+       Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), vel);
+       particules.push_back(p);
+        p->setAnisotropyValues(1, 1, 0.1);
+	//p->setAnisotropyRotation(utils::rotation(1.5708, VEC3(1, 0, 0)));
+     }
+     
+}
+
+
+void Simulation::addPurShearingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed) { 
+     PoissonGenerator::PRNG prng;
+     uint nb_part = 10000;
+     std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsC(nb_part, prng, 30);
+     FLOAT volume = 4.0/3.0*M_PI*pow(ray, 3);
+     nb_part = points.size();
+     VEC3 n(-1, 0, 0);
+     //	    uint i = 0;
+     for (auto &v: points) {
+       VEC3 dir = (v-VEC3(0.5, 0.5, 0.5));
+       dir.normalize();
+       VEC3 vel = VEC3(0, speed*(v(1) - 0.5), -speed*(v(2) - 0.5));
+       Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), vel);
+       particules.push_back(p);
+        p->setAnisotropyValues(1, 1, 0.1);
+
+	p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
+     }
+     
+}
+
+
+void Simulation::addTranslatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed) { 
+     PoissonGenerator::PRNG prng;
+     uint nb_part = 10000;
+     std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsC(nb_part, prng, 30);
+     FLOAT volume = 4.0/3.0*M_PI*pow(ray, 3);
+     nb_part = points.size();
+     VEC3 n(-1, 0, 0);
+     //	    uint i = 0;
+     for (auto &v: points) {
+       VEC3 dir = (v-VEC3(0.5, 0.5, 0.5));
+       //dir.normalize();
+       VEC3 vel = VEC3(0, speed, 0);
+       Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), vel);
+       particules.push_back(p);
+        p->setAnisotropyValues(1, 1, 0.1);
+	p->setAnisotropyRotation(utils::rotation(1.5708, VEC3(1, 0, 0)));
+     }
+     
+}
+
+

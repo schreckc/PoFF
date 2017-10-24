@@ -19,13 +19,26 @@ PlaneObstacle::PlaneObstacle(VEC3 p, VEC3 n, FLOAT l, FLOAT w, int shader) : Obs
   }
 }
 
+PlaneObstacle::PlaneObstacle(VEC3 p, VEC3 n, FLOAT l, FLOAT w, VEC3 d1, VEC3 d2, int shader) : Obstacle(shader) {
+  pos = p;
+  normal = n;
+  normal.normalize();
+  length = l;
+  width = w;
+
+  v1 = d1;
+  v2 = d2;
+}
+
+PlaneObstacle::~PlaneObstacle() {}
+
 // void PlaneObstacle::animate() {
 //   rotate(-0.05*mpm_conf::dt_, VEC3(0, 1, 0));
 // }
 
 void PlaneObstacle::apply(Motion m) {
+  //   INFO(3, "center\n"<<m.center);
   if (m.rotation_center_def) {
-    //INFO(3, "center\n"<<m.center);
     VEC3 diff = pos - m.center;
     diff = m.rotation*diff;
     pos = m.center + diff;
@@ -37,6 +50,9 @@ void PlaneObstacle::apply(Motion m) {
   normal = m.rotation*normal;
   v1 = m.rotation*v1;
   v2 = m.rotation*v2;
+     v2.normalize();
+    v1.normalize();
+    normal.normalize();
    //   INFO(3, "scale "<<scale);
 }
   
@@ -75,6 +91,12 @@ void PlaneObstacle::draw(glm::mat4 m, int s) {
   
   GLfloat colors[18] = {0.9, 0.9, 1.0,   0.9, 0.9, 1.0,  0.9, 0.9, 1.0,
 			0.9, 0.9, 1.0,   0.9, 0.9, 1.0,  0.9, 0.9, 1.0};
+
+  float coordTexture[12] =  {0, 0,   1, 0,   1, 1,
+    			     1, 1,   0, 1,   0, 0};
+  
+   m_shader = 1;
+   m_texture = 2;
   enableShader();
    setMVP(m, s);
   
@@ -86,9 +108,13 @@ void PlaneObstacle::draw(glm::mat4 m, int s) {
     
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, vertices);
     glEnableVertexAttribArray(2);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 0, coordTexture);
+    glEnableVertexAttribArray(3);
+    
 
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
+    
+    glDisableVertexAttribArray(3);
     glDisableVertexAttribArray(2);
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
@@ -157,15 +183,34 @@ void PlaneObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &n) const {
   // }
   VEC3 proj = utils::projectionOrtho(p, pos, v1, v2);
   dist = 10;
+  
+  // if (length != 0) {
+  //   FLOAT d1 = v1.dot(proj-pos);
+  //   if (d1 > 0.5*length) {
+  //     proj += -(d1 -  0.5*length)*v1;
+  //   } else if (d1 < -0.5*length) {
+  //     proj += (-d1 -  0.5*length)*v1;
+  //   }
+  //   FLOAT d2 =  v2.dot(proj-pos);
+  //   if (d2 > 0.5*width) {
+  //     proj += -(d2 -  0.5*width)*v2;
+  //   } else if (d2 < -0.5*width) {
+  //     proj += (-d2 -  0.5*width)*v2;
+  //   }
+  // }
   if (length == 0 || (fabs(v1.dot(proj-pos)) < 0.5*length && fabs(v2.dot(proj-pos)) < 0.5*width)) {
     dist = (proj - p).norm();
+    // n = p - proj;//normal;
+    // n.normalize();
     if (normal.dot(p-pos) < 0) {
       dist = -dist;
+      //      n = -n;
     }
-   }
+  }
 
     //INFO(3, "dist "<<dist);
-  n = normal;
+  
+        n = normal;
 }
 
 void PlaneObstacle::rotate(FLOAT angle, VEC3 axe) {

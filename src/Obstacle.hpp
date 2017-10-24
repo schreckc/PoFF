@@ -42,6 +42,7 @@ public :
 
   void setMotions(std::list<Motion> lm);
   void addMotion(Motion m);
+  bool isMoving() const;
 };
 
 #endif

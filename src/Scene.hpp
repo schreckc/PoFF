@@ -23,6 +23,7 @@
 #include "CameraObject.hpp"
 #include "Object.hpp"
 #include "Simulation.hpp"
+#include "Skybox.hpp"
 #include <SDL2/SDL_ttf.h>
 
 class Scene {
@@ -47,6 +48,8 @@ public:
   Shader* getShader(uint i);
   Texture* getTexture(uint i);
   glm::vec3 getCameraPosition() const;
+  void setCameraPosition(glm::vec3 pos);
+  void setCameraOrientation(glm::vec3 pos);
 
   void setLoad(std::string);
   void setExport(std::string);
@@ -57,6 +60,7 @@ public:
   void setStop(uint t_end);
 
   FLOAT getTime();
+  void printCameraPos();
     bool running;
 private:
   uint step_by_step;
@@ -95,6 +99,8 @@ private:
   Uint32 m_debutBoucle, m_finBoucle, m_tempsEcoule;
   unsigned int m_input_rate;
   Uint32 m_input_loop0, m_input_loop1, m_input_loop_time;
+
+  Skybox *skybox;
 };
 
 void render_text(SDL_Renderer *renderer,
