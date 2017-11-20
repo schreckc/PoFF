@@ -338,11 +338,17 @@ export OMP_PROC_BIND=true
 #./poff_no_graph -l test_goo_ap2.conf -s rotating_planesv.sc -e test_goo_ap2/testv_ -es 40 -stop 40000
 
 
-rm -r test_sand_mixer2
-mkdir test_sand_mixer2
-./poff_no_graph -l sand3.conf -s rotating_planesr.sc -e test_sand_mixer2/testr_ -es 4 -stop 4000
-./poff_no_graph -l sand3.conf -s rotating_planesh.sc -e test_sand_mixer2/testh_ -es 4 -stop 4000
-./poff_no_graph -l sand3.conf -s rotating_planesd.sc -e test_sand_mixer2/testd_ -es 4 -stop 4000
-./poff_no_graph -l sand3.conf -s rotating_planesd2.sc -e test_sand_mixer2/testd2_ -es 4 -stop 4000
-./poff_no_graph -l sand3.conf -s rotating_planesv.sc -e test_sand_mixer2/testv_ -es 4 -stop 4000
-./poff_no_graph -l sand3.conf -s rotating_planesv2.sc -e test_sand_mixer2/testv2_ -es 4 -stop 4000
+#rm -r test_sand_mixer2
+#mkdir test_sand_mixer2
+#./poff_no_graph -l sand3.conf -s rotating_planesr.sc -e test_sand_mixer2/testr_ -es 4 -stop 4000
+#./poff_no_graph -l sand3.conf -s rotating_planesh.sc -e test_sand_mixer2/testh_ -es 4 -stop 4000
+#./poff_no_graph -l sand3.conf -s rotating_planesd.sc -e test_sand_mixer2/testd_ -es 4 -stop 4000
+#./poff_no_graph -l sand3.conf -s rotating_planesd2.sc -e test_sand_mixer2/testd2_ -es 4 -stop 4000
+#./poff_no_graph -l sand3.conf -s rotating_planesv.sc -e test_sand_mixer2/testv_ -es 4 -stop 4000
+#./poff_no_graph -l sand3.conf -s rotating_planesv2.sc -e test_sand_mixer2/testv2_ -es 4 -stop 4000
+
+#rm -r test_wood
+#mkdir test_wood
+#./poff_no_graph -l test_wood.sc -s broken_cuboidv.sc -e test_wood/testv_ -es 10 -stop 20000
+./poff_no_graph -l test_wood.sc -s broken_cuboidh.sc -e test_wood/testh_ -es 10 -stop 20000
+./poff_no_graph -l test_wood.sc -s broken_cuboidd.sc -e test_wood/testd_ -es 10 -stop 20000

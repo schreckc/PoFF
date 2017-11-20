@@ -50,6 +50,7 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, int shader)
   
   masses = std::vector<FLOAT>(nb_nodes);
   active_nodes = std::vector<bool>(nb_nodes);
+  fixed_nodes = std::vector<bool>(nb_nodes);
   velocities = std::vector<VEC3>(nb_nodes);
   inter_velocities = std::vector<VEC3>(nb_nodes);
   prev_velocities = std::vector<VEC3>(nb_nodes);
@@ -68,6 +69,7 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, int shader)
 	//std::cout<<index(i, j, k)<<std::endl;
 	positions[index(i, j, k)] = VEC3(i*mpm_conf::grid_spacing_, j*mpm_conf::grid_spacing_, k*mpm_conf::grid_spacing_);
 	velocities[index(i, j, k)] = VEC3(0, 0, 0);
+	fixed_nodes[index(i, j, k)] = false;
       }
     }
   }
@@ -748,31 +750,31 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
     density_av /= s3;
     p->setDensity(density_max);
     
-    // /* Rotation */
-    // MAT3 A = MAT3::Zero(3, 3);
-    // FLOAT sum = 0;
-    //  for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
-    //   if (i >= 0 && i <= (int)i_max) {
-    // 	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
-    // 	  if (j >= 0 && j <= (int)j_max) {
-    // 	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
-    // 	      if (k >= 0 && k <= (int)k_max) {
-    // 		uint ind = index(i, j, k);
-    // 		if (active_nodes[ind]) {
-    // 		  FLOAT w = p->weight(Vector3i(i, j, k));
-    // 		  sum += w;
-    // 		  A += w * (new_positions[ind] - p->getPosition())*(positions[ind] - prev_pos).transpose();
-    // 		}
-    // 	      }
-    // 	    }
-    // 	  }
-    // 	}
-    //   }
-    //  }
-    //  A /= sum;
-    //  JacobiSVD<MAT3> svd(A, ComputeFullU | ComputeFullV);
-    //  MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
-    //  p->rotate(rot);
+    // // /* Rotation */
+    // // MAT3 A = MAT3::Zero(3, 3);
+    // // FLOAT sum = 0;
+    // //  for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
+    // //   if (i >= 0 && i <= (int)i_max) {
+    // // 	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
+    // // 	  if (j >= 0 && j <= (int)j_max) {
+    // // 	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
+    // // 	      if (k >= 0 && k <= (int)k_max) {
+    // // 		uint ind = index(i, j, k);
+    // // 		if (active_nodes[ind]) {
+    // // 		  FLOAT w = p->weight(Vector3i(i, j, k));
+    // // 		  sum += w;
+    // // 		  A += w * (new_positions[ind] - p->getPosition())*(positions[ind] - prev_pos).transpose();
+    // // 		}
+    // // 	      }
+    // // 	    }
+    // // 	  }
+    // // 	}
+    // //   }
+    // //  }
+    // //  A /= sum;
+    // //  JacobiSVD<MAT3> svd(A, ComputeFullU | ComputeFullV);
+    // //  MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
+    // //  p->rotate(rot);
 
      if (mpm_conf::method_ == mpm_conf::apic_ || mpm_conf::method_ == mpm_conf::pic_) {
       p->update(pos, vel, B, T);
@@ -786,33 +788,33 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
       p->update(pos, v, B, T);
     }
 
-    // /* Rotation */
-    // MAT3 A = MAT3::Zero(3, 3);
-    // FLOAT sum = 0;
-    //  for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
-    //   if (i >= 0 && i <= (int)i_max) {
-    // 	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
-    // 	  if (j >= 0 && j <= (int)j_max) {
-    // 	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
-    // 	      if (k >= 0 && k <= (int)k_max) {
-    // 		uint ind = index(i, j, k);
-    // 		if (active_nodes[ind]) {
-    // 		  FLOAT w = p->weight(Vector3i(i, j, k));
-    // 		  sum += w;
-    // 		  A += w * (new_positions[ind] - p->getPosition())*(positions[ind] - prev_pos).transpose();
-    // 		}
-    // 	      }
-    // 	    }
-    // 	  }
-    // 	}
-    //   }
-    //  }
-    //  A /= sum;
-    //  JacobiSVD<MAT3> svd(A, ComputeFullU | ComputeFullV);
-    //  MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
-    //  p->rotate(rot);
+    /* Rotation */
+    MAT3 A = MAT3::Zero(3, 3);
+    FLOAT sum = 0;
+     for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
+      if (i >= 0 && i <= (int)i_max) {
+    	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
+    	  if (j >= 0 && j <= (int)j_max) {
+    	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
+    	      if (k >= 0 && k <= (int)k_max) {
+    		uint ind = index(i, j, k);
+    		if (active_nodes[ind]) {
+    		  FLOAT w = p->weight(Vector3i(i, j, k));
+    		  sum += w;
+    		  A += w * (new_positions[ind] - p->getPosition())*(positions[ind] - prev_pos).transpose();
+    		}
+    	      }
+    	    }
+    	  }
+    	}
+      }
+     }
+     A /= sum;
+     JacobiSVD<MAT3> svd(A, ComputeFullU | ComputeFullV);
+     MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
+     p->rotate(rot);
     
-  }
+   }
   // INFO(2, "END Grid 2 Part");
 }
 
@@ -979,7 +981,12 @@ void Grid::collision(std::list<Obstacle*> obstacles) {
   //  INFO(2, "Collision");
 #pragma omp parallel for
   for (uint i = 0; i < nb_nodes; ++i) {
-    if (active_nodes[i]) {
+     if (fixed_nodes[i]) {
+       velocities[i] = VEC3(0, 0, 0);
+       inter_velocities[i] = VEC3(0, 0, 0);
+       new_positions[i] = positions[i];
+     } else
+      if (active_nodes[i]) {
       VEC3 n(0, 0, 1);// = ob->getNormal(pos);
       FLOAT d = 10;// = ob->distance(pos);
       // FLOAT d_prev;
@@ -1148,4 +1155,20 @@ MAT3 Grid::secondDer(uint i, uint j, std::vector<Particule*> & particules) {
   //   }
   // }
   return second_der;
+}
+
+
+void Grid::fix(VEC3 min, VEC3 max) {
+  INFO(3, "min\n"<<min);
+  INFO(3, "max\n"<<max);
+  for (uint i = 0; i < nb_nodes; ++i) {
+    bool to_fix = true;
+    VEC3 v = positions[i];
+    for (uint i = 0; i < 3; ++i) {
+      to_fix = to_fix && v(i) > min(i) && v(i) < max(i);
+    }
+    if (to_fix) {
+      fixed_nodes[i] = true;
+    }
+  }
 }

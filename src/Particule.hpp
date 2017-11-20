@@ -79,6 +79,8 @@ private :
 
   // volume correction
   FLOAT vp; //plastic volume change 
+
+  bool fixed;
   
 public:
   Particule(int shader = -1);
@@ -151,6 +153,8 @@ public:
   FLOAT energySecondDer(VEC3 sigma, uint i, uint j);
 
   MAT3 getOrientation();
+
+  void fix();
 };
 
 

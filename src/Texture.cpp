@@ -59,7 +59,7 @@ bool Texture::charger() {
       format = GL_BGR;
     }
   } else if (imageInversee->format->BytesPerPixel == 4) {
-    std::cout<< "RGBAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"<< std::endl;
+    //    std::cout<< "RGBAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"<< std::endl;
     formatInterne = GL_RGBA;
     if(imageInversee->format->Rmask == 0xff) {
       format = GL_RGBA;

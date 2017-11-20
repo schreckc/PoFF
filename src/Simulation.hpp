@@ -64,10 +64,13 @@ public :
   void saveState(std::string save_file);
   
   void addRotatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT angular_speed);
+  void addRotatingCubeOfParticules(VEC3 center, FLOAT ray, FLOAT angular_speed);
   void addExtendingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed);
   void addSimpleShearingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed);
   void addPurShearingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed);
   void addTranslatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed);
+
+  void fix(VEC3 min, VEC3 max);
 };
 
 

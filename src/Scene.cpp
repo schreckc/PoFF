@@ -243,7 +243,7 @@ void Scene::draw() {
   for (it = l_objects.begin(); it != l_objects.end(); ++it) {
       (*it)->draw();
   }
-  skybox->draw();
+  //skybox->draw();
 }
 
 
@@ -266,7 +266,7 @@ void Scene::animationLoop() {
       running = !running;
     }
     if(m_input.getTouche(SDL_SCANCODE_SPACE)) {
-      --back;
+      // --back;
       ++step_by_step;
     }
     if(m_input.getTouche(SDL_SCANCODE_BACKSPACE)) {
@@ -346,6 +346,7 @@ void Scene::bouclePrincipale() {
       re_init = false;
     }
     if (back) {
+      //      INFO(3, "back "<<back);
       sim->backward(back+mpm_conf::replay_speed_);
       back = 0;
     }
