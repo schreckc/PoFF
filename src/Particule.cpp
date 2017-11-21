@@ -138,8 +138,8 @@ void Particule::draw(glm::mat4 m, int s) {
       D[1] = glm::vec3(0, valy, 0);
       D[2] = glm::vec3(0, 0, valz);
 
-      glm::mat3 S = R*D;
-      //glm::mat3 S = R;
+      //glm::mat3 S = R*D;
+      glm::mat3 S = R;
       glm::mat4 S4 = glm::mat4(S);
        cur_model = cur_model * S4;
       //}
