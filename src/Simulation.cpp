@@ -951,16 +951,16 @@ void Simulation::loadScene() {
 	}
 #endif
 	// end camera
-      // } else if (line.substr(0,5) == "<fix>") {
-      // 	std::istringstream s(line.substr(5));
-      // 	VEC3 min, max;
-      // 	for (uint i = 0; i < 3; ++i) {
-      // 	  s >> min(i);
-      // 	}
-      // 	for (uint i = 0; i < 3; ++i) {
-      // 	  s >> max(i);
-      // 	}
-      // 	fix(min, max);
+      } else if (line.substr(0,5) == "<fix>") {
+	std::istringstream s(line.substr(5));
+	VEC3 min, max;
+	for (uint i = 0; i < 3; ++i) {
+	  s >> min(i);
+	}
+	for (uint i = 0; i < 3; ++i) {
+	  s >> max(i);
+	}
+	fix(min, max);
       } else {
 	std::cerr<<"Line not recognized in file \""<<scene_path<<"\": "<<line<<std::endl;
 	exit(-1);
@@ -1195,6 +1195,6 @@ void Simulation::addTranslatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT 
 }
 
 
-// void Simulation::fix(VEC3 min, VEC3 max) {
-//   grid.fix(min, max);
-// }
+void Simulation::fix(VEC3 min, VEC3 max) {
+  grid.fix(min, max);
+}

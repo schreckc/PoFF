@@ -339,16 +339,16 @@ namespace mpm_conf {
    // map from anisotropic to isotropc space
    for (uint i = 0; i < 3; ++i) {
      for (uint j = 0; j < 3; ++j) {
-        anisotropy_stress_(i, j, i, j) = anisotropy_values_(i);
-        inv_anisotropy_stress_(i, j, i, j) = 1.0/anisotropy_values_(i);
+      //   anisotropy_stress_(i, j, i, j) = anisotropy_values_(i);
+      //   inv_anisotropy_stress_(i, j, i, j) = 1.0/anisotropy_values_(i);
+      // }
+       anisotropy_stress_(i, j, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
+       anisotropy_stress_(j, i, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
+       inv_anisotropy_stress_(i, j, i, j) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
+       inv_anisotropy_stress_(i, j, j, i) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
       }
-     //   anisotropy_stress_(i, j, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
-     //   anisotropy_stress_(j, i, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
-     //   inv_anisotropy_stress_(i, j, i, j) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
-     //   inv_anisotropy_stress_(i, j, j, i) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
-     //  }
-     // anisotropy_stress_(i, i, i, i) = anisotropy_values_(i)*anisotropy_values_(i);
-     // inv_anisotropy_stress_(i, i, i, i) = 1.0/anisotropy_values_(i)/anisotropy_values_(i);
+     anisotropy_stress_(i, i, i, i) = anisotropy_values_(i)*anisotropy_values_(i);
+     inv_anisotropy_stress_(i, i, i, i) = 1.0/anisotropy_values_(i)/anisotropy_values_(i);
 
    }
    Tensor C_iso = mat2TensorOrtho(tangent_stiffness_iso);

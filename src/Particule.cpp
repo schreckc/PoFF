@@ -877,7 +877,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
    FLOAT l = (length/width - 1)/(length/width + 1); //ellongation of the ellipsoidal object
  
  // //  // INFO(3, "D\n"<<D);
- // //  // INFO(3, "W\n"<<W);
+   //  INFO(3, "W\n"<<W);
 
  // //    // W << 0, 0, 0,
  // //    //  0, 0, 0,
@@ -887,14 +887,24 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  // //  //   0, 20, 0;
  // //            // rotation = utils::rotation(mpm_conf::dt_*100, VEC3(1, 0, 0));
 
+  //   INFO(3, "rotation*roation\n"<< rotation*rotation.transpose());
    // rotation += mpm_conf::dt_ *(W*rotation);// + l*D*rotation);
-
+   // for (uint i = 0; i < 3; ++i) {
+   //   rotation.col(i).normalize();
+   // }
+   //  rotation.col(2) = rotation.col(0).cross(rotation.col(1));
+   //  rotation.col(1) = rotation.col(2).cross(rotation.col(0));
+    //   INFO(3, "rotation*roation\n"<< rotation*rotation.transpose());
    // es.compute(rotation);
+   // rotation = es.eigenvectors().real()*es.eigenvectors().real().transpose();
+   // INFO(3, "eigen values \n"<<es.eigenvalues()(0).real()<<" "<<es.eigenvalues()(1).real()<<" "<<es.eigenvalues()(2).real());
+   // INFO(3, "eigen values \n"<<es.eigenvalues()(0).imag()<<" "<<es.eigenvalues()(1).imag()<<" "<<es.eigenvalues()(2).imag());
+   //  INFO(3, "eigen vec \n"<<es.eigenvectors().real());
    // FLOAT norm = std::fabs(es.eigenvalues()(0).real()) + std::fabs(es.eigenvalues()(1).real()) + std::fabs(es.eigenvalues()(2).real());
    // rotation /= norm;
    // rotation *= 3.0;
 
-   // INFO(3, "rotation*roation\n"<< rotation*rotation.transpose());
+   
 
  // //   // //  //  for (uint i = 0; i < 3; ++i) {
  // // // //  //     rotation.col(i).normalize();
