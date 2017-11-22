@@ -349,6 +349,7 @@ export OMP_PROC_BIND=true
 
 #rm -r test_wood
 mkdir test_wood4
-./poff_no_graph -l test_wood.sc -s broken_cuboidv.sc -e test_wood4/testv_ -es 20 -stop 30000
-./poff_no_graph -l test_wood.sc -s broken_cuboidh.sc -e test_wood4/testh_ -es 20 -stop 30000
-./poff_no_graph -l test_wood.sc -s broken_cuboidd.sc -e test_wood4/testd_ -es 20 -stop 30000
+./poff_no_graph -l test_wood.sc -s broken_cuboid2v.sc -e test_wood/testv_ -es 10 -stop 15000
+./poff_no_graph -l test_wood.sc -s broken_cuboid2h.sc -e test_wood/testh_ -es 10 -stop 15000
+./poff_no_graph -l test_wood.sc -s broken_cuboid2d.sc -e test_wood/testd_ -es 10 -stop 15000
+./poff_no_graph -l test_wood.sc -s broken_cuboid2d2.sc -e test_wood/testd2_ -es 10 -stop 15000

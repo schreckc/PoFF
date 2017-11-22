@@ -4,7 +4,7 @@
 <grid_spacing> 0.01
 <young_modulus_vec> 1e5 1e5 1e5
 <poisson_ratio_vec> 0.1 0.1 0.1
-<time_step> 0.00005 
+<time_step> 0.0001 
 <density> 800
 <gravity> 0 0 -9.81
 <friction> 1
@@ -17,4 +17,4 @@
 <method> apic
 <stretch_max> 0.0025
 <stretch_min> 0.0
-<anisotropy> 0.7 0.7 1.6
+<anisotropy> 0.8 0.8 1.4
