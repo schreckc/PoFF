@@ -130,7 +130,7 @@ void Particule::draw(glm::mat4 m, int s) {
 
 
       
-      //      valx = 0.05; valy = 0.05;  valz = 0.9;
+            valx = 0.1; valy = 0.1;  valz = 0.8;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
       //valx = 1; valy = 1;  valz = 1;
       glm::mat3 D;
@@ -138,8 +138,8 @@ void Particule::draw(glm::mat4 m, int s) {
       D[1] = glm::vec3(0, valy, 0);
       D[2] = glm::vec3(0, 0, valz);
 
-      //glm::mat3 S = R*D;
-      glm::mat3 S = R;
+      glm::mat3 S = R*D;
+      //glm::mat3 S = R;
       glm::mat4 S4 = glm::mat4(S);
        cur_model = cur_model * S4;
       //}
@@ -829,9 +829,9 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   
      // INFO(3, "vel prev\n"<<vel);
      // INFO(3, "vel new\n"<<v);
-      // VEC3 n(-1, 0, 0);
-      // VEC3 d = (pos- VEC3(0.5, 0.5, 0.45));
-      // vel = 100*d.cross(n);
+  // VEC3 n(-1, 0, 0);
+  // VEC3 d = (pos- VEC3(0.5, 0.5, 0.45));
+  // vel = 10*d.cross(n);
 
   vel = v;
    
@@ -888,13 +888,17 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  // //            // rotation = utils::rotation(mpm_conf::dt_*100, VEC3(1, 0, 0));
 
   //   INFO(3, "rotation*roation\n"<< rotation*rotation.transpose());
-   // rotation += mpm_conf::dt_ *(W*rotation);// + l*D*rotation);
-   // for (uint i = 0; i < 3; ++i) {
-   //   rotation.col(i).normalize();
-   // }
-   //  rotation.col(2) = rotation.col(0).cross(rotation.col(1));
-   //  rotation.col(1) = rotation.col(2).cross(rotation.col(0));
-    //   INFO(3, "rotation*roation\n"<< rotation*rotation.transpose());
+
+
+    // rotation += mpm_conf::dt_ *(W*rotation);// + l*D*rotation);
+    // for (uint i = 0; i < 3; ++i) {
+    //    rotation.col(i).normalize();
+    //  }
+    //   rotation.col(2) = rotation.col(0).cross(rotation.col(1));
+    //   rotation.col(1) = rotation.col(2).cross(rotation.col(0));
+   
+
+   //   INFO(3, "rotation*roation\n"<< rotation*rotation.transpose());
    // es.compute(rotation);
    // rotation = es.eigenvectors().real()*es.eigenvectors().real().transpose();
    // INFO(3, "eigen values \n"<<es.eigenvalues()(0).real()<<" "<<es.eigenvalues()(1).real()<<" "<<es.eigenvalues()(2).real());

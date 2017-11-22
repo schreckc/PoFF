@@ -969,14 +969,14 @@ void Simulation::loadScene() {
     } //end main loop
 
     // DO NOT FORGET TO REMOVE
-    //mpm_conf::dt_ = 0.0001; 
-    //    addRotatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 50);
-    // addRotatingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 100);
-    //  addExtendingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
-    //   addSimpleShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 3);
+    // mpm_conf::dt_ = 0.0001; 
+    // addRotatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
+    // addRotatingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.05, 10);
+    // addExtendingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
+    // addSimpleShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 3);
     // addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
-    //addTranslatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
-    //    mpm_conf::anisotropy_on = false;
+    // addTranslatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
+    // mpm_conf::anisotropy_on = false;
 
 
     
@@ -1092,9 +1092,9 @@ void Simulation::addRotatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT ang
 
 void Simulation::addRotatingCubeOfParticules(VEC3 center, FLOAT ray, FLOAT angular_speed) { 
      PoissonGenerator::PRNG prng;
-     uint nb_part = 6000;
+     uint nb_part = 1000;
      std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsR(nb_part, prng, 30, 2*VEC3(ray, ray, ray));
-     FLOAT volume = 4.0/3.0*M_PI*pow(ray, 3);
+     FLOAT volume = pow(ray, 3);
      nb_part = points.size();
      VEC3 n(-1, 0, 0);
      //	    uint i = 0;
@@ -1151,6 +1151,27 @@ void Simulation::addSimpleShearingSphereOfParticules(VEC3 center, FLOAT ray, FLO
      
 }
 
+void Simulation::addSimpleShearingCubeOfParticules(VEC3 center, FLOAT ray, FLOAT speed) { 
+     PoissonGenerator::PRNG prng;
+     uint nb_part = 10000;
+     std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsR(nb_part, prng, 30, 2*VEC3(ray, ray, ray));
+     FLOAT volume = pow(ray, 3);
+     nb_part = points.size();
+     VEC3 n(-1, 0, 0);
+     //	    uint i = 0;
+     for (auto &v: points) {
+       VEC3 dir = (v-VEC3(ray, ray, ray));
+       dir.normalize();
+       VEC3 vel = VEC3(0, speed*(v(2) - ray), 0);
+       Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, (v-VEC3(ray, ray, ray)) + center, VEC3(0, 0, 1), vel);
+       particules.push_back(p);
+        p->setAnisotropyValues(1, 1, 1);
+
+	p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
+     }
+     
+}
+
 
 void Simulation::addPurShearingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed) { 
      PoissonGenerator::PRNG prng;
@@ -1165,6 +1186,27 @@ void Simulation::addPurShearingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT 
        dir.normalize();
        VEC3 vel = VEC3(0, speed*(v(1) - 0.5), -speed*(v(2) - 0.5));
        Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), vel);
+       particules.push_back(p);
+        p->setAnisotropyValues(1, 1, 1);
+
+	p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
+     }
+     
+}
+
+void Simulation::addPurShearingCubeOfParticules(VEC3 center, FLOAT ray, FLOAT speed) { 
+     PoissonGenerator::PRNG prng;
+     uint nb_part = 10000;
+     std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsR(nb_part, prng, 30, 2*VEC3(ray, ray, ray));
+     FLOAT volume = pow(ray, 3);
+     nb_part = points.size();
+     VEC3 n(-1, 0, 0);
+     //	    uint i = 0;
+     for (auto &v: points) {
+       VEC3 dir = (v-VEC3(ray, ray, ray));
+       dir.normalize();
+       VEC3 vel = VEC3(0, speed*(v(1) - ray), -speed*(v(2) - ray));
+       Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, (v-VEC3(ray, ray, ray)) + center, VEC3(0, 0, 1), vel);
        particules.push_back(p);
         p->setAnisotropyValues(1, 1, 1);
 
