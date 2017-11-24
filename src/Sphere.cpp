@@ -1,4 +1,3 @@
-#ifndef NO_GRAPHICS_ 
 
 #include "Sphere.hpp"
 
@@ -8,16 +7,23 @@
 
 #include "Scene.hpp"
 
+#ifndef NO_GRAPHICS_ 
 
  GLfloat* Sphere::vertices = new GLfloat[Sphere::size_array];
  GLfloat* Sphere::normals = new GLfloat[Sphere::size_array];
 // GLfloat* Sphere::colors_sphere = new GLfloat[Sphere::size_array];
 
+#endif
+
 Sphere::Sphere(float s, int shader): Object(shader) {
     m_size = s;
     // m_model_view = translate(m_model_view, glm::vec3(0.0, 5.0, 0.0));
+    
+
+   #ifndef NO_GRAPHICS_
     m_model_view = scale(m_model_view, glm::vec3(s, s, s));
     m_texture = NULL;
+    #endif
     // create_array();
     // for (uint i = 0; i < 18*meridians_count + 18*meridians_count* (parallels_count-1); i+= 3) {
     //   std::cout <<"("<<vertices_sphere[i]<<", "<<vertices_sphere[i+1]<<", "<<vertices_sphere[i+2]<<") "<< std::endl;
@@ -44,6 +50,8 @@ void Sphere::setColor(float r, float g, float b) {
   
   void Sphere::animate() {
   }
+
+#ifndef NO_GRAPHICS_ 
 
 void Sphere::draw(glm::mat4 m, int s) {
   GLfloat colors[size_array];

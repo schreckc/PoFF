@@ -4,6 +4,7 @@
 #include "mpm_conf.hpp"
 #include "Eigen/Dense"
 #include "Eigen/Core"
+#include <vector>
 
 class Tensor {
   uint dim;

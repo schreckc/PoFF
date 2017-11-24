@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include "mpm_conf.hpp"
+#include <vector>
 
 #define EPS 0.0000001
 
