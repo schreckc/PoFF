@@ -5,7 +5,9 @@
 
 #include "Object.hpp"
 #include <glm/gtx/transform.hpp>
-    
+#include "mpm_conf.hpp"
+#include <list>
+
 class Sphere : public Object {
 private :
   float m_size;
@@ -33,6 +35,10 @@ public :
   static void create_vertex(float theta, float phi, uint &index);
   //void delete_array();
 
+  void addToMesh(MAT3 S, std::list<VEC3> & points, std::list<VEC3> & normals,
+		 std::list<VEC2> & tex_points, std::list<unsigned int> & connectivity);
+  void addPoint(float theta, float phi, std::list<VEC3> & points, std::list<VEC3> & normals,
+		  std::list<VEC2> & tex_points);
 };
   
 #endif

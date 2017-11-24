@@ -3,6 +3,7 @@
 
 #include "Object.hpp"
 #include "Tensor.hpp"
+#include <list>
 
 // struct Tensor {
 //   FLOAT dim;
@@ -155,6 +156,9 @@ public:
   MAT3 getOrientation();
 
   void fix();
+
+  void addToMesh(std::list<VEC3> & points, std::list<VEC3> & normals,
+		 std::list<VEC2> & tex_points, std::list<unsigned int> & connectivity);
 };
 
 

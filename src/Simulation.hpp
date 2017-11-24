@@ -50,6 +50,8 @@ public :
   void importSim();
   void exportSim() const;
 
+  void exportMesh(std::ofstream & file) const;
+
   void setLoad(std::string s);
   void setExport(std::string s);
   void setImport(std::string s);
@@ -73,6 +75,7 @@ public :
   void addTranslatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed);
 
   void fix(VEC3 min, VEC3 max);
+  void move(VEC3 min, VEC3 max, VEC3 trans);
 };
 
 

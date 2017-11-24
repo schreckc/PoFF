@@ -30,6 +30,7 @@ private :
   std::vector<FLOAT> masses;
   std::vector<bool> active_nodes;
   std::vector<bool> fixed_nodes;
+  std::vector<VEC3> fixed_velocities;
   std::vector<VEC3> velocities;
   std::vector<VEC3> inter_velocities;
   std::vector<VEC3> prev_velocities;
@@ -73,6 +74,7 @@ public :
   MAT3 secondDer(uint i, uint j, std::vector<Particule*> & particules);
 
   void fix(VEC3 min, VEC3 max);
+  void move(VEC3 min, VEC3 max, VEC3 trans);
 };
 
 #endif

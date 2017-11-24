@@ -829,11 +829,11 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   
      // INFO(3, "vel prev\n"<<vel);
      // INFO(3, "vel new\n"<<v);
-  // VEC3 n(-1, 0, 0);
-  // VEC3 d = (pos- VEC3(0.5, 0.5, 0.45));
-  // vel = 10*d.cross(n);
+   // VEC3 n(-1, 0, 0);
+   // VEC3 d = (pos- VEC3(0.5, 0.5, 0.45));
+   // vel = 20*d.cross(n);
 
-  vel = v;
+   vel = v;
    
   } else {
     vel = VEC3(0, 0, 0);
@@ -1978,4 +1978,17 @@ MAT3 Particule::getOrientation() {
 void Particule::fix() {
   fixed = true;
   
+}
+
+
+void Particule::addToMesh(std::list<VEC3> & points, std::list<VEC3> & normals,
+			   std::list<VEC2> & tex_points, std::list<unsigned int> & connectivity) {
+  MAT3 D;
+  D << valx, 0, 0,
+    0, valy, 0,
+    0, 0, valz;
+  MAT3 S = rotation*D;
+
+  Sphere sp(0.01, m_shader);
+  sp.addToMesh(S, points, normals, tex_points, connectivity);
 }

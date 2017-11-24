@@ -51,6 +51,7 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, int shader)
   masses = std::vector<FLOAT>(nb_nodes);
   active_nodes = std::vector<bool>(nb_nodes);
   fixed_nodes = std::vector<bool>(nb_nodes);
+  fixed_velocities = std::vector<VEC3>(nb_nodes);
   velocities = std::vector<VEC3>(nb_nodes);
   inter_velocities = std::vector<VEC3>(nb_nodes);
   prev_velocities = std::vector<VEC3>(nb_nodes);
@@ -69,6 +70,7 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, int shader)
 	//std::cout<<index(i, j, k)<<std::endl;
 	positions[index(i, j, k)] = VEC3(i*mpm_conf::grid_spacing_, j*mpm_conf::grid_spacing_, k*mpm_conf::grid_spacing_);
 	velocities[index(i, j, k)] = VEC3(0, 0, 0);
+	fixed_velocities[index(i, j, k)] = VEC3(0, 0, 0);
 	fixed_nodes[index(i, j, k)] = false;
       }
     }
@@ -729,7 +731,7 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
 		  vel += w*velocities[ind];
 		  vel_flip += w*(velocities[ind] - prev_velocities[ind]);
 		  B += w*velocities[ind]*(positions[ind] - p->getPosition()).transpose();
-		  pos += w*(positions[ind] + mpm_conf::dt_*velocities[ind]); //mult by w twice ?
+		  pos += w*/*(positions[ind] + mpm_conf::dt_*velocities[ind])*/new_positions[ind]; //mult by w twice ?
 		  T += mpm_conf::cheat_damping_*velocities[ind]*p->gradWeight(Vector3i(i, j, k)).transpose();
 		  //	INFO(3, "vel g2p \n"<<prev_velocities[ind]);
 		  IS_DEF(velocities[ind](0));
@@ -750,44 +752,6 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
     density_av /= s3;
     p->setDensity(density_max);
     
-    // // /* Rotation */
-    // // MAT3 A = MAT3::Zero(3, 3);
-    // // FLOAT sum = 0;
-    // //  for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
-    // //   if (i >= 0 && i <= (int)i_max) {
-    // // 	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
-    // // 	  if (j >= 0 && j <= (int)j_max) {
-    // // 	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
-    // // 	      if (k >= 0 && k <= (int)k_max) {
-    // // 		uint ind = index(i, j, k);
-    // // 		if (active_nodes[ind]) {
-    // // 		  FLOAT w = p->weight(Vector3i(i, j, k));
-    // // 		  sum += w;
-    // // 		  A += w * (new_positions[ind] - p->getPosition())*(positions[ind] - prev_pos).transpose();
-    // // 		}
-    // // 	      }
-    // // 	    }
-    // // 	  }
-    // // 	}
-    // //   }
-    // //  }
-    // //  A /= sum;
-    // //  JacobiSVD<MAT3> svd(A, ComputeFullU | ComputeFullV);
-    // //  MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
-    // //  p->rotate(rot);
-
-     if (mpm_conf::method_ == mpm_conf::apic_ || mpm_conf::method_ == mpm_conf::pic_) {
-      p->update(pos, vel, B, T);
-      //INFO(3, "V PARTICUlLE "<<vel(0)<<" "<<vel(1)<<" "<<vel(2));
-    } else if (mpm_conf::method_ == mpm_conf::flip_) {
-      p->update(pos, vel_flip, B, T);
-      // INFO(3, "V PARTICUlLE "<<vel_flip(0)<<" "<<vel_flip(1)<<" "<<vel_flip(2));
-    } else if  (mpm_conf::method_ == mpm_conf::mix_) {
-      FLOAT alpha = 0.95;
-      VEC3 v = alpha*vel_flip + (1-alpha)*vel;
-      p->update(pos, v, B, T);
-    }
-
     /* Rotation */
     MAT3 A = MAT3::Zero(3, 3);
     FLOAT sum = 0;
@@ -801,7 +765,7 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
     		if (active_nodes[ind]) {
     		  FLOAT w = p->weight(Vector3i(i, j, k));
     		  sum += w;
-    		  A += w * (new_positions[ind] - p->getPosition())*(positions[ind] - prev_pos).transpose();
+    		  A += w * (new_positions[ind] - pos)*(positions[ind] - prev_pos).transpose();
     		}
     	      }
     	    }
@@ -813,6 +777,44 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
      JacobiSVD<MAT3> svd(A, ComputeFullU | ComputeFullV);
      MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
      p->rotate(rot);
+
+     if (mpm_conf::method_ == mpm_conf::apic_ || mpm_conf::method_ == mpm_conf::pic_) {
+      p->update(pos, vel, B, T);
+      //INFO(3, "V PARTICUlLE "<<vel(0)<<" "<<vel(1)<<" "<<vel(2));
+    } else if (mpm_conf::method_ == mpm_conf::flip_) {
+      p->update(pos, vel_flip, B, T);
+      // INFO(3, "V PARTICUlLE "<<vel_flip(0)<<" "<<vel_flip(1)<<" "<<vel_flip(2));
+    } else if  (mpm_conf::method_ == mpm_conf::mix_) {
+      FLOAT alpha = 0.95;
+      VEC3 v = alpha*vel_flip + (1-alpha)*vel;
+      p->update(pos, v, B, T);
+    }
+
+    // /* Rotation */
+    // MAT3 A = MAT3::Zero(3, 3);
+    // FLOAT sum = 0;
+    //  for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
+    //   if (i >= 0 && i <= (int)i_max) {
+    // 	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
+    // 	  if (j >= 0 && j <= (int)j_max) {
+    // 	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
+    // 	      if (k >= 0 && k <= (int)k_max) {
+    // 		uint ind = index(i, j, k);
+    // 		if (active_nodes[ind]) {
+    // 		  FLOAT w = p->weight(Vector3i(i, j, k));
+    // 		  sum += w;
+    // 		  A += w * (new_positions[ind] - p->getPosition())*(positions[ind] - prev_pos).transpose();
+    // 		}
+    // 	      }
+    // 	    }
+    // 	  }
+    // 	}
+    //   }
+    //  }
+    //  A /= sum;
+    //  JacobiSVD<MAT3> svd(A, ComputeFullU | ComputeFullV);
+    //  MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
+    //  p->rotate(rot);
     
    }
   // INFO(2, "END Grid 2 Part");
@@ -982,9 +984,9 @@ void Grid::collision(std::list<Obstacle*> obstacles) {
 #pragma omp parallel for
   for (uint i = 0; i < nb_nodes; ++i) {
      if (fixed_nodes[i]) {
-       velocities[i] = VEC3(0, 0, 0);
+       velocities[i] = fixed_velocities[i];
        inter_velocities[i] = VEC3(0, 0, 0);
-       new_positions[i] = positions[i];
+       new_positions[i] = positions[i] + mpm_conf::dt_*velocities[i];
      } else
       if (active_nodes[i]) {
       VEC3 n(0, 0, 1);// = ob->getNormal(pos);
@@ -1169,6 +1171,23 @@ void Grid::fix(VEC3 min, VEC3 max) {
     }
     if (to_fix) {
       fixed_nodes[i] = true;
+    }
+  }
+}
+
+
+void Grid::move(VEC3 min, VEC3 max, VEC3 trans) {
+  // INFO(3, "min\n"<<min);
+  // INFO(3, "max\n"<<max);
+  for (uint i = 0; i < nb_nodes; ++i) {
+    bool to_fix = true;
+    VEC3 v = positions[i];
+    for (uint i = 0; i < 3; ++i) {
+      to_fix = to_fix && v(i) > min(i) && v(i) < max(i);
+    }
+    if (to_fix) {
+      fixed_nodes[i] = true;
+      fixed_velocities[i] = trans;
     }
   }
 }

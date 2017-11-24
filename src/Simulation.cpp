@@ -321,6 +321,39 @@ void Simulation::exportParticules(std::ofstream & file) const {
   
 }
 
+
+void Simulation::exportMesh(std::ofstream & file) const {
+  std::list<VEC3> points;
+  std::list<VEC3> normals;
+  std::list<VEC2> tex_points;
+  std::list<unsigned int> connectivity;
+
+  for (auto &p : particules) {
+    p->addToMesh(points, normals, tex_points, connectivity);
+  }
+
+  for (auto &v : points) {
+    file<<"v "<<v(0)<<" "<<v(1)<<" "<<v(2)<<"\n";
+  }
+  for (auto &n : normals) {
+    file<<"vn "<<n(0)<<" "<<n(1)<<" "<<n(2)<<"\n";
+  }
+  for (auto &t : tex_points) {
+    file<<"vt "<<t(0)<<" "<<t(1)<<" "<<t(2)<<"\n";
+  }
+  std::list<unsigned int>::iterator it = connectivity.begin();
+  while (it != connectivity.end()) {
+    file<<"f ";
+    file<<*it<<"/"<<*it<<"/"<<*it<<" ";
+    ++it;
+    file<<*it<<"/"<<*it<<"/"<<*it<<" ";
+    ++it;
+    file<<*it<<"/"<<*it<<"/"<<*it<<"\n";
+    ++it;
+  }
+  
+}
+
 void Simulation::exportParticulesAll(std::ofstream & file) const {
   // file << "# Recorded simulation (conf: "<<conf_file<<", scene: "<<scene_path<<", step: "<<t<< ")\n";
   // for (auto &p : particules) {
@@ -961,6 +994,19 @@ void Simulation::loadScene() {
 	  s >> max(i);
 	}
 	fix(min, max);
+      } else if (line.substr(0,6) == "<move>") {
+	std::istringstream s(line.substr(6));
+	VEC3 min, max, trans;
+	for (uint i = 0; i < 3; ++i) {
+	  s >> min(i);
+	}
+	for (uint i = 0; i < 3; ++i) {
+	  s >> max(i);
+	}
+	for (uint i = 0; i < 3; ++i) {
+	  s >> trans(i);
+	}
+	move(min, max, trans);
       } else {
 	std::cerr<<"Line not recognized in file \""<<scene_path<<"\": "<<line<<std::endl;
 	exit(-1);
@@ -971,10 +1017,12 @@ void Simulation::loadScene() {
     // DO NOT FORGET TO REMOVE
     // mpm_conf::dt_ = 0.0001; 
     // addRotatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
-    // addRotatingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.05, 10);
+    //    addRotatingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, M_PI*10);
     // addExtendingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
     // addSimpleShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 3);
+    // addSimpleShearingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
     // addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
+    // addPurShearingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 20);
     // addTranslatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
     // mpm_conf::anisotropy_on = false;
 
@@ -1092,7 +1140,7 @@ void Simulation::addRotatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT ang
 
 void Simulation::addRotatingCubeOfParticules(VEC3 center, FLOAT ray, FLOAT angular_speed) { 
      PoissonGenerator::PRNG prng;
-     uint nb_part = 1000;
+     uint nb_part = 10000;
      std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsR(nb_part, prng, 30, 2*VEC3(ray, ray, ray));
      FLOAT volume = pow(ray, 3);
      nb_part = points.size();
@@ -1167,7 +1215,7 @@ void Simulation::addSimpleShearingCubeOfParticules(VEC3 center, FLOAT ray, FLOAT
        particules.push_back(p);
         p->setAnisotropyValues(1, 1, 1);
 
-	p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
+	//p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
      }
      
 }
@@ -1189,7 +1237,7 @@ void Simulation::addPurShearingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT 
        particules.push_back(p);
         p->setAnisotropyValues(1, 1, 1);
 
-	p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
+		p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
      }
      
 }
@@ -1210,7 +1258,7 @@ void Simulation::addPurShearingCubeOfParticules(VEC3 center, FLOAT ray, FLOAT sp
        particules.push_back(p);
         p->setAnisotropyValues(1, 1, 1);
 
-	p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
+	//	p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
      }
      
 }
@@ -1239,4 +1287,9 @@ void Simulation::addTranslatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT 
 
 void Simulation::fix(VEC3 min, VEC3 max) {
   grid.fix(min, max);
+}
+
+
+void Simulation::move(VEC3 min, VEC3 max, VEC3 trans) {
+  grid.move(min, max, trans);
 }
