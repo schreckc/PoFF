@@ -138,8 +138,8 @@ void Particule::draw(glm::mat4 m, int s) {
       D[1] = glm::vec3(0, valy, 0);
       D[2] = glm::vec3(0, 0, valz);
 
-      glm::mat3 S = R*D;
-      //glm::mat3 S = R;
+  glm::mat3 S = R*D;
+  //    glm::mat3 S = R;
       glm::mat4 S4 = glm::mat4(S);
        cur_model = cur_model * S4;
       //}
@@ -260,7 +260,7 @@ void Particule::draw(glm::mat4 m, int s) {
   GLfloat color[6] = {0, 0, 0};
   GLfloat normal[6] = {1, 0, 0};
   //  glPointSize(10.0f);
-  glLineWidth(5.0f);
+  glLineWidth(50.0f);
 
   enableShader();
   setMVP(m, s);
@@ -833,7 +833,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
    // VEC3 d = (pos- VEC3(0.5, 0.5, 0.45));
    // vel = 20*d.cross(n);
 
-   vel = v;
+  vel = v;
    
   } else {
     vel = VEC3(0, 0, 0);
@@ -870,12 +870,22 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  //   // INFO(3, "eigen vec \n"<<es.eigenvectors().imag());
   
     // // update orientation
+
+
  MAT3 W = 0.5/mpm_conf::cheat_damping_*(t - t.transpose()); // skew-sym part of velocity grad
-   MAT3 D = 0.5/mpm_conf::cheat_damping_*(t + t.transpose()); // sym part of velocity grad, strain rate tensor
-   D = rotation.transpose()*D*rotation;
-   FLOAT width = 10, length = 1;
-   FLOAT l = (length/width - 1)/(length/width + 1); //ellongation of the ellipsoidal object
- 
+ MAT3 D = 0.5/mpm_conf::cheat_damping_*(t + t.transpose()); // sym part of velocity grad, strain rate tensor
+ D = rotation.transpose()*D*rotation;
+ FLOAT width = 10, length = 1;
+ FLOAT l = (length/width - 1)/(length/width + 1); //ellongation of the ellipsoidal object
+
+
+  // rotation += mpm_conf::dt_ *(W*rotation);// + l*D*rotation);
+  //   for (uint i = 0; i < 3; ++i) {
+  //      rotation.col(i).normalize();
+  //    }
+  //     rotation.col(2) = rotation.col(0).cross(rotation.col(1));
+  //     rotation.col(1) = rotation.col(2).cross(rotation.col(0));
+ /*
  // //  // INFO(3, "D\n"<<D);
    //  INFO(3, "W\n"<<W);
 
@@ -890,12 +900,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   //   INFO(3, "rotation*roation\n"<< rotation*rotation.transpose());
 
 
-    // rotation += mpm_conf::dt_ *(W*rotation);// + l*D*rotation);
-    // for (uint i = 0; i < 3; ++i) {
-    //    rotation.col(i).normalize();
-    //  }
-    //   rotation.col(2) = rotation.col(0).cross(rotation.col(1));
-    //   rotation.col(1) = rotation.col(2).cross(rotation.col(0));
+   
    
 
    //   INFO(3, "rotation*roation\n"<< rotation*rotation.transpose());
@@ -924,16 +929,17 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  // // // // //  //     //    INFO(3, "eigen val prev\n"<<es.eigenvalues().real());
  // // // // //  // MAT3 Diag = es.pseudoEigenvalueMatrix();
  // // // // //  // MAT3 P = es.pseudoEigenvectors();
- // //   MAT3 Pi2 = 0.5*(MAT3::Identity() - orientation);//0.5*P*(MAT3::Identity() - Diag)*P.transpose();
- // //   MAT3 der_Pi2 = W*Pi2 + Pi2*W.transpose();// +*/ l*(D*Pi2 + Pi2*D - 2*innerProduct(D, outerProduct(Pi2, Pi2)));
- // //   Pi2 += mpm_conf::dt_ * der_Pi2;
+ MAT3 Pi2 = 0.5*(MAT3::Identity() - orientation);//0.5*P*(MAT3::Identity() - Diag)*P.transpose();
+ //MAT3 der_Pi2 = W*Pi2 + Pi2*W.transpose() + l*(D*Pi2 + Pi2*D - 2*innerProduct(D, outerProduct(Pi2, Pi2)));
+ MAT3 der_Pi2 = l*(D*Pi2 + Pi2*D - 2*innerProduct(D, outerProduct(Pi2, Pi2)));
+ Pi2 += mpm_conf::dt_ * der_Pi2;
  // // // //  //  INFO(3, "der \n"<<der_Pi2);
  // // // // //    // INFO(3, " W*Pi2\n"<< W*Pi2 + Pi2*W);
   
  // // // // //  // EigenSolver<MatrixXd> es2(Pi2);
  // // // // //  // MAT3 Diag2 = es2.pseudoEigenvalueMatrix();
  // // // // //  // MAT3 P2 = es2.pseudoEigenvectors();
- // //    orientation = MAT3::Identity() - 2*Pi2;//P2*(MAT3::Identity() - 2*Diag2)*P2.transpose();
+ orientation = MAT3::Identity() - 2*Pi2;//P2*(MAT3::Identity() - 2*Diag2)*P2.transpose();
    
  // // // // //   // FLOAT norm = orientation.colwise().lpNorm<1>().maxCoeff();
  // // // // //   // orientation /= norm;
@@ -948,26 +954,26 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  // // // // //   //  INFO(3, "orientation\n"<<orientation)
  // // // // //   //   INFO(3, "rotatoted init  orientation\n"<<rotation*init_o*rotation.transpose())
    
- // //   VEC3 a_orient(1, 1, 1);
- // //    VEC3 eigenvec;
- // //    MAT3 diag = MAT3::Identity();
- // //    es.compute(orientation);
- // //    if (es.info() == Success) {
- // //     VEC3 ev = es.eigenvalues().real();
- // //     MAT3 evec = es.eigenvectors().real();
- // //     for (uint i = 0; i < 3; ++i) {
- // //       if (ev(i) < 0) {
- // //         ev(i) =  0;
- // //       } else if (ev(i) > 1){
- // //         ev(i) =  1;
- // //       }
- // //      diag(i, i) = ev(i);
- // //    }
- // //    orientation = evec*diag*evec.inverse();
-
- // //      FLOAT norm = std::fabs(es.eigenvalues()(0).real()) + std::fabs(es.eigenvalues()(1).real()) + std::fabs(es.eigenvalues()(2).real());
- // //      orientation /= norm;
- // //    }
+ VEC3 a_orient(1, 1, 1);
+ VEC3 eigenvec;
+ MAT3 diag = MAT3::Identity();
+ es.compute(orientation);
+ if (es.info() == Success) {
+     VEC3 ev = es.eigenvalues().real();
+     MAT3 evec = es.eigenvectors().real();
+     for (uint i = 0; i < 3; ++i) {
+       if (ev(i) < 0.01) {
+	 ev(i) =  0.01;
+       } else if (ev(i) > 0.98){
+	 ev(i) =  0.98;
+       }
+       diag(i, i) = ev(i);
+     }
+     orientation = evec*diag*evec.inverse();
+     
+     FLOAT norm = std::fabs(es.eigenvalues()(0).real()) + std::fabs(es.eigenvalues()(1).real()) + std::fabs(es.eigenvalues()(2).real());
+     orientation /= norm;
+ }
  // // // //     orientation *= 3.0;
 
  // //   es.compute(orientation);
@@ -976,77 +982,88 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
 
  // // //     //setAnisotropyTensor(orientation);
     
- // //  //  //   rotation = P2;
- // //   // eigenvec(0) = 1 - 2*Diag2(0, 0);//std::fabs(es.eigenvalues()(0).real());
- // //   // eigenvec(1) = 1 - 2*Diag2(1, 1);//std::fabs(es.eigenvalues()(1).real());
- // //   // eigenvec(2) = 1 - 2*Diag2(2, 2);//std::fabs(es.eigenvalues()(2).real());
- // //   eigenvec(0) = std::fabs(es.eigenvalues()(0).real());
- // //   eigenvec(1) = std::fabs(es.eigenvalues()(1).real());
- // //   eigenvec(2) = std::fabs(es.eigenvalues()(2).real());
- // //  //  //INFO(3, "eigen vec\n"<<es.eigenvectors().real());
- // //  // INFO(3, "eigen val\n"<<es.eigenvalues().real());
- // //   // INFO(3, "eigen val imag \n"<<es.eigenvectors().imag());
- // //  //  //   INFO(3, "axes vec\n"<<axes.col(2));
- // //  // // FLOAT norm = eigenvec(0) + eigenvec(1) + eigenvec(2);
- // //  // // orientation /= norm;
- // //  // // es.compute(orientation);
- // //  // //rotation = es.eigenvectors().real();
- // //  // // VEC3 no;
- // //  // // VEC3 n = axes.col(i);
- // //   VEC3 c(1, 1, 1);
- // //   MAT3 axes_o = MAT3::Identity();
- // //   for (uint i = 0; i < 3; ++i) {
- // //     if (eigenvec(i) < 1.0/3.0) {
- // //       c(i) = 1 - eigenvec(i)*3.0;
- // //       a_orient(i) = (1-c(i))*1 +c(i) * mpm_conf::anisotropy_values_(0);
- // //     } else {
- // //       c(i) =  (eigenvec(i) - 1.0/3.0)*3.0/2.0;
- // //       a_orient(i) = (1-c(i))*1 +c(i) * mpm_conf::anisotropy_values_(2);
- // //     }
- // //   }
+  //  //   rotation = P2;
+   // eigenvec(0) = 1 - 2*Diag2(0, 0);//std::fabs(es.eigenvalues()(0).real());
+   // eigenvec(1) = 1 - 2*Diag2(1, 1);//std::fabs(es.eigenvalues()(1).real());
+   // eigenvec(2) = 1 - 2*Diag2(2, 2);//std::fabs(es.eigenvalues()(2).real());
+   eigenvec(0) = std::fabs(es.eigenvalues()(0).real());
+   eigenvec(1) = std::fabs(es.eigenvalues()(1).real());
+   eigenvec(2) = std::fabs(es.eigenvalues()(2).real());
+  //  //INFO(3, "eigen vec\n"<<es.eigenvectors().real());
+  // INFO(3, "eigen val\n"<<es.eigenvalues().real());
+   // INFO(3, "eigen val imag \n"<<es.eigenvectors().imag());
+  //  //   INFO(3, "axes vec\n"<<axes.col(2));
+  // // FLOAT norm = eigenvec(0) + eigenvec(1) + eigenvec(2);
+  // // orientation /= norm;
+  // // es.compute(orientation);
+  // //rotation = es.eigenvectors().real();
+  // // VEC3 no;
+  // // VEC3 n = axes.col(i);
+   VEC3 c(1, 1, 1);
+   MAT3 axes_o = MAT3::Identity();
+   for (uint i = 0; i < 3; ++i) {
+     if (eigenvec(i) < 1.0/3.0) {
+       c(i) = 1 - eigenvec(i)*3.0;
+       a_orient(i) = (1-c(i))*1 +c(i) * mpm_conf::anisotropy_values_(0);
+     } else {
+       c(i) =  (eigenvec(i) - 1.0/3.0)*3.0/2.0;
+       a_orient(i) = (1-c(i))*1 +c(i) * mpm_conf::anisotropy_values_(2);
+     }
+   }
      
- // //   VEC3 a(0.123, 0.123, 0.123);
- // //   VEC3 c_new(0.123, 0.123, 0.123);
- // //   VEC3 used(0, 0, 0);
- // //   for (uint i = 0; i < 3; ++i) {
- // //     uint dir;
- // //     FLOAT max = -1;
- // //     for (uint j = 0; j < 3; ++j) {
- // //       FLOAT ps =  /*P2.col(j).dot(axes.col(i));*/es.eigenvectors().col(j).real().dot(axes.col(i));
- // //       if (fabs(ps) > max && used(j) == 0) {
- // //   	max = fabs(ps);
- // //   	dir = j;
- // //       }
- // //     }
- // //  // if (i == 2) {
- // //  //    INFO(3, "eigen vec\n"<<es.eigenvectors().col(dir).real());
- // //  //    INFO(3, "----> ps : "<<es.eigenvectors().col(dir).real().dot(axes.col(i)));
- // //  //  }
+   VEC3 a(0.123, 0.123, 0.123);
+   VEC3 c_new(0.123, 0.123, 0.123);
+   VEC3 used(0, 0, 0);
+   for (uint i = 0; i < 3; ++i) {
+     uint dir;
+     FLOAT max = -1;
+     for (uint j = 0; j < 3; ++j) {
+     //  FLOAT ps =  P2.col(j).dot(axes.col(i));es.eigenvectors().col(j).real().dot(axes.col(i));
+     FLOAT ps =  es.eigenvectors().col(j).real().dot(axes.col(i));
+       if (fabs(ps) > max && used(j) == 0) {
+   	max = fabs(ps);
+   	dir = j;
+       }
+     }
+  // if (i == 2) {
+  //    INFO(3, "eigen vec\n"<<es.eigenvectors().col(dir).real());
+  //    INFO(3, "----> ps : "<<es.eigenvectors().col(dir).real().dot(axes.col(i)));
+  //  }
 
- // //     used(dir) = 1;
- // //     if (es.eigenvectors().col(dir).real().dot(axes.col(i)) < 0) {
- // // 	 axes.col(i) = -es.eigenvectors().col(dir).real();
- // //       } else {
- // // 	 axes.col(i) = es.eigenvectors().col(dir).real();
- // //       }
- // //     c_new(i) = eigenvec(dir);
- // //     a(i) = /*es.eigenvalues()(dir).real();*/a_orient(dir);
- // //     //INFO(3, "cnew "<<c_new(i));
- // //   }
+     used(dir) = 1;
+     if (es.eigenvectors().col(dir).real().dot(axes.col(i)) < 0) {
+ 	 axes.col(i) = -es.eigenvectors().col(dir).real();
+       } else {
+ 	 axes.col(i) = es.eigenvectors().col(dir).real();
+       }
+     c_new(i) = eigenvec(dir);
+ //    a(i) = es.eigenvalues()(dir).real();
+ a(i) = a_orient(dir);
+     //INFO(3, "cnew "<<c_new(i));
+   }
 
- // // axes.col(2) = axes.col(0).cross(axes.col(1));
- // //  axes.col(1) = axes.col(2).cross(axes.col(0));
+ axes.col(2) = axes.col(0).cross(axes.col(1));
+  axes.col(1) = axes.col(2).cross(axes.col(0));
 
- // //  for (uint i = 0; i < 3; ++i) {
- // //    axes.col(i).normalize();
- // //  }
+  for (uint i = 0; i < 3; ++i) {
+    axes.col(i).normalize();
+  }
   
- // //  // INFO(3, "\naxes\n"<<axes);
- // //   // INFO(3, "\naxes*axes\n"<<axes*axes.transpose());
- // //   // INFO(3, "\nrotation\n"<<rotation);
+  // INFO(3, "\naxes\n"<<axes);
+   // INFO(3, "\naxes*axes\n"<<axes*axes.transpose());
+   // INFO(3, "\nrotation\n"<<rotation);
 
- // //  rotation = axes*rotation;
+  rotation = axes*rotation;
+  //INFO(3, "val "<<a(0)<<" "<<a(1)<<" "<<a(2));
+  valx = a(0);
+  valy = a(1);
+  valz = a(2);
+  
+  setAnisotropyTensor(a);
 
+  ****/
+
+  
  // //  // INFO(3, "\nrotation*rotation\n"<<rotation*rotation.transpose());
  // //   orientation = MAT3::Identity();
  // //   orientation(0, 0) = c_new(0);
@@ -1068,9 +1085,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     // INFO(3, "eigen vec \n"<<es.pseudoEigenvectors().real());
     // // // INFO(3, "eigen vec \n"<<es.eigenvectors().imag());
    // //rotation = axes;
-    // valx = a(0);
-    // valy = a(1);
-    // valz = a(2);
+
   //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
  
    // orientation = rotation.transpose()*orientation*rotation;
