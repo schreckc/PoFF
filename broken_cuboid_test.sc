@@ -6,27 +6,27 @@
  <cylinder>
   <pos> 0.5 0.45 0.75
   <direction> 1 0 0
-  <ray> 0.02
+  <ray> 0.04
  </cylinder>
  <cylinder>
   <pos> 0.5 0.5 0.62
   <direction> 1 0 0
-  <ray> 0.02
+  <ray> 0.04
  </cylinder>
  <cylinder>
-  <pos> 0.5 0.55 0.5
+  <pos> 0.5 0.55 0.50
   <direction> 1 0 0
-  <ray> 0.02
+  <ray> 0.04
  </cylinder>
  <cylinder>
-  <pos> 0.5 0.6 0.38
+  <pos> 0.5 0.62 0.38
   <direction> 1 0 0
-  <ray> 0.02
+  <ray> 0.04
  </cylinder>
  <cylinder>
-  <pos> 0.5 0.65 0.26
+  <pos> 0.5 0.68 0.26
   <direction> 1 0 0
-  <ray> 0.02
+  <ray> 0.04
  </cylinder>
 </obstacles>
 <particules>

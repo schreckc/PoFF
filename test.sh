@@ -2,10 +2,10 @@
 #
 #$ -S /bin/bash
 #$ -N omptest
-#$ -pe openmp 16
-#$ -l h_vmem=2G
+#$ -pe openmp 60
+#$ -l h_vmem=6G
 
-export OMP_NUM_THREADS=7  # gets number from -pe
+export OMP_NUM_THREADS=60  # gets number from -pe
 ### for performance reasons, you might want to use some agressive scheduling ###
 export OMP_WAIT_POLICY=active
 export OMP_DYNAMIC=false
@@ -347,9 +347,12 @@ export OMP_PROC_BIND=true
 #./poff_no_graph -l sand3.conf -s rotating_planesv.sc -e test_sand_mixer2/testv_ -es 4 -stop 4000
 #./poff_no_graph -l sand3.conf -s rotating_planesv2.sc -e test_sand_mixer2/testv2_ -es 4 -stop 4000
 
-rm -r test_wood
-mkdir test_wood
-./poff_no_graph -l test_wood2.sc -s broken_cuboidv.sc -e test_wood/testv_ -es 10 -stop 15000
-./poff_no_graph -l test_wood2.sc -s broken_cuboidh.sc -e test_wood/testh_ -es 10 -stop 15000
-./poff_no_graph -l test_wood2.sc -s broken_cuboidd.sc -e test_wood/testd_ -es 10 -stop 15000
+#rm -r test_wood
+#mkdir test_wood
+#./poff_no_graph -l test_wood2.sc -s broken_cuboidv.sc -e test_wood/testv_ -es 10 -stop 15000
+#./poff_no_graph -l test_wood2.sc -s broken_cuboidh.sc -e test_wood/testh_ -es 10 -stop 15000
+#./poff_no_graph -l test_wood2.sc -s broken_cuboidd.sc -e test_wood/testd_ -es 10 -stop 15000
+#./poff_no_graph -l test_wood2.sc -s broken_cuboidd2.sc -e test_wood/testd2_ -es 10 -stop 15000
 
+#./poff_no_graph -l test_wood2.sc -s broken_cuboid2v.sc -e test_wood/testv_ -es 10 -stop 15000
+./poff_no_graph -s broken_cuboid_test.sc -l test_wood_test.sc -e test_wood/test -es 10 -stop 50000
