@@ -232,7 +232,7 @@ void Grid::draw(glm::mat4 m, int s) {
   	 //    sp.setColor(1, 0, 0);
   	 //  }
   	 VEC3 pos = positions[ind];
-  	 VEC3 vel = 10*mpm_conf::dt_ * velocities[ind]+pos; 
+  	 VEC3 vel = mpm_conf::dt_ * velocities[ind]+pos; 
   	 // glm::mat4 model = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)));
   	 // glm::mat4 cur_model = model * m_model_view;
   	 // 	 sp.draw(cur_model, Scene::SCENE->getShader(0));
