@@ -1021,7 +1021,7 @@ void Simulation::loadScene() {
     // addExtendingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
     // addSimpleShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 3);
     // addSimpleShearingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
-    // addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
+     addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
     // addPurShearingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 20);
     // addTranslatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
     // mpm_conf::anisotropy_on = false;
@@ -1235,9 +1235,9 @@ void Simulation::addPurShearingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT 
        VEC3 vel = VEC3(0, speed*(v(1) - 0.5), -speed*(v(2) - 0.5));
        Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), vel);
        particules.push_back(p);
-        p->setAnisotropyValues(1, 1, 1);
+        p->setAnisotropyValues(0.7, 0.7, 1.6);
 
-		p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
+	p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
      }
      
 }

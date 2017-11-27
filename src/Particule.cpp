@@ -65,6 +65,10 @@ Particule::Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n, VEC3 velo, int shade
     orientation << 0.1, 0, 0,
       0, 0.1, 0,
       0, 0, 0.8;
+
+    // orientation << 0.01, 0, 0,
+    //   0, 0.01, 0,
+    //   0, 0, 0.98;
   // orientation <<  mpm_conf::anisotropy_values_(0), 0, 0,
   //   0,  mpm_conf::anisotropy_values_(1), 0,
   //   0, 0,  mpm_conf::anisotropy_values_(2);
@@ -130,7 +134,7 @@ void Particule::draw(glm::mat4 m, int s) {
 
 
       
-            valx = 0.1; valy = 0.1;  valz = 0.8;
+      //            valx = 0.1; valy = 0.1;  valz = 0.8;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
       //valx = 1; valy = 1;  valz = 1;
       glm::mat3 D;
@@ -885,7 +889,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
   //    }
   //     rotation.col(2) = rotation.col(0).cross(rotation.col(1));
   //     rotation.col(1) = rotation.col(2).cross(rotation.col(0));
- /*
+ 
  // //  // INFO(3, "D\n"<<D);
    //  INFO(3, "W\n"<<W);
 
@@ -955,7 +959,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  // // // // //   //   INFO(3, "rotatoted init  orientation\n"<<rotation*init_o*rotation.transpose())
    
  VEC3 a_orient(1, 1, 1);
- VEC3 eigenvec;
+ // VEC3 eigenvec;
  MAT3 diag = MAT3::Identity();
  es.compute(orientation);
  if (es.info() == Success) {
@@ -971,9 +975,9 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
      }
      orientation = evec*diag*evec.inverse();
      
-     FLOAT norm = std::fabs(es.eigenvalues()(0).real()) + std::fabs(es.eigenvalues()(1).real()) + std::fabs(es.eigenvalues()(2).real());
+     FLOAT norm = std::fabs(ev(0))+std::fabs(ev(1))+std::fabs(ev(2));//std::fabs(es.eigenvalues()(0).real()) + std::fabs(es.eigenvalues()(1).real()) + std::fabs(es.eigenvalues()(2).real());
      orientation /= norm;
- }
+ 
  // // // //     orientation *= 3.0;
 
  // //   es.compute(orientation);
@@ -986,9 +990,9 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
    // eigenvec(0) = 1 - 2*Diag2(0, 0);//std::fabs(es.eigenvalues()(0).real());
    // eigenvec(1) = 1 - 2*Diag2(1, 1);//std::fabs(es.eigenvalues()(1).real());
    // eigenvec(2) = 1 - 2*Diag2(2, 2);//std::fabs(es.eigenvalues()(2).real());
-   eigenvec(0) = std::fabs(es.eigenvalues()(0).real());
-   eigenvec(1) = std::fabs(es.eigenvalues()(1).real());
-   eigenvec(2) = std::fabs(es.eigenvalues()(2).real());
+     // eigenvec(0) = fabs(ev(0))//std::fabs(es.eigenvalues()(0).real());
+ //   eigenvec(1) = std::fabs(es.eigenvalues()(1).real());
+ //   eigenvec(2) = std::fabs(es.eigenvalues()(2).real());
   //  //INFO(3, "eigen vec\n"<<es.eigenvectors().real());
   // INFO(3, "eigen val\n"<<es.eigenvalues().real());
    // INFO(3, "eigen val imag \n"<<es.eigenvectors().imag());
@@ -1002,11 +1006,11 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
    VEC3 c(1, 1, 1);
    MAT3 axes_o = MAT3::Identity();
    for (uint i = 0; i < 3; ++i) {
-     if (eigenvec(i) < 1.0/3.0) {
-       c(i) = 1 - eigenvec(i)*3.0;
+     if (ev(i) < 1.0/3.0) {
+       c(i) = 1 - ev(i)*3.0;
        a_orient(i) = (1-c(i))*1 +c(i) * mpm_conf::anisotropy_values_(0);
      } else {
-       c(i) =  (eigenvec(i) - 1.0/3.0)*3.0/2.0;
+       c(i) =  (ev(i) - 1.0/3.0)*3.0/2.0;
        a_orient(i) = (1-c(i))*1 +c(i) * mpm_conf::anisotropy_values_(2);
      }
    }
@@ -1036,9 +1040,9 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
        } else {
  	 axes.col(i) = es.eigenvectors().col(dir).real();
        }
-     c_new(i) = eigenvec(dir);
- //    a(i) = es.eigenvalues()(dir).real();
- a(i) = a_orient(dir);
+     c_new(i) = ev(dir);
+     // a(i) = es.eigenvalues()(dir).real();
+     a(i) = a_orient(dir);
      //INFO(3, "cnew "<<c_new(i));
    }
 
@@ -1054,22 +1058,24 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
    // INFO(3, "\nrotation\n"<<rotation);
 
   rotation = axes*rotation;
-  //INFO(3, "val "<<a(0)<<" "<<a(1)<<" "<<a(2));
+  INFO(3, "val "<<a(0)<<" "<<a(1)<<" "<<a(2));
   valx = a(0);
   valy = a(1);
   valz = a(2);
   
-  setAnisotropyTensor(a);
+  //  setAnisotropyTensor(a);
 
-  ****/
+   orientation = MAT3::Identity();
+   orientation(0, 0) = c_new(0);
+   orientation(1, 1) = c_new(1);
+   orientation(2, 2) = c_new(2);
+
+ }
+ /****/
 
   
- // //  // INFO(3, "\nrotation*rotation\n"<<rotation*rotation.transpose());
- // //   orientation = MAT3::Identity();
- // //   orientation(0, 0) = c_new(0);
- // //   orientation(1, 1) = c_new(1);
- // //   orientation(2, 2) = c_new(2);
- // //   // INFO(3, "orientation\n"<<orientation);
+  // INFO(3, "\nrotation*rotation\n"<<rotation*rotation.transpose());
+     // INFO(3, "orientation\n"<<orientation);
 
 
  
