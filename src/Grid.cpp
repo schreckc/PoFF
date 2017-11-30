@@ -820,6 +820,92 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
   // INFO(2, "END Grid 2 Part");
 }
 
+
+
+
+void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
+    FLOAT s3 = pow(mpm_conf::grid_spacing_, 3);
+#pragma omp parallel for
+  //for (auto& p : particules) {
+  for (uint ip = 0; ip < subparticules.size(); ++ip) {
+    Subparticule *p = subparticules[ip];
+    Vector3i cell = p->getCell();
+    VEC3 prev_pos = p->getPosition();
+    //    INFO(3, "prev_pos\n"<<prev_pos);
+    //INFO(3, "cell\n"<< cell);
+    VEC3 vel(0, 0, 0);
+    VEC3 vel_flip = p->getVelocity();
+    // INFO(3, "vel FLIP \n"<<vel_flip);
+    VEC3 pos(0, 0, 0);
+    FLOAT total_masse = 0;
+    for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
+      if (i >= 0 && i <= (int)i_max) {
+    	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
+    	  if (j >= 0 && j <= (int)j_max) {
+    	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
+	      if (k >= 0 && k <= (int)k_max) {
+		uint ind = index(i, j, k);
+		if (active_nodes[ind]) {
+		  FLOAT w = p->weight(Vector3i(i, j, k));
+		  vel += w*velocities[ind];
+		  vel_flip += w*(velocities[ind] - prev_velocities[ind]);
+		  pos += w*new_positions[ind];
+		  // pos += w*(positions[ind] + mpm_conf::dt_*velocities[ind]);
+		  //INFO(3, w);
+		  total_masse += w*masses[ind];
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    if (total_masse > 0.000001) {
+      /* Rotation */
+      MAT3 A = MAT3::Zero(3, 3);
+      FLOAT sum = 0;
+       for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
+        if (i >= 0 && i <= (int)i_max) {
+      	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
+      	  if (j >= 0 && j <= (int)j_max) {
+      	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
+      	      if (k >= 0 && k <= (int)k_max) {
+      		uint ind = index(i, j, k);
+      		if (active_nodes[ind]) {
+      		  FLOAT w = p->weight(Vector3i(i, j, k));
+      		  sum += w;
+      		  A += w * (new_positions[ind] - pos)*(positions[ind] - prev_pos).transpose();
+      		}
+      	      }
+      	    }
+      	  }
+      	}
+        }
+       }
+       A /= sum;
+       JacobiSVD<MAT3> svd(A, ComputeFullU | ComputeFullV);
+       MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
+       p->rotate(rot);
+      //         INFO(3, "vel\n"<<vel);
+      // INFO(3, "total weigth  "<<total_weight);
+      if (mpm_conf::method_ == mpm_conf::apic_ || mpm_conf::method_ == mpm_conf::pic_) {
+	p->update(pos, vel);
+      } else if (mpm_conf::method_ == mpm_conf::flip_) {
+	p->update(pos, vel_flip);
+      } else if  (mpm_conf::method_ == mpm_conf::mix_) {
+	FLOAT alpha = 0.95;
+	VEC3 v = alpha*vel_flip + (1-alpha)*vel;
+	p->update(pos, v);
+      }
+    } else {
+      //  INFO(3, "total masse  "<<total_masse);
+      p->eulerStep();
+    }
+  }
+
+}
+
+
 void Grid::init(std::vector<Particule*> & particules) {
   for (auto &p : particules) {
     Vector3i c = p->getCell();
@@ -830,6 +916,7 @@ void Grid::init(std::vector<Particule*> & particules) {
   }
 
   FLOAT s2 = mpm_conf::grid_spacing_*mpm_conf::grid_spacing_;
+  FLOAT mt = 0;
 #pragma omp parallel for
   for (int i = 0; i <= (int)i_max; ++i) {
     for (int j = 0; j <= (int)j_max; ++j) {
@@ -857,6 +944,7 @@ void Grid::init(std::vector<Particule*> & particules) {
 	    }
 	  }
 	}
+	mt += masses[ind];
 	if (active_nodes[ind]) {
 	  if (masses[ind] > 1e-8*mpm_conf::dt_) {
 	    velocities[ind] /= masses[ind];
@@ -871,27 +959,26 @@ void Grid::init(std::vector<Particule*> & particules) {
 #pragma omp parallel for
   for (uint ip = 0; ip < particules.size(); ++ip) {
     Particule *p = particules[ip];
-    FLOAT density = mpm_conf::density_;
-    // FLOAT density = 0;//mpm_conf::density_;;
-    // Vector3i cell = p->getCell();
-    // for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
-    //   if (i >= 0 && i <= (int)i_max) {
-    // 	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
-    // 	  if (j >= 0 && j <= (int)j_max) {
-    // 	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
-    // 	      if (k >= 0 && k <= (int)k_max) {
-    // 		uint ind = index(i, j, k);
-    // 		FLOAT w = p->weight(Vector3i(i, j, k));
-    // 		density += masses[ind]*w;
-    // 	      }
-    // 	    }
-    // 	  }
-    // 	}
-    //   }
-    // }
-    // density /= s3;
+    // FLOAT density = mpm_conf::density_;
+     FLOAT density = 0;mpm_conf::density_;;
+    Vector3i cell = p->getCell();
+    for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
+      if (i >= 0 && i <= (int)i_max) {
+    	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
+    	  if (j >= 0 && j <= (int)j_max) {
+    	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
+    	      if (k >= 0 && k <= (int)k_max) {
+    		uint ind = index(i, j, k);
+    		FLOAT w = p->weight(Vector3i(i, j, k));
+    		density += masses[ind]*w;
+    	      }
+    	    }
+    	  }
+    	}
+      }
+    }
+    density /= s3;
     //INFO(3,"density "<<mpm_conf::density_<<"   denstity local "<<density);
- 
     p->initVolume(density);
   }
   double masse = 0;
@@ -899,7 +986,7 @@ void Grid::init(std::vector<Particule*> & particules) {
     Particule *p = particules[ip];
     masse += p->getMass();
   }
-  INFO(2, "END Init Volume "<<masse );
+  INFO(2, "END Init Volume "<<masse<<" "<<mt );
 }
 
 void Grid::initCollision(std::list<Obstacle*> obstacles) {
@@ -1008,7 +1095,7 @@ void Grid::collision(std::list<Obstacle*> obstacles) {
       
 	  FLOAT dcomp;
 	  dcomp = d - std::min(distance_collision[i],(FLOAT)0.0);
-	  if (fabs(d) <= 4*mpm_conf::grid_spacing_ && dcomp < 0) {
+	  if (/*fabs(d) <= 4*mpm_conf::grid_spacing_ &&*/ dcomp < 0) {
 	    VEC3 vel_prev = velocities[i];
 	    //INFO(3,"vel prev "<< velocities[i](0)<<" "<< velocities[i](1)<<" "<< velocities[i](2));
 	    //	VEC3 n = ob->getNormal(pos);
@@ -1044,19 +1131,19 @@ void Grid::collision(std::list<Obstacle*> obstacles) {
 	    FLOAT dcomp = d - std::min(d_prev, (FLOAT)0.0);
 	    if (/*fabs(d) <= 4*mpm_conf::grid_spacing_ &&*/ dcomp < 0) {
 	      VEC3 vel_prev = velocities[i];
-	      //	      INFO(3,"vel prev "<< velocities[i](0)<<" "<< velocities[i](1)<<" "<< velocities[i](2));
+	      //INFO(3,"vel prev "<< velocities[i](0)<<" "<< velocities[i](1)<<" "<< velocities[i](2));
 	      //	VEC3 n = ob->getNormal(pos);
 	      FLOAT dv = -dcomp/mpm_conf::dt_;
-	      velocities[i] += dv*n;//dcomp*ob->getNormal(pos)/mpm_conf::dt_;
+	      velocities[i] += 1.0*dv*n;//dcomp*ob->getNormal(pos)/mpm_conf::dt_;
 
 	      //  INFO(3,"vel new\n"<< velocities[i](0)<<" "<< velocities[i](1)<<" "<< velocities[i](2));
-	
+	      //      INFO(3,"vel prev "<< velocities[i](0)<<" "<< velocities[i](1)<<" "<< velocities[i](2));
 	      // // //friction
 	       VEC3 vt = velocities[i] - velocities[i].dot(n)*n;
 	       FLOAT nvt = vt.norm();
 	       friction = ob->getFriction();
 	       if (nvt > friction*dv) {
-	       	//		INFO(3, "nvt dv" <<friction*dv*vt/nvt);
+		 //INFO(3, "nvt dv" <<friction*dv*vt/nvt);
 	       	velocities[i] -= friction*dv*vt/nvt;
 	       } else {
 	       	velocities[i] -= vt;

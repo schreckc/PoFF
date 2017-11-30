@@ -25,6 +25,7 @@ private :
   
   Grid grid;
   std::vector<Particule*> particules;
+  std::vector<Subparticule*> subparticules;
   std::list<Obstacle*> obstacles;
 
   inline FLOAT weight(FLOAT x);
@@ -44,9 +45,11 @@ public :
   void oneStep();
 
   void importParticules(std::ifstream & file);
+  void importSubparticules(std::ifstream & file);
   void importParticulesAll(std::ifstream & file);
   void exportParticules(std::ofstream & file) const;
   void exportParticulesAll(std::ofstream & file) const;
+  void exportSubparticules(std::ofstream & file) const;
   void importSim();
   void exportSim() const;
 

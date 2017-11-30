@@ -7,6 +7,7 @@
 #include <list>
 #include "Eigen/Core"
 #include "Particule.hpp"
+#include "Subparticule.hpp"
 #include "Obstacle.hpp"
 
 using namespace Eigen;
@@ -64,6 +65,7 @@ public :
   void particulesToGrid(std::vector<Particule*> & particules);
   void particulesToGridImplicite(std::vector<Particule*> & particules);
   void gridToParticules(std::vector<Particule*> & particules);
+  void gridToSubparticules(std::vector<Subparticule*> & subparticules);
 
 
   void initCollision(Obstacle *ob);

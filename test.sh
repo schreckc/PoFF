@@ -347,9 +347,22 @@ export OMP_PROC_BIND=true
 #./poff_no_graph -l sand3.conf -s rotating_planesv.sc -e test_sand_mixer2/testv_ -es 4 -stop 4000
 #./poff_no_graph -l sand3.conf -s rotating_planesv2.sc -e test_sand_mixer2/testv2_ -es 4 -stop 4000
 
-rm -r test_wood
-mkdir test_wood
-./poff_no_graph -l test_wood2.sc -s broken_cuboidv.sc -e test_wood/testv_ -es 10 -stop 15000
-./poff_no_graph -l test_wood2.sc -s broken_cuboidh.sc -e test_wood/testh_ -es 10 -stop 15000
-./poff_no_graph -l test_wood2.sc -s broken_cuboidd.sc -e test_wood/testd_ -es 10 -stop 15000
+#rm -r test_wood
+#mkdir test_wood
+#./poff_no_graph -l test_wood2.sc -s broken_cuboidv.sc -e test_wood/testv_ -es 10 -stop 15000
+#./poff_no_graph -l test_wood2.sc -s broken_cuboidh.sc -e test_wood/testh_ -es 10 -stop 15000
+#./poff_no_graph -l test_wood2.sc -s broken_cuboidd.sc -e test_wood/testd_ -es 10 -stop 15000
 
+#./poff_no_graph -s column_testh.sc -l test_sand_fall.conf -e test/testh_ -stop 1000
+#./poff_no_graph -s column_testv.sc -l test_sand_fall.conf -e test/testv_ -stop 1000
+#./poff_no_graph -s column_testd.sc -l test_sand_fall.conf -e test/testd_ -stop 1000
+
+mkdir falling_sub
+./poff_no_graph -s falling_cube_cylinder_testv.sc -l test_sand_fall.conf -e falling_sub/testv_ -stop 1000
+./poff_no_graph -s falling_cube_cylinder_testh.sc -l test_sand_fall.conf -e falling_sub/testh_ -stop 1000
+./poff_no_graph -s falling_cube_cylinder_testd.sc -l test_sand_fall.conf -e falling_sub/testd_ -stop 1000
+
+mkdir stretch_sub
+./poff_no_graph -s broken_cuboid_subh.sc -l test_sub.conf -e stretch_sub/testh_ -es 10 -stop 15000
+./poff_no_graph -s broken_cuboid_subh.sc -l test_sub.conf -e stretch_sub/testh_ -es 10 -stop 15000
+./poff_no_graph -s broken_cuboid_subh.sc -l test_sub.conf -e stretch_sub/testh_ -es 10 -stop 15000
