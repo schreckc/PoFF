@@ -412,9 +412,9 @@ namespace mpm_conf {
    // INFO(3, "inv tang stiff\n"<< inverse_tangent_stiffness);
    // INFO(3, "inv tang stiff iso \n"<< inverse_tangent_stiffness_iso);
     
-    // INFO(2, "stress anisotropy map"<< anisotropy_stress_);
-    // INFO(2, "strain anisotropy map"<< anisotropy_strain_);
-     INFO(3, "ANIS "<< innerProduct(inv_anisotropy_stress_,anisotropy_stress_));
+     INFO(2, "stress anisotropy map"<< anisotropy_stress_);
+     INFO(2, "strain anisotropy map"<< anisotropy_strain_);
+   //     INFO(3, "ANIS "<< innerProduct(inv_anisotropy_stress_,anisotropy_stress_));
     
  }
 

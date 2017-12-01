@@ -96,7 +96,7 @@ void PlaneObstacle::draw(glm::mat4 m, int s) {
     			     1, 1,   0, 1,   0, 0};
   
    m_shader = 1;
-   m_texture = 2;
+   m_texture = 3;
   enableShader();
    setMVP(m, s);
   
