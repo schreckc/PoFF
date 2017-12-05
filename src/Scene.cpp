@@ -230,13 +230,13 @@ void Scene::draw() {
 
    std::list<Object*>::iterator it;
 
-   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
-     SDL_RenderClear(renderer);
-     render_text(renderer, 0, 0,               "hello", font, &rect, &color);
-     render_text(renderer, 0, rect.y + rect.h, "world", font, &rect, &color);
-     snprintf(text, MAX_STRING_LEN, "%u", (unsigned int)(time(NULL) % 1000));
-     render_text(renderer, 0, rect.y + rect.h, text, font, &rect, &color);
-     SDL_RenderPresent(renderer);
+   // SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
+   //   SDL_RenderClear(renderer);
+   //   render_text(renderer, 0, 0,               "hello", font, &rect, &color);
+   //   render_text(renderer, 0, rect.y + rect.h, "world", font, &rect, &color);
+   //   snprintf(text, MAX_STRING_LEN, "%u", (unsigned int)(time(NULL) % 1000));
+   //   render_text(renderer, 0, rect.y + rect.h, text, font, &rect, &color);
+   //   SDL_RenderPresent(renderer);
 
      //     common_fps_update_and_print();
    
@@ -278,6 +278,9 @@ void Scene::animationLoop() {
     }
     if(m_input.getTouche(SDL_SCANCODE_C) ) {
       printCameraPos();
+    }
+    if(m_input.getTouche(SDL_SCANCODE_P) ) {
+      saveScreenshotBMP("test_screenshot.bmp", m_fenetre, m_renderer);
     }
     if(m_input.getTouche(SDL_SCANCODE_S) ) {
           mpm_conf::display_sphere_ = !mpm_conf::display_sphere_;
@@ -417,6 +420,14 @@ void Scene::setScene(std::string s) {
   sim->setScene(s);
 }
 
+void Scene::setExportGrid(std::string s) {
+  sim->setExportGrid(s);
+}
+
+void Scene::setImportGrid(std::string s) {
+  sim->setImportGrid(s);
+}
+
 void Scene::setRun(bool run) {
   if (running) {
     INFO(1, "STOP ANIMATION");
@@ -442,24 +453,33 @@ void Scene::printCameraPos() {
 }
 
 
-bool saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_Renderer* SDLRenderer) {
+bool Scene::saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_Renderer* SDLRenderer) {
     SDL_Surface* saveSurface = NULL;
-    SDL_Surface* infoSurface = NULL;
-    infoSurface = SDL_GetWindowSurface(SDLWindow);
-    if (infoSurface == NULL) {
-        std::cerr << "Failed to create info surface from window in saveScreenshotBMP(string), SDL_GetError() - " << SDL_GetError() << "\n";
-    } else {
-        unsigned char * pixels = new (std::nothrow) unsigned char[infoSurface->w * infoSurface->h * infoSurface->format->BytesPerPixel];
+     // SDL_Surface* infoSurface = NULL;
+     // infoSurface = SDL_GetWindowSurface(SDLWindow);
+    // if (infoSurface == NULL) {
+    //     std::cerr << "Failed to create info surface from window in saveScreenshotBMP(string), SDL_GetError() - " << SDL_GetError() << "\n";
+    // } else {
+    unsigned char * pixels = new (std::nothrow) unsigned char[m_largeurFenetre*m_hauteurFenetre*4];
+    //[infoSurface->w * infoSurface->h * infoSurface->format->BytesPerPixel];
         if (pixels == 0) {
             std::cerr << "Unable to allocate memory for screenshot pixel data buffer!\n";
             return false;
         } else {
-            if (SDL_RenderReadPixels(SDLRenderer, &infoSurface->clip_rect, infoSurface->format->format, pixels, infoSurface->w * infoSurface->format->BytesPerPixel) != 0) {
+	  if (SDL_RenderReadPixels(SDLRenderer, NULL, 0, pixels, 4* m_largeurFenetre)  != 0) {
+	    //	     &infoSurface->clip_rect, infoSurface->format->format, pixels, infoSurface->w * infoSurface->format->BytesPerPixel) != 0) {
                 std::cerr << "Failed to read pixel data from SDL_Renderer object. SDL_GetError() - " << SDL_GetError() << "\n";
-                pixels = NULL;
-                return false;
-            } else {
-                saveSurface = SDL_CreateRGBSurfaceFrom(pixels, infoSurface->w, infoSurface->h, infoSurface->format->BitsPerPixel, infoSurface->w * infoSurface->format->BytesPerPixel, infoSurface->format->Rmask, infoSurface->format->Gmask, infoSurface->format->Bmask, infoSurface->format->Amask);
+                 pixels = NULL;
+                 return false;
+	  } else {
+	  Uint32 rmask, gmask, bmask, amask;
+	  rmask = 0x000000ff;
+	  gmask = 0x0000ff00;
+	  bmask = 0x00ff0000;
+	  amask = 0xff000000;
+
+	  saveSurface = SDL_CreateRGBSurfaceFrom(pixels, m_largeurFenetre, m_hauteurFenetre, 32, 4* m_largeurFenetre, rmask, gmask, bmask, amask);
+	  //						       infoSurface->w, infoSurface->h, infoSurface->format->BitsPerPixel, infoSurface->w * infoSurface->format->BytesPerPixel, infoSurface->format->Rmask, infoSurface->format->Gmask, infoSurface->format->Bmask, infoSurface->format->Amask);
                 if (saveSurface == NULL) {
                     std::cerr << "Couldn't create SDL_Surface from renderer pixel data. SDL_GetError() - " << SDL_GetError() << "\n";
                     return false;
@@ -467,12 +487,13 @@ bool saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_Renderer
                 SDL_SaveBMP(saveSurface, filepath.c_str());
                 SDL_FreeSurface(saveSurface);
                 saveSurface = NULL;
-            }
+	  }
             delete[] pixels;
         }
-        SDL_FreeSurface(infoSurface);
-        infoSurface = NULL;
-    }
+	//  SDL_FreeSurface(infoSurface);
+        //infoSurface = NULL;
+	// }
+	INFO(1, "Screenshot "<<filepath);
     return true;
 }
 

@@ -55,13 +55,18 @@ public:
   void setExport(std::string);
   void setImport(std::string);
   void setScene(std::string);
+  void setExportGrid(std::string);
+  void setImportGrid(std::string);
 
+  
   void setRun(bool run);
   void setStop(uint t_end);
 
   FLOAT getTime();
   void printCameraPos();
     bool running;
+
+  bool saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_Renderer* SDLRenderer);
 private:
   uint step_by_step;
   uint t;
@@ -103,6 +108,8 @@ private:
   Skybox *skybox;
 };
 
+
+
 void render_text(SDL_Renderer *renderer,
     int x,
     int y,
@@ -110,6 +117,7 @@ void render_text(SDL_Renderer *renderer,
     TTF_Font *font,
     SDL_Rect *rect,
     SDL_Color *color);
+
 
 #endif
 

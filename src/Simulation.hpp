@@ -15,9 +15,13 @@ private :
   std::string conf_file;
   std::string import_path;
   std::string export_path;
+  std::string import_path_grid;
+  std::string export_path_grid;
   std::string scene_path;
   bool import_;
   bool export_;
+  bool import_grid;
+  bool export_grid;
   bool load_conf_;
   uint nb_file_i;
   mutable uint nb_file_e;
@@ -50,6 +54,9 @@ public :
   void exportParticules(std::ofstream & file) const;
   void exportParticulesAll(std::ofstream & file) const;
   void exportSubparticules(std::ofstream & file) const;
+  
+  void importGrid();
+  void exportGrid() const;
   void importSim();
   void exportSim() const;
 
@@ -59,9 +66,10 @@ public :
   void setExport(std::string s);
   void setImport(std::string s);
   void setScene(std::string s);
+  void setExportGrid(std::string s);
+  void setImportGrid(std::string s);
   
   void backward(uint n);
-  //TODO
   void initPoissonSampling(uint i1, uint i2, uint j1, uint j2, uint k1, uint k2);
 
   void loadScene();

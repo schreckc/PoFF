@@ -77,6 +77,9 @@ public :
 
   void fix(VEC3 min, VEC3 max);
   void move(VEC3 min, VEC3 max, VEC3 trans);
+
+  void exportGrid(std::ofstream & file) const;
+  void importGrid(std::ifstream & file);
 };
 
 #endif

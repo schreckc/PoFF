@@ -169,15 +169,17 @@ MAT3 Subparticule::getRotation() const {
 }
 
 void Subparticule::update(VEC3 &p, VEC3 &v) {
-  //    if (mpm_conf::method_ == mpm_conf::apic_) {
-     pos = p;
-  // } else {
-  // pos += mpm_conf::dt_*v;
-    // }
-    vel = v;
-    // INFO(3, "pos "<<pos(0)<<" "<<pos(1)<<" "<<pos(2));
-    // INFO(3, "vel "<<v(0)<<" "<<v(1)<<" "<<v(2));
-    FLOAT h = mpm_conf::grid_spacing_;
+  // INFO(3, " prev pos "<<pos(0)<<" "<<pos(1)<<" "<<pos(2));
+  // INFO(3, "prev vel "<<vel(0)<<" "<<vel(1)<<" "<<vel(2));
+  if (mpm_conf::method_ == mpm_conf::apic_) {
+    pos = p;
+  } else {
+    pos += mpm_conf::dt_*v;
+  }
+  vel = v;
+  // INFO(3, "pos "<<pos(0)<<" "<<pos(1)<<" "<<pos(2));
+  // INFO(3, "vel "<<v(0)<<" "<<v(1)<<" "<<v(2));
+  FLOAT h = mpm_conf::grid_spacing_;
   cell = Vector3i((int)(pos(0)/h), (int)(pos(1)/h), (int)(pos(2)/h));   
 }
 
@@ -200,7 +202,13 @@ FLOAT Subparticule::weight(Vector3i node) {
 }
 
 void Subparticule::eulerStep(VEC3 forces) {
+  // INFO(3, "prev vel "<<vel(0)<<" "<<vel(1)<<" "<<vel(2));
+  // INFO(3, "prev pos "<<pos(0)<<" "<<pos(1)<<" "<<pos(2));
   VEC3 a = forces/mass + mpm_conf::gravity_;
-  vel += mpm_conf::dt_*a;
   pos += mpm_conf::dt_*vel;
+  vel += mpm_conf::dt_*a;
+  FLOAT h = mpm_conf::grid_spacing_;
+  cell = Vector3i((int)(pos(0)/h), (int)(pos(1)/h), (int)(pos(2)/h));   
+  // INFO(3, "new vel "<<vel(0)<<" "<<vel(1)<<" "<<vel(2));
+  // INFO(3, "new pos "<<pos(0)<<" "<<pos(1)<<" "<<pos(2));
 }

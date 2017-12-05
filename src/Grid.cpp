@@ -308,7 +308,7 @@ void Grid::nextStep() {
   //   elem = VEC3(0, 0, 0);
   // }
   //  INFO(3, "next step");
-#pragma omp parallel for
+  #pragma omp parallel for
   for (uint i = 0; i < nb_nodes; ++i) {
     masses[i] = 0;
     active_nodes[i] = false;
@@ -316,8 +316,10 @@ void Grid::nextStep() {
     prev_velocities[i] = velocities[i]; 
     velocities[i] = VEC3(0, 0, 0);
   }
-#pragma omp parallel for
+  //  INFO(3, "nb cells "<<nb_cells<<" "<<cells.size());
+  //#pragma omp parallel for
   for (uint i = 0; i < nb_cells; ++i) {
+    //INFO(3, "cell "<<cells[i].size());
     cells[i].clear();
   }
 }
@@ -831,13 +833,14 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
     Subparticule *p = subparticules[ip];
     Vector3i cell = p->getCell();
     VEC3 prev_pos = p->getPosition();
-    //    INFO(3, "prev_pos\n"<<prev_pos);
-    //INFO(3, "cell\n"<< cell);
+    //INFO(3, "prev_pos\n"<<prev_pos);
+    // INFO(3, "cell\n"<< cell);
     VEC3 vel(0, 0, 0);
     VEC3 vel_flip = p->getVelocity();
     // INFO(3, "vel FLIP \n"<<vel_flip);
     VEC3 pos(0, 0, 0);
     FLOAT total_masse = 0;
+    FLOAT total_weigth = 0;
     for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
       if (i >= 0 && i <= (int)i_max) {
     	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
@@ -845,14 +848,15 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
     	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
 	      if (k >= 0 && k <= (int)k_max) {
 		uint ind = index(i, j, k);
-		if (active_nodes[ind]) {
+		if (/*active_nodes[ind]*/true) {
 		  FLOAT w = p->weight(Vector3i(i, j, k));
 		  vel += w*velocities[ind];
 		  vel_flip += w*(velocities[ind] - prev_velocities[ind]);
-		  pos += w*new_positions[ind];
-		  // pos += w*(positions[ind] + mpm_conf::dt_*velocities[ind]);
+		  // pos += w*new_positions[ind];
+		  pos += w*(positions[ind] + mpm_conf::dt_*velocities[ind]);
 		  //INFO(3, w);
 		  total_masse += w*masses[ind];
+		  total_weigth += w;
 		}
 	      }
 	    }
@@ -860,7 +864,8 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
 	}
       }
     }
-    if (total_masse > 0.000001) {
+    //  INFO(3, "total weigth  "<<total_weigth);
+    if (total_masse > 0.1*mpm_conf::density_*s3) {
       /* Rotation */
       MAT3 A = MAT3::Zero(3, 3);
       FLOAT sum = 0;
@@ -874,7 +879,7 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
       		if (active_nodes[ind]) {
       		  FLOAT w = p->weight(Vector3i(i, j, k));
       		  sum += w;
-      		  A += w * (new_positions[ind] - pos)*(positions[ind] - prev_pos).transpose();
+      		  A += w * (positions[ind] + mpm_conf::dt_*velocities[ind] - pos)*(positions[ind] - prev_pos).transpose();
       		}
       	      }
       	    }
@@ -887,7 +892,7 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
        MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
        p->rotate(rot);
       //         INFO(3, "vel\n"<<vel);
-      // INFO(3, "total weigth  "<<total_weight);
+
       if (mpm_conf::method_ == mpm_conf::apic_ || mpm_conf::method_ == mpm_conf::pic_) {
 	p->update(pos, vel);
       } else if (mpm_conf::method_ == mpm_conf::flip_) {
@@ -897,8 +902,10 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
 	VEC3 v = alpha*vel_flip + (1-alpha)*vel;
 	p->update(pos, v);
       }
+      //      INFO(3, "total masse  "<<total_masse);
     } else {
-      //  INFO(3, "total masse  "<<total_masse);
+     // INFO(3, "total masse e "<<total_masse<<" "<<mpm_conf::density_*s3);
+     // INFO(3, "total weigth  "<<total_weigth);
       p->eulerStep();
     }
   }
@@ -1264,4 +1271,40 @@ void Grid::move(VEC3 min, VEC3 max, VEC3 trans) {
       fixed_velocities[i] = trans;
     }
   }
+}
+
+
+void Grid::exportGrid(std::ofstream & file) const {
+  file << "# grid: "<<i_max<<"x"<<j_max<<"x"<<k_max<<" / "<<x_max<<"x"<<y_max<<"x"<<z_max<<"\n";
+  for (uint i = 0; i < masses.size(); ++i) {
+    if (active_nodes[i]) {
+      file <<i<<" "<<masses[i]<<" " ;
+      file<<velocities[i](0)<<" "<<velocities[i](1)<<" "<<velocities[i](2)<<"\n";
+    }
+  }
+}
+
+
+void Grid::importGrid(std::ifstream & file) {
+  std::string line;
+  while (getline(file, line)) {
+    if (line[0] == '#') {
+      INFO(3, "COMMENT "<<line);
+    } else {
+      //  INFO(3, "line "<<line);
+      std::istringstream s(line);
+      uint index;
+      FLOAT m;
+      VEC3 vel;
+      s >> index;
+      active_nodes[index] = true;
+      s >> m;
+      masses[index] = m;
+      for (uint i = 0; i < 3; ++i) {
+	s >> vel(i);
+      }
+      velocities[index] = vel;
+    }
+  }
+  
 }
