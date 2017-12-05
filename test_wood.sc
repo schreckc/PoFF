@@ -17,4 +17,4 @@
 <method> apic
 <stretch_max> 0.0025
 <stretch_min> 0.0
-<anisotropy> 0.9 0.9 1.2
+<anisotropy> 1 1 1

@@ -14,7 +14,7 @@
   <ray> 0.04
  </cylinder>
  <cylinder>
-  <pos> 0.5 0.55 0.5
+  <pos> 0.5 0.55 0.50
   <direction> 1 0 0
   <ray> 0.04
  </cylinder>
