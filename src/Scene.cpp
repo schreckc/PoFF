@@ -28,6 +28,10 @@ void Scene::animateScene() {
   SCENE->animationLoop();
 }
 
+void Scene::saveScreenshot() {
+  SCENE->saveScreenshotBMP();
+}
+
 Scene::Scene() {
 }
 
@@ -193,6 +197,10 @@ void Scene::init() {
   skybox = new Skybox(10);
   skybox->setPosition(m_camera.getPosition());
   //l_objects.push_back(skybox);
+
+  toggle_record = false;
+  movie_path = "movie/im";
+  nb_file_m = 0;
 }
 
 void Scene::animate() {
@@ -201,10 +209,21 @@ void Scene::animate() {
   skybox->setPosition(m_camera.getPosition());
 
   if (running || step_by_step > 0) {
+    if (toggle_record) {
+      std::thread thr(saveScreenshot);
+      thr.join();
+
     t += mpm_conf::replay_speed_;
     std::list<Object*>::iterator it;
     for (it = l_objects.begin(); it != l_objects.end(); ++it) {
       (*it)->animate();
+    }
+    } else {
+      t += mpm_conf::replay_speed_;
+    std::list<Object*>::iterator it;
+    for (it = l_objects.begin(); it != l_objects.end(); ++it) {
+      (*it)->animate();
+    }
     }
   }
   if (step_by_step > 0) {
@@ -280,7 +299,11 @@ void Scene::animationLoop() {
       printCameraPos();
     }
     if(m_input.getTouche(SDL_SCANCODE_P) ) {
-      saveScreenshotBMP("test_screenshot.bmp", m_fenetre, m_renderer);
+      saveScreenshotBMP("test_screenshot.bmp");
+    }
+    if(m_input.getTouche(SDL_SCANCODE_R) ) {
+      toggle_record = !toggle_record;
+      INFO(1, "Recording ");
     }
     if(m_input.getTouche(SDL_SCANCODE_S) ) {
           mpm_conf::display_sphere_ = !mpm_conf::display_sphere_;
@@ -337,10 +360,9 @@ void Scene::bouclePrincipale() {
   std::thread t1(animateScene);
   sim->init();
   FLOAT spacing =  mpm_conf::grid_spacing_;
-
- 
   
   while(!end_) {
+    
     m_debutBoucle = SDL_GetTicks();
     if (re_init) {
       sim->clear();
@@ -356,7 +378,7 @@ void Scene::bouclePrincipale() {
     Times::TIMES->tick(Times::total_time_);
     animate();
     draw();
-
+    
     if (t > stop) {
       end_ = true;
     }
@@ -367,6 +389,9 @@ void Scene::bouclePrincipale() {
      	   <<"   display "<<Times::TIMES->getTime(Times::display_time_)
      	   <<"   total "<<Times::TIMES->getTime(Times::total_time_));
        Times::TIMES->next_loop();
+       // if (toggle_record) {
+       // 	 saveScreenshotBMP();
+       // }
      }
      SDL_GL_SwapWindow(m_fenetre);
      m_finBoucle = SDL_GetTicks();
@@ -453,7 +478,7 @@ void Scene::printCameraPos() {
 }
 
 
-bool Scene::saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_Renderer* SDLRenderer) {
+bool Scene::saveScreenshotBMP(std::string filepath) {
     SDL_Surface* saveSurface = NULL;
      // SDL_Surface* infoSurface = NULL;
      // infoSurface = SDL_GetWindowSurface(SDLWindow);
@@ -466,7 +491,7 @@ bool Scene::saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_R
             std::cerr << "Unable to allocate memory for screenshot pixel data buffer!\n";
             return false;
         } else {
-	  if (SDL_RenderReadPixels(SDLRenderer, NULL, 0, pixels, 4* m_largeurFenetre)  != 0) {
+	  if (SDL_RenderReadPixels(m_renderer, NULL, 0, pixels, 4* m_largeurFenetre)  != 0) {
 	    //	     &infoSurface->clip_rect, infoSurface->format->format, pixels, infoSurface->w * infoSurface->format->BytesPerPixel) != 0) {
                 std::cerr << "Failed to read pixel data from SDL_Renderer object. SDL_GetError() - " << SDL_GetError() << "\n";
                  pixels = NULL;
@@ -497,6 +522,14 @@ bool Scene::saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_R
     return true;
 }
 
+
+bool Scene::saveScreenshotBMP() {
+   std::stringstream ss;
+     ss <<movie_path<<nb_file_m<<".bmp";
+     std::string str(ss.str());
+     saveScreenshotBMP(str);
+     nb_file_m++;
+}
 
 
 /*

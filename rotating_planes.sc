@@ -11,8 +11,8 @@
  <plane>
   <position> 0.5 0.5 0.5
   <normal> -1 0 0
-  <width> 1.02
-  <length> 1.02
+  <width> 1.3
+  <length> 1.3
  </plane>
 </obstacles>
 <obstacles>

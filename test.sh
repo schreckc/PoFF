@@ -353,17 +353,17 @@ export OMP_PROC_BIND=true
 #./poff_no_graph -l test_wood2.sc -s broken_cuboidh.sc -e test_wood/testh_ -es 10 -stop 15000
 #./poff_no_graph -l test_wood2.sc -s broken_cuboidd.sc -e test_wood/testd_ -es 10 -stop 15000
 
-mkdir column_sub_g
-./poff_no_graph -s column_testh.sc -l test_sand_fall.conf -eg column_sub_g/testh_ -stop 1000
-./poff_no_graph -s column_testv.sc -l test_sand_fall.conf -eg column_sub_g/testv_ -stop 1000
-./poff_no_graph -s column_testd.sc -l test_sand_fall.conf -eg column_sub_gtestd_ -stop 1000
-
-mkdir falling_sub_g
-./poff_no_graph -s falling_cube_cylinder_testv.sc -l test_sand_fall.conf -eg falling_sub_g/testv_ -stop 1000
-./poff_no_graph -s falling_cube_cylinder_testh.sc -l test_sand_fall.conf -eg falling_sub_g/testh_ -stop 1000
-./poff_no_graph -s falling_cube_cylinder_testd.sc -l test_sand_fall.conf -eg falling_sub_g/testd_ -stop 1000
+#mkdir column_sub_g
+#./poff_no_graph -s column_testh.sc -l test_sand_fall.conf -eg column_sub_g/testh_ -stop 1000
+#./poff_no_graph -s column_testv.sc -l test_sand_fall.conf -eg column_sub_g/testv_ -stop 1000
+#./poff_no_graph -s column_testd.sc -l test_sand_fall.conf -eg column_sub_g/testd_ -stop 1000
+#
+#mkdir falling_sub_g
+#./poff_no_graph -s falling_cube_cylinder_testv.sc -l test_sand_fall.conf -eg falling_sub_g/testv_ -stop 1000
+#./poff_no_graph -s falling_cube_cylinder_testh.sc -l test_sand_fall.conf -eg falling_sub_g/testh_ -stop 1000
+#./poff_no_graph -s falling_cube_cylinder_testd.sc -l test_sand_fall.conf -eg falling_sub_g/testd_ -stop 1000
 
 mkdir stretch_sub_g
-./poff_no_graph -s broken_cuboid_subh.sc -l test_sub.conf -eg stretch_sub_g/testh_ -es 10 -stop 2000
-./poff_no_graph -s broken_cuboid_subv.sc -l test_sub.conf -eg stretch_sub_g/testv_ -es 10 -stop 2000
-./poff_no_graph -s broken_cuboid_subd.sc -l test_sub.conf -eg stretch_sub_g/testd_ -es 10 -stop 2000
+./poff_no_graph -s broken_cuboid_subh.sc -l test_sub.conf -eg stretch_sub_g/testh_ -es 1 -stop 2000
+#./poff_no_graph -s broken_cuboid_subv.sc -l test_sub.conf -e stretch_sub_g/testv_ -es 10 -stop 2000
+#./poff_no_graph -s broken_cuboid_subd.sc -l test_sub.conf -e stretch_sub_g/testd_ -es 10 -stop 2000
