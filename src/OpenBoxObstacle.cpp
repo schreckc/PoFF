@@ -100,7 +100,7 @@ void OpenBoxObstacle::draw(glm::mat4 m, int s) {
       PlaneObstacle po2(f2, -v[i], size((i+1)%3), size((i+2)%3), v[(i+1)%3], v[(i+2)%3], m_shader);
       po2.draw(m, s);
 
-      if (i != 2) {
+      if (i != 2 && i != 1) {
 	PlaneObstacle po1(f1, v[i], size((i+1)%3), size((i+2)%3), v[(i+1)%3], v[(i+2)%3], m_shader);
 	po1.draw(m, s);
       }
@@ -274,38 +274,13 @@ FLOAT OpenBoxObstacle::distance(VEC3 p) const {
 }
 
 void OpenBoxObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) const {
-  
-
-  
-  // VEC3 dist_to_min, dist_to_max;
-  // FLOAT min_d = p(0) - min_pos(0);
-  // int i_min = 0;
-  // int dir = 1;
-  // for (uint i = 0; i < 3; ++i) {
-  //   dist_to_min(i) = p(i) - min_pos(i);
-  //   dist_to_max(i) = max_pos(i) - p(i);
-  //   if (fabs(dist_to_min(i)) < fabs(min_d)) {
-  //     min_d = dist_to_min(i);
-  //     i_min = i;
-  //     dir = 1;
-  //   }
-  //   if (fabs(dist_to_max(i)) < fabs(min_d)) {
-  //     min_d = dist_to_max(i);
-  //     i_min = i;
-  //     dir = -1;
-  //   }
-  // }
-  // normal(i_min) = (FLOAT)dir*1.0;
-  // normal((i_min+1)%3) = 0.0;
-  // normal((i_min+2)%3) = 0.0;
-  // dist = min_d;
 
   VEC3 dir = p - middle;
   VEC3 proj = p;
   FLOAT d_min = 100;
   FLOAT i_min = 0;
   FLOAT out = 1;
-  if (v[2].dot(dir) < 0.5*size(2)) {
+  if (v[2].dot(dir) < 0.5*size(2) && v[1].dot(dir) < 0.5*size(1)) {
     for (uint i = 0; i < 3; ++i) {
       FLOAT d =  v[i].dot(dir);
       if (d > 0.5*size(i)) {

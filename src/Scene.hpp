@@ -30,6 +30,7 @@ class Scene {
 public:
   static Scene* SCENE;
   static void animateScene();
+  static void saveScreenshot();
   
   Scene();
   Scene(std::string titreFenetre, int largeurFenetre, int hauteurFenetre);
@@ -66,7 +67,8 @@ public:
   void printCameraPos();
     bool running;
 
-  bool saveScreenshotBMP(std::string filepath, SDL_Window* SDLWindow, SDL_Renderer* SDLRenderer);
+  bool saveScreenshotBMP(std::string filepath);
+  bool saveScreenshotBMP();
 private:
   uint step_by_step;
   uint t;
@@ -74,6 +76,10 @@ private:
   bool re_init;
   int back;
   uint stop;
+
+  bool toggle_record;
+  uint nb_file_m;
+  std::string movie_path;
   
   std::string m_titreFenetre;
   int m_largeurFenetre;
