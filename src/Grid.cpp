@@ -865,7 +865,7 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
       }
     }
     //  INFO(3, "total weigth  "<<total_weigth);
-    if (total_masse > 0.1*mpm_conf::density_*s3) {
+    if (total_masse > 0.01*mpm_conf::density_*s3) {
       /* Rotation */
       MAT3 A = MAT3::Zero(3, 3);
       FLOAT sum = 0;
@@ -902,9 +902,9 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
 	VEC3 v = alpha*vel_flip + (1-alpha)*vel;
 	p->update(pos, v);
       }
-      //      INFO(3, "total masse  "<<total_masse);
+      //INFO(3, "total masse  "<<total_masse);
     } else {
-     // INFO(3, "total masse e "<<total_masse<<" "<<mpm_conf::density_*s3);
+      // INFO(3, "total masse e "<<total_masse<<" "<<mpm_conf::density_*s3);
      // INFO(3, "total weigth  "<<total_weigth);
       p->eulerStep();
     }
