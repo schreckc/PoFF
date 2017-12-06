@@ -11,8 +11,8 @@
  <plane>
   <position> 0.5 0.5 0.5
   <normal> -1 0 0
-  <width> 1.02
-  <length> 1.02
+  <width> 1.3
+  <length> 1.3
  </plane>
 </obstacles>
 <obstacles>
@@ -26,10 +26,6 @@
   <x> 0.2 0.3
   <y> 0.3 0.4
   <z> 0.06 0.16
-  <nb particules> 1000
+  <nb particules> 10000
  </cuboid>
 </particules>
-<camera>
- <position> 0.190755 1.31101 0.213523
- <orientation> 0.193168 -0.981101 -0.0112831
-</camera>
