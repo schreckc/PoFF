@@ -211,13 +211,12 @@ void Scene::animate() {
   if (running || step_by_step > 0) {
     if (toggle_record) {
       std::thread thr(saveScreenshot);
-      thr.join();
-
     t += mpm_conf::replay_speed_;
     std::list<Object*>::iterator it;
     for (it = l_objects.begin(); it != l_objects.end(); ++it) {
       (*it)->animate();
     }
+    thr.join();
     } else {
       t += mpm_conf::replay_speed_;
     std::list<Object*>::iterator it;
@@ -303,7 +302,11 @@ void Scene::animationLoop() {
     }
     if(m_input.getTouche(SDL_SCANCODE_R) ) {
       toggle_record = !toggle_record;
-      INFO(1, "Recording ");
+      if (toggle_record) {
+	INFO(1, "Recording "<<movie_path);
+      } else {
+	INFO(1, "Stop Recording ");
+      }
     }
     if(m_input.getTouche(SDL_SCANCODE_S) ) {
           mpm_conf::display_sphere_ = !mpm_conf::display_sphere_;
@@ -472,9 +475,12 @@ FLOAT Scene::getTime() {
 
 
 void Scene::printCameraPos() {
+  glm::vec3 pos = m_camera.getPosition(), target = pos+m_camera.getOrientation(), up = glm::vec3(0, 0, 1);
+
   INFO(1, "<camera>\n <position> "<<m_camera.getPosition()[0]<<" "<<m_camera.getPosition()[1]<<" "<<m_camera.getPosition()[2]<<
        "\n <orientation> "<<m_camera.getOrientation()[0]<<" "<<m_camera.getOrientation()[1]<<" "<<m_camera.getOrientation()[2]<<
        "\n</camera>");
+  INFO(1, "Mistuba:\n"<<"<lookat target=\""<<target[0]<<", "<<target[1]<<", "<<target[2]<<"\" origin=\""<<pos[0]<<", "<<pos[1]<<", "<<pos[2]<<"\" up=\""<<up[0]<<", "<<up[1]<<", "<<up[2] <<"\"/>");
 }
 
 
@@ -498,9 +504,9 @@ bool Scene::saveScreenshotBMP(std::string filepath) {
                  return false;
 	  } else {
 	  Uint32 rmask, gmask, bmask, amask;
-	  rmask = 0x000000ff;
+	  rmask = 0x00ff0000;
 	  gmask = 0x0000ff00;
-	  bmask = 0x00ff0000;
+	  bmask = 0x000000ff;
 	  amask = 0xff000000;
 
 	  saveSurface = SDL_CreateRGBSurfaceFrom(pixels, m_largeurFenetre, m_hauteurFenetre, 32, 4* m_largeurFenetre, rmask, gmask, bmask, amask);
@@ -525,7 +531,15 @@ bool Scene::saveScreenshotBMP(std::string filepath) {
 
 bool Scene::saveScreenshotBMP() {
    std::stringstream ss;
+   if (nb_file_m < 10) {
+     ss <<movie_path<<"000"<<nb_file_m<<".bmp";
+   } else if (nb_file_m < 100) {
+       ss <<movie_path<<"00"<<nb_file_m<<".bmp";
+   } else if (nb_file_m < 1000) {
+     ss <<movie_path<<"0"<<nb_file_m<<".bmp";
+   } else {
      ss <<movie_path<<nb_file_m<<".bmp";
+   }
      std::string str(ss.str());
      saveScreenshotBMP(str);
      nb_file_m++;

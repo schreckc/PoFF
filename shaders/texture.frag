@@ -17,5 +17,5 @@ void main(){
   if(texel.a < 0.5)
     discard;
    col = col * texel.rgba;
-   out_color.rgba = col.bgra;
+   out_color = col;
 }

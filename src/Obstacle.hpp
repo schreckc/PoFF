@@ -27,6 +27,7 @@ private :
 public :
   Obstacle(int shader = -1);
   void animate();
+  void animate(FLOAT t);
   virtual void apply(Motion m) = 0;
   
 #ifndef NO_GRAPHICS_ 
@@ -43,6 +44,8 @@ public :
   void setMotions(std::list<Motion> lm);
   void addMotion(Motion m);
   bool isMoving() const;
+
+  virtual void exportMitsuba(std::ofstream & file) const = 0;
 };
 
 #endif

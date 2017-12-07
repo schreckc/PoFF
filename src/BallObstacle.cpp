@@ -60,3 +60,7 @@ void BallObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) const 
   normal = n;
   dist = norm - ray;
 }
+
+void BallObstacle::exportMitsuba(std::ofstream & file) const {
+  TEST(false); //TODO
+}

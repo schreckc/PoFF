@@ -130,3 +130,8 @@ void SphereObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) cons
   }
 
 }
+
+
+void SphereObstacle::exportMitsuba(std::ofstream & file) const {
+  TEST(false); //TODO
+}

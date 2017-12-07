@@ -25,7 +25,7 @@ private :
   bool load_conf_;
   uint nb_file_i;
   mutable uint nb_file_e;
-  uint t;
+  uint time;
   
   Grid grid;
   std::vector<Particule*> particules;
@@ -87,6 +87,8 @@ public :
 
   void fix(VEC3 min, VEC3 max);
   void move(VEC3 min, VEC3 max, VEC3 trans);
+
+  void exportMitsuba() const;
 };
 
 

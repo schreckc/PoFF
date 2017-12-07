@@ -29,6 +29,7 @@ public :
   void getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &n) const;
 
   void rotate(FLOAT angle, VEC3 axe);
+  void exportMitsuba(std::ofstream & file) const;
 };
 
 #endif

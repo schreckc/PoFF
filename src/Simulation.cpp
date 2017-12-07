@@ -76,7 +76,7 @@ void Simulation::init() {
     exportGrid();
   }
   
-  t = 0;
+  time = 0;
 }
 
 void Simulation::clearParticules() {
@@ -103,14 +103,14 @@ void Simulation::clear() {
 }
 
 void Simulation::animate() {
-  ++t;
+  ++time;
   //  INFO(1, "Simulation step : "<<t);
   if (!import_ && !import_grid) {
     oneStep();
     //        mpm_conf::anisotropy_values_(2) += 0.01;
   
     for (auto &ob : obstacles) {
-      ob->animate();
+      ob->animate(time*mpm_conf::dt_);
     }
   } else {
     if (import_) {
@@ -118,13 +118,15 @@ void Simulation::animate() {
     } else if (import_grid) {
       importGrid();
     }
+    #ifndef NO_GRAPHICS_
     //    INFO(3, particules.front()->getVolume());
     for (uint s = 0; s < mpm_conf::replay_speed_; ++s) {
       for (auto &ob : obstacles) {
-	ob->animate();
+	ob->animate(Scene::SCENE->getTime());
       }
     } 
   }
+  #endif
   if (export_) {
     exportSim();
   }
@@ -569,7 +571,7 @@ void Simulation::exportSim() const {
     file.close();
   }
   ++nb_file_e;
-  //  exportGrid();
+  // exportMitsuba();
 }
 
 void Simulation::setLoad(std::string s) {
@@ -1608,4 +1610,21 @@ void Simulation::fix(VEC3 min, VEC3 max) {
 
 void Simulation::move(VEC3 min, VEC3 max, VEC3 trans) {
   grid.move(min, max, trans);
+}
+
+
+void Simulation::exportMitsuba() const {
+  if (nb_file_e % mpm_conf::export_step_ == 0) {
+    std::stringstream ss;
+    ss <<export_path<<nb_file_e/mpm_conf::export_step_<<".xml";
+    std::string str(ss.str());
+    std::ofstream file(str.c_str());
+    ERROR(file.good(), "cannot open file \""<<str<<"\"", "");
+    INFO(1, "Export file \""<<str<<"\"");
+    for (auto &p : particules) {
+      p->exportMitsuba(file);
+    }
+    file.close();
+  }
+  ++nb_file_e;
 }

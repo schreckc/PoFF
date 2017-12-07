@@ -80,3 +80,7 @@ void CylinderObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) co
   //  normal.normalize();
   dist = norm - ray;
 }
+
+void CylinderObstacle::exportMitsuba(std::ofstream & file) const {
+  TEST(false); //TODO
+}
