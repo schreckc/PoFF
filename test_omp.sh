@@ -29,5 +29,5 @@ export OMP_PROC_BIND=true
 
 
 #run the respective binary through SLURM's srun
-CMD="./poff_no_graph -l test_wood_a1.conf -s broken_cuboidv.sc -e test_wood_a1/testvv_ -es 10 -stop 15000"
+CMD="./poff_no_graph -l test_sand_fall.conf -s truck.sc -e truck/test_ -es 10 -stop 10000"
 srun --cpu_bind=verbose $CMD

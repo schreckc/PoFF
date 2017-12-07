@@ -1,7 +1,7 @@
 # Wood ?
 # Professor Quirrell, excuse me. Could I borrow Wood for a moment please?
 <grid_size> 1 1 1
-<grid_spacing> 0.002
+<grid_spacing> 0.01
 <young_modulus_vec> 1e5 1e5 5e4
 <poisson_ratio_vec> 0.1 0.1 0.4
 <time_step> 0.00002 
