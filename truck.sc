@@ -5,8 +5,8 @@
    <angle> -1.5
    <center> 0.5 0.5 0.5
   </rotation>
-  <begin> 0
-  <end> 0
+  <begin> 0.1
+  <end> 0.6
  </motion> 
  <open box>
   <min pos> 0.3 0.2 0.5
@@ -32,6 +32,6 @@
   <x> 0.3 0.7
   <y> 0.2 0.7
   <z> 0.50 0.65
-  <nb particules> 100
+  <nb particules> 50000
  </cuboid>
 </particules>

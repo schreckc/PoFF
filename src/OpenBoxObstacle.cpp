@@ -326,3 +326,7 @@ void OpenBoxObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) con
     normal = VEC3(0, 0, 1);//v[2];
   }
 }
+
+void OpenBoxObstacle::exportMitsuba(std::ofstream & file) const {
+  TEST(false); //TODO
+}

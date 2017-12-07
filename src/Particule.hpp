@@ -159,6 +159,8 @@ public:
 
   void addToMesh(std::list<VEC3> & points, std::list<VEC3> & normals,
 		 std::list<VEC2> & tex_points, std::list<unsigned int> & connectivity);
+
+  void exportMitsuba(std::ofstream &file);
 };
 
 

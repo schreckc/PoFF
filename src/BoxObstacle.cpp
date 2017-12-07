@@ -248,3 +248,7 @@ void BoxObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) const {
   normal((i_min+2)%3) = 0.0;
   dist = min_d;
 }
+
+void BoxObstacle::exportMitsuba(std::ofstream & file) const {
+  TEST(false); //TODO
+}

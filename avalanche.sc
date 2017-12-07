@@ -18,19 +18,19 @@
   <max pos> 0.98 0.98 0.98
  </box>
  <cylinder>
-  <pos> 0.5 0.6 0.3
+  <pos> 0.5 0.5 0.3
   <direction> 0 0 1
-  <ray> 0.02
+  <ray> 0.04
  </cylinder>
  <cylinder>
-  <pos> 0.2 0.6 0.3
+  <pos> 0.2 0.5 0.3
   <direction> 0 0 1
-  <ray> 0.02
+  <ray> 0.04
  </cylinder>
  <cylinder>
-  <pos> 0.8 0.6 0.3
+  <pos> 0.8 0.5 0.3
   <direction> 0 0 1
-  <ray> 0.02
+  <ray> 0.04
  </cylinder> 
 </obstacles>
 <particules>
@@ -41,7 +41,3 @@
   <nb particules> 10000
  </cuboid>
 </particules>
-<camera>
- <position> 0.190755 1.31101 0.213523
- <orientation> 0.193168 -0.981101 -0.0112831
-</camera>

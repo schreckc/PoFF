@@ -2015,3 +2015,14 @@ void Particule::addToMesh(std::list<VEC3> & points, std::list<VEC3> & normals,
   Sphere sp(0.01, m_shader);
   sp.addToMesh(S, points, normals, tex_points, connectivity);
 }
+
+
+void Particule::exportMitsuba(std::ofstream &file) {
+  file<<"<shape type=\"sphere\">\n";
+  file<<"<point name=\"center\" x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
+  file<<"<transform name=\"toWorld\">\n";
+  file<<"<scale x=\"0.3\" y=\"0.3\" z=\"1\"/>\n";
+  file<<"</transform>";
+  file<<"<ref name=\"bsdf\" id=\"particle\"/>\n";
+  file<<"</shape>\n";
+}

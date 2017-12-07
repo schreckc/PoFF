@@ -1,6 +1,7 @@
 #include "PlaneObstacle.hpp"
 #include "error.hpp"
 #include "utils.hpp"
+#include <fstream>
 
 PlaneObstacle::PlaneObstacle(VEC3 p, VEC3 n, FLOAT l, FLOAT w, int shader) : Obstacle(shader) {
   pos = p;
@@ -217,4 +218,16 @@ void PlaneObstacle::rotate(FLOAT angle, VEC3 axe) {
   VEC3 n = utils::rotation(normal, angle, axe);
   normal = n;
   //  INFO(3, normal);
+}
+
+void PlaneObstacle::exportMitsuba(std::ofstream & file) const {
+  file<<"<shape type=\"rectangle\">\n";
+  file<<"<transform name=\"toWorld\">\n";
+  file<<"<scale x=\"10000\" y=\"10000\" z=\"10000\"/>\n";
+  file<<"<translate x=\"0\" y=\"0\" z=\"0.05\"/>\n";
+  file<<"</transform>";
+  file<<"<bsdf type=\"diffuse\">\n";
+  file<<"<srgb name=\"reflectance\" value=\"#FFD18C\"/>\n";
+  file<<"</bsdf>\n";
+  file<<"</shape>\n";
 }

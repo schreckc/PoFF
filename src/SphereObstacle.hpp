@@ -28,6 +28,7 @@ public :
    
   FLOAT distance(VEC3 v) const;
   void getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) const;
+  void exportMitsuba(std::ofstream & file) const;
 };
 
 #endif

@@ -22,6 +22,10 @@
  </box>
 </obstacles>
 <particules>
+ <rotation>
+  <axe> 1 0 0
+  <angle> 0
+ </rotation>
  <cuboid> 
   <x> 0.2 0.3
   <y> 0.3 0.4
