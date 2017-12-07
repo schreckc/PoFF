@@ -125,8 +125,8 @@ void Simulation::animate() {
 	ob->animate(Scene::SCENE->getTime());
       }
     } 
-  }
   #endif
+  }
   if (export_) {
     exportSim();
   }
