@@ -1641,14 +1641,15 @@ void Simulation::exportMitsuba(std::string file_name) const {
       o->exportMitsuba(file);
     }
  
-    glm::vec3 pos = Scene::SCENE->getCameraPosition(), target = pos+Scene::SCENE->getCameraOrientation(), up = glm::vec3(0, 0, 1);
+    //    glm::vec3 pos = Scene::SCENE->getCameraPosition(), target = pos+Scene::SCENE->getCameraOrientation(), up = glm::vec3(0, 0, 1);
     
     file<<"<sensor type=\"perspective\">\n";
     file<<"<float name=\"focusDistance\" value=\"2.78088\"/>\n";
     file<<"<float name=\"fov\" value=\"32\"/>\n";
     file<<"<string name=\"fovAxis\" value=\"x\"/>\n";
     file<<"<transform name=\"toWorld\">\n";
-    file<<"<lookat target=\""<<10*target[0]<<", "<<10*target[1]<<", "<<10*target[2]<<"\" origin=\""<<10*pos[0]<<", "<<10*pos[1]<<", "<<10*pos[2]<<"\" up=\""<<up[0]<<", "<<up[1]<<", "<<up[2] <<"\"/>";
+    // file<<"<lookat target=\""<<10*target[0]<<", "<<10*target[1]<<", "<<10*target[2]<<"\" origin=\""<<10*pos[0]<<", "<<10*pos[1]<<", "<<10*pos[2]<<"\" up=\""<<up[0]<<", "<<up[1]<<", "<<up[2] <<"\"/>\n";
+    file<<"<lookat target=\"0.203847, 3.68133, 4.82679\" origin=\"-9.72093, 4.64086, 5.58709\" up=\"0, 0, 1\"/>\n";
     file<<"</transform>\n";
     file<<"<sampler type=\"ldsampler\">\n";
     file<<"<integer name=\"sampleCount\" value=\"64\"/>\n";
