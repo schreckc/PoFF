@@ -49,6 +49,7 @@ public:
   Shader* getShader(uint i);
   Texture* getTexture(uint i);
   glm::vec3 getCameraPosition() const;
+  glm::vec3 getCameraOrientation() const;
   void setCameraPosition(glm::vec3 pos);
   void setCameraOrientation(glm::vec3 pos);
 

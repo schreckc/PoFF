@@ -34,10 +34,14 @@
  </cylinder> 
 </obstacles>
 <particules>
+ <rotation>
+  <axe> 1 0 0
+  <angle> 0
+ </rotation>	
  <cuboid> 
   <x> 0.1 0.9
   <y> 0.05 0.25
   <z> 0.5 0.8
-  <nb particules> 100
+  <nb particules> 50000
  </cuboid>
 </particules>

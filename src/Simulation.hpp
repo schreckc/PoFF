@@ -88,7 +88,7 @@ public :
   void fix(VEC3 min, VEC3 max);
   void move(VEC3 min, VEC3 max, VEC3 trans);
 
-  void exportMitsuba() const;
+  void exportMitsuba(std::string file_name) const;
 };
 
 

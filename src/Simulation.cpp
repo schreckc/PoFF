@@ -1613,17 +1613,74 @@ void Simulation::move(VEC3 min, VEC3 max, VEC3 trans) {
 }
 
 
-void Simulation::exportMitsuba() const {
+void Simulation::exportMitsuba(std::string file_name) const {
   if (nb_file_e % mpm_conf::export_step_ == 0) {
-    std::stringstream ss;
-    ss <<export_path<<nb_file_e/mpm_conf::export_step_<<".xml";
-    std::string str(ss.str());
-    std::ofstream file(str.c_str());
-    ERROR(file.good(), "cannot open file \""<<str<<"\"", "");
-    INFO(1, "Export file \""<<str<<"\"");
+    // std::stringstream ss;
+    // ss <<export_path<<nb_file_e/mpm_conf::export_step_<<".xml";
+    // std::string str(ss.str());
+    // std::ofstream file(str.c_str());
+    std::ofstream file(file_name.c_str());
+    ERROR(file.good(), "cannot open file \""<<file_name<<"\"", "");
+    INFO(1, "Export file \""<<file_name<<"\"");
+
+    std::string diff_reflectance = "#bbcdff";
+    std::string integrator = "direct";
+    
+    file<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
+    file<<"<scene version=\"0.5.0\">\n";
+    file<<"<integrator type=\""<<integrator<<"\"/>\n";
+    file<<"<bsdf type=\"plastic\" id=\"particle\">\n";
+    file<<"<srgb name=\"diffuseReflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+    file<<"</bsdf>";
+    
     for (auto &p : particules) {
       p->exportMitsuba(file);
     }
+
+    for (auto &o : obstacles) {
+      o->exportMitsuba(file);
+    }
+ 
+    glm::vec3 pos = Scene::SCENE->getCameraPosition(), target = pos+Scene::SCENE->getCameraOrientation(), up = glm::vec3(0, 0, 1);
+    
+    file<<"<sensor type=\"perspective\">\n";
+    file<<"<float name=\"focusDistance\" value=\"2.78088\"/>\n";
+    file<<"<float name=\"fov\" value=\"32\"/>\n";
+    file<<"<string name=\"fovAxis\" value=\"x\"/>\n";
+    file<<"<transform name=\"toWorld\">\n";
+    file<<"<lookat target=\""<<10*target[0]<<", "<<10*target[1]<<", "<<10*target[2]<<"\" origin=\""<<10*pos[0]<<", "<<10*pos[1]<<", "<<10*pos[2]<<"\" up=\""<<up[0]<<", "<<up[1]<<", "<<up[2] <<"\"/>";
+    file<<"</transform>\n";
+    file<<"<sampler type=\"ldsampler\">\n";
+    file<<"<integer name=\"sampleCount\" value=\"64\"/>\n";
+    file<<"</sampler>\n";
+    file<<"<film type=\"hdrfilm\">\n";
+    file<<"<boolean name=\"banner\" value=\"false\"/>\n";
+    file<<"<integer name=\"height\" value=\"720\"/>\n";
+    file<<"<string name=\"pixelFormat\" value=\"rgb\"/>\n";
+    file<<"<integer name=\"width\" value=\"1280\"/>\n";
+    file<<"<rfilter type=\"gaussian\"/>\n";
+    file<<"</film>\n";
+    file<<"</sensor>\n";
+
+
+    file<<"<shape type=\"sphere\">\n";
+    file<<"<point name=\"center\" x=\"30\" y=\"-15\" z=\"30\"/>\n";
+    file<<"<float name=\"radius\" value=\"4.0\"/>\n";
+    file<<"<emitter type=\"area\">\n";
+    file<<"<spectrum name=\"radiance\" value=\"90\"/>\n";
+    file<<"</emitter>\n";
+    file<<"</shape>\n";
+
+    file<<"<emitter type=\"sky\">\n";
+    file<<"<transform name=\"toWorld\">\n";
+    file<<"<rotate x=\"1\" angle=\"90\"/>\n";
+    file<<"</transform>\n";
+    file<<"<float name=\"scale\" value=\"4\"/>\n";
+    file<<"<vector name=\"sunDirection\" x=\"0\" y=\"40\" z=\"20\"/>\n";
+    file<<"</emitter>\n";
+
+    file<<"</scene>\n";
+
     file.close();
   }
   ++nb_file_e;

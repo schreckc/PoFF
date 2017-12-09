@@ -82,5 +82,6 @@ void CylinderObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) co
 }
 
 void CylinderObstacle::exportMitsuba(std::ofstream & file) const {
-  TEST(false); //TODO
+  INFO(3, "Export boxobstacle in xml format for mitsuba not implemented");
+  //  TEST(false); //TODO
 }

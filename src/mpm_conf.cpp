@@ -26,7 +26,7 @@ namespace mpm_conf {
   VEC3 poisson_vec_(poisson_, poisson_, poisson_); // (nu_23, nu_13, nu_12)
   VEC3 shearing_vec_(young_modulus_/(1+poisson_), young_modulus_/(1+poisson_),young_modulus_/(1+poisson_));// (G_23, G_13, G_12)
   
-  FLOAT dt_ = 0.1; 
+  FLOAT dt_ = 0.01; 
   VEC3 gravity_ = VEC3(0.0, 0.0, -9.81); 
 
   FLOAT density_ = 150.0; //sable 1530 kg/m^3

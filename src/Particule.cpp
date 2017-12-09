@@ -136,7 +136,7 @@ void Particule::draw(glm::mat4 m, int s) {
 
 
       
-      //            valx = 0.1; valy = 0.1;  valz = 0.8;
+      valx = 0.1; valy = 0.1;  valz = 0.1;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
       //valx = 1; valy = 1;  valz = 1;
       glm::mat3 D;

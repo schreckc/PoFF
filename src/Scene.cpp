@@ -308,6 +308,9 @@ void Scene::animationLoop() {
 	INFO(1, "Stop Recording ");
       }
     }
+    if(m_input.getTouche(SDL_SCANCODE_E) ) {
+      sim->exportMitsuba("test_mistuba.xml");
+    }
     if(m_input.getTouche(SDL_SCANCODE_S) ) {
           mpm_conf::display_sphere_ = !mpm_conf::display_sphere_;
 	   if (mpm_conf::display_sphere_) {
@@ -422,6 +425,10 @@ Texture* Scene::getTexture(uint i) {
 
 glm::vec3 Scene::getCameraPosition() const {
   return m_camera.getPosition();
+}
+
+glm::vec3 Scene::getCameraOrientation() const {
+  return m_camera.getOrientation();
 }
 
 void Scene::setCameraPosition(glm::vec3 pos) {
