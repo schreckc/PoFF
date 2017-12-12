@@ -59,6 +59,7 @@ public:
   void setScene(std::string);
   void setExportGrid(std::string);
   void setImportGrid(std::string);
+  void setExportMitsuba(std::string);
 
   
   void setRun(bool run);
@@ -81,8 +82,8 @@ private:
   bool toggle_record;
   uint nb_file_m;
   std::string movie_path;
-  
-  std::string m_titreFenetre;
+
+    std::string m_titreFenetre;
   int m_largeurFenetre;
   int m_hauteurFenetre;
 

@@ -370,7 +370,39 @@ export OMP_PROC_BIND=true
 
 #mkdir avalanche
 #./poff_no_graph -l test_sand_fall_iso.conf -s avalanche.sc -e avalanche/test_ -stop 3000
+#./poff_no_graph -l test_sand_fall.conf -s avalanched.sc -e avalanche/testd_ -stop 3000
 #./poff_no_graph -l test_sand_fall.conf -s avalancheh.sc -e avalanche/testh_ -stop 3000
 #./poff_no_graph -l test_sand_fall.conf -s avalanchev.sc -e avalanche/testv_ -stop 3000
-./poff_no_graph -l test_sand_fall.conf -s avalanched.sc -e avalanche/testd_ -stop 3000
+
+
+#./poff -l mat0.conf -s columnd.sc -e test/test0_  -stop 600 -r
+#./poff -l mat_y1.conf -s columnd.sc -e test/test_y1_ -stop 600 -r
+#./poff -l mat_y2.conf -s columnd.sc -e test/test_y2_ -stop 600 -r
+#./poff -l mat_y3.conf -s columnd.sc -e test/test_y3_ -stop 600 -r
+#./poff -l mat_p1.conf -s columnd.sc -e test/test_p1_ -stop 600 -r
+#./poff -l mat_p2.conf -s columnd.sc -e test/test_p2_ -stop 600 -r
+#./poff -l mat_a1.conf -s columnd.sc -e test/test_a1_ -stop 600 -r
+#./poff -l mat_a2.conf -s columnd.sc -e test/test_a2_ -stop 600 -r
+#./poff -l mat_a3.conf -s columnd.sc -e test/test_a3_ -stop 600 -r
+#./poff -l mat_a4.conf -s columnd.sc -e test/test_a4_ -stop 600 -r
+
+#./poff -l mat0.conf -s columnh.sc -e test/testh0_  -stop 600 -r
+#./poff -l mat_y1.conf -s columnh.sc -e test/testh_y1_ -stop 600 -r
+#./poff -l mat_y2.conf -s columnh.sc -e test/testh_y2_ -stop 600 -r
+#./poff -l mat_y3.conf -s columnh.sc -e test/testh_y3_ -stop 600 -r
+#./poff -l mat_p1.conf -s columnh.sc -e test/testh_p1_ -stop 600 -r
+#./poff -l mat_p2.conf -s columnh.sc -e test/testh_p2_ -stop 600 -r
+#./poff -l mat_a1.conf -s columnh.sc -e test/testh_a1_ -stop 600 -r
+#./poff -l mat_a2.conf -s columnh.sc -e test/testh_a2_ -stop 600 -r
+#./poff -l mat_a3.conf -s columnh.sc -e test/testh_a3_ -stop 600 -r
+
+./poff -l mat0.conf -s columnv.sc -e test/testv0_  -stop 600 -r
+./poff -l mat_y1.conf -s columnv.sc -e test/testv_y1_ -stop 600 -r
+./poff -l mat_y2.conf -s columnv.sc -e test/testv_y2_ -stop 600 -r
+./poff -l mat_y3.conf -s columnv.sc -e test/testv_y3_ -stop 600 -r
+./poff -l mat_p1.conf -s columnv.sc -e test/testv_p1_ -stop 600 -r
+./poff -l mat_p2.conf -s columnv.sc -e test/testv_p2_ -stop 600 -r
+./poff -l mat_a1.conf -s columnv.sc -e test/testv_a1_ -stop 600 -r
+./poff -l mat_a3.conf -s columnv.sc -e test/testv_a3_ -stop 600 -r
+
 

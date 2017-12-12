@@ -18,6 +18,7 @@ Simulation::Simulation(int shader) : Object(shader) {
   import_ = false;
   export_ = false;
   load_conf_ = false;
+  mitsuba = false;
 
   // conf_file = "test.conf";
   // export_path = "object/test";
@@ -35,6 +36,7 @@ Simulation::~Simulation() {
 void Simulation::init() {
   nb_file_i = 0;
   nb_file_e = 0;
+  nb_file_mitsuba = 0;
 
     if (load_conf_) {
       mpm_conf::loadConf(conf_file);
@@ -74,6 +76,9 @@ void Simulation::init() {
   }
   if (export_grid) {
     exportGrid();
+  }
+  if (mitsuba) {
+    exportMitsuba();
   }
   
   time = 0;
@@ -132,6 +137,9 @@ void Simulation::animate() {
   }
   if (export_grid) {
     exportGrid();
+  }
+  if (mitsuba) {
+    exportMitsuba();
   }
 }
 
@@ -598,6 +606,12 @@ void Simulation::setImportGrid(std::string s) {
   import_path_grid = s;
   import_grid = true;
 }
+
+void Simulation::setExportMitsuba(std::string s) {
+  mitsuba_path = s;
+  mitsuba = true;
+}
+
 
 void Simulation::setScene(std::string s) {
   scene_path = s;
@@ -1612,9 +1626,18 @@ void Simulation::move(VEC3 min, VEC3 max, VEC3 trans) {
   grid.move(min, max, trans);
 }
 
+void Simulation::exportMitsuba() const{
+ if (nb_file_mitsuba % mpm_conf::export_step_ == 0) {
+     std::stringstream ss;
+     ss <<mitsuba_path<<nb_file_mitsuba/mpm_conf::export_step_<<".xml";
+     std::string str(ss.str());
+     exportMitsuba(str);
+        }
+   ++nb_file_mitsuba;
+ }
 
 void Simulation::exportMitsuba(std::string file_name) const {
-  if (nb_file_e % mpm_conf::export_step_ == 0) {
+  //if (nb_file_e % mpm_conf::export_step_ == 0) {
     // std::stringstream ss;
     // ss <<export_path<<nb_file_e/mpm_conf::export_step_<<".xml";
     // std::string str(ss.str());
@@ -1629,9 +1652,9 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     file<<"<scene version=\"0.5.0\">\n";
     file<<"<integrator type=\""<<integrator<<"\"/>\n";
-    file<<"<bsdf type=\"plastic\" id=\"particle\">\n";
+    file<<"<bsdf type=\"diffuse\" id=\"particle\">\n";
     file<<"<srgb name=\"diffuseReflectance\" value=\""<<diff_reflectance<<"\"/>\n";
-    file<<"</bsdf>";
+    file<<"</bsdf>\n";
     
     for (auto &p : particules) {
       p->exportMitsuba(file);
@@ -1641,15 +1664,15 @@ void Simulation::exportMitsuba(std::string file_name) const {
       o->exportMitsuba(file);
     }
  
-    //    glm::vec3 pos = Scene::SCENE->getCameraPosition(), target = pos+Scene::SCENE->getCameraOrientation(), up = glm::vec3(0, 0, 1);
+    glm::vec3 pos = Scene::SCENE->getCameraPosition(), target = pos+Scene::SCENE->getCameraOrientation(), up = glm::vec3(0, 0, 1);
     
     file<<"<sensor type=\"perspective\">\n";
     file<<"<float name=\"focusDistance\" value=\"2.78088\"/>\n";
-    file<<"<float name=\"fov\" value=\"32\"/>\n";
+    file<<"<float name=\"fov\" value=\"64\"/>\n";
     file<<"<string name=\"fovAxis\" value=\"x\"/>\n";
     file<<"<transform name=\"toWorld\">\n";
-    // file<<"<lookat target=\""<<10*target[0]<<", "<<10*target[1]<<", "<<10*target[2]<<"\" origin=\""<<10*pos[0]<<", "<<10*pos[1]<<", "<<10*pos[2]<<"\" up=\""<<up[0]<<", "<<up[1]<<", "<<up[2] <<"\"/>\n";
-    file<<"<lookat target=\"0.203847, 3.68133, 4.82679\" origin=\"-9.72093, 4.64086, 5.58709\" up=\"0, 0, 1\"/>\n";
+     file<<"<lookat target=\""<<10*target[0]<<", "<<10*target[1]<<", "<<10*target[2]<<"\" origin=\""<<10*pos[0]<<", "<<10*pos[1]<<", "<<10*pos[2]<<"\" up=\""<<up[0]<<", "<<up[1]<<", "<<up[2] <<"\"/>\n";
+    //    file<<"<lookat target=\"0.203847, 3.68133, 4.82679\" origin=\"-9.72093, 4.64086, 5.58709\" up=\"0, 0, 1\"/>\n";
     file<<"</transform>\n";
     file<<"<sampler type=\"ldsampler\">\n";
     file<<"<integer name=\"sampleCount\" value=\"64\"/>\n";
@@ -1683,6 +1706,6 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"</scene>\n";
 
     file.close();
-  }
-  ++nb_file_e;
+  // }
+  // ++nb_file_mitsuba;
 }

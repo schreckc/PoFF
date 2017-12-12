@@ -70,6 +70,14 @@ int main(int argc, char **argv) {
       std::cout<<"Exporting (grid)"<<" "<<argv[i+1]<<std::endl;
       Scene::SCENE->setExportGrid(argv[i+1]);
       ++i;
+    } else if (s == "-em") {
+      if (argc < i + 2) {
+  	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
+  	help();
+      }
+      std::cout<<"Exporting (mitsuba) "<<" "<<argv[i+1]<<std::endl;
+      Scene::SCENE->setExportMitsuba(argv[i+1]);
+      ++i;
     } else if (s == "-s" || s == "-scene") {
       if (argc < i + 2) {
   	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;

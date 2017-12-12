@@ -309,7 +309,7 @@ void Scene::animationLoop() {
       }
     }
     if(m_input.getTouche(SDL_SCANCODE_E) ) {
-      sim->exportMitsuba("test_mistuba.xml");
+      sim->exportMitsuba("test_mistuba2.xml");
     }
     if(m_input.getTouche(SDL_SCANCODE_S) ) {
           mpm_conf::display_sphere_ = !mpm_conf::display_sphere_;
@@ -461,6 +461,10 @@ void Scene::setExportGrid(std::string s) {
 
 void Scene::setImportGrid(std::string s) {
   sim->setImportGrid(s);
+}
+
+void Scene::setExportMitsuba(std::string s) {
+  sim->setExportMitsuba(s);
 }
 
 void Scene::setRun(bool run) {

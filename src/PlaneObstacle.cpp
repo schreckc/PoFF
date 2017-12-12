@@ -221,10 +221,19 @@ void PlaneObstacle::rotate(FLOAT angle, VEC3 axe) {
 }
 
 void PlaneObstacle::exportMitsuba(std::ofstream & file) const {
+  VEC3 axe(1, 0, 0);
+  FLOAT angle = 0;
+  FLOAT l = 10*length, w = 10*width;
+  if (l == 0) {
+    l = 10000;
+    w = 10000;
+  }
+  //  getRotation(axe, angle);
   file<<"<shape type=\"rectangle\">\n";
   file<<"<transform name=\"toWorld\">\n";
-  file<<"<scale x=\"10000\" y=\"10000\" z=\"10000\"/>\n";
-  file<<"<translate x=\"0\" y=\"0\" z=\"0.0\"/>\n";
+  file<<"<scale x=\""<<l<<"\" y=\""<<w<<"\" z=\"1\"/>\n";
+  file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
+  file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"</transform>";
   file<<"<bsdf type=\"diffuse\">\n";
   file<<"<srgb name=\"reflectance\" value=\"#FFD18C\"/>\n";
