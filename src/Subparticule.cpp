@@ -1,6 +1,7 @@
 #include "Subparticule.hpp"
 #include "Sphere.hpp"
 #include "error.hpp"
+#include <fstream>
 
 Subparticule::Subparticule(int shader) : Object(shader) {
   pos = VEC3(0, 0, 0);
@@ -211,4 +212,27 @@ void Subparticule::eulerStep(VEC3 forces) {
   cell = Vector3i((int)(pos(0)/h), (int)(pos(1)/h), (int)(pos(2)/h));   
   // INFO(3, "new vel "<<vel(0)<<" "<<vel(1)<<" "<<vel(2));
   // INFO(3, "new pos "<<pos(0)<<" "<<pos(1)<<" "<<pos(2));
+}
+
+void Subparticule::exportMitsuba(std::ofstream &file) {
+  // file<<"<shape type=\"sphere\">\n";
+  // //  file<<"<point name=\"center\" x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
+  // file<<"<point name=\"center\" x=\"0\" y=\"0\" z=\"0\"/>\n";
+  // file<<"<transform name=\"toWorld\">\n";
+  // //  file<<"<scale x=\""<<valx<<"\" y=\""<<valy<<"\" z=\""<<valz<<"\"/>\n";
+  // file<<"<scale x=\"0.1\" y=\"0.1\" z=\"1\"/>\n";
+  // file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
+  // file<<"</transform>";
+  // file<<"<ref name=\"bsdf\" id=\"particle\"/>\n";
+  // file<<"</shape>\n";
+
+  file<<"<shape type=\"instance\">\n";
+  file<<"<ref id=\"particle\"/>\n";
+  file<<"<transform name=\"toWorld\">\n";
+  // file<<"<scale x=\""<<valx<<"\" y=\""<<valy<<"\" z=\""<<valz<<"\"/>\n";
+  //file<<"<scale x=\"0.1\" y=\"0.1\" z=\"1\"/>\n";
+  file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
+  file<<"</transform>\n";
+  //  file<<"<ref name=\"bsdf\" id=\"particle\"/>\n";
+  file<<"</shape>\n";
 }

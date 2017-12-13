@@ -44,6 +44,7 @@ public :
   FLOAT weight(Vector3i node);
 
   void eulerStep(VEC3 forces = VEC3(0, 0, 0));
+  void exportMitsuba(std::ofstream &file);
 };
 
 #endif

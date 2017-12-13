@@ -1629,7 +1629,16 @@ void Simulation::move(VEC3 min, VEC3 max, VEC3 trans) {
 void Simulation::exportMitsuba() const{
  if (nb_file_mitsuba % mpm_conf::export_step_ == 0) {
      std::stringstream ss;
-     ss <<mitsuba_path<<nb_file_mitsuba/mpm_conf::export_step_<<".xml";
+     uint nb = nb_file_mitsuba/mpm_conf::export_step_;
+     if (nb < 10) {
+     ss <<mitsuba_path<<"000"<<nb<<".xml";
+     } else if (nb < 100) {
+       ss <<mitsuba_path<<"00"<<nb<<".xml";
+     } else if (nb < 1000) {
+       ss <<mitsuba_path<<"0"<<nb<<".xml";
+     } else {
+       ss <<mitsuba_path<<nb<<".xml";
+     }
      std::string str(ss.str());
      exportMitsuba(str);
         }
@@ -1652,13 +1661,28 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     file<<"<scene version=\"0.5.0\">\n";
     file<<"<integrator type=\""<<integrator<<"\"/>\n";
-    file<<"<bsdf type=\"diffuse\" id=\"particle\">\n";
-    file<<"<srgb name=\"diffuseReflectance\" value=\""<<diff_reflectance<<"\"/>\n";
-    file<<"</bsdf>\n";
-    
-    for (auto &p : particules) {
-      p->exportMitsuba(file);
-    }
+
+
+    // file<<"<bsdf type=\"diffuse\" id=\"particle\">\n";
+    // file<<"<srgb name=\"diffuseReflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+    // file<<"</bsdf>\n";
+
+    file<<"<shape  type=\"shapegroup\"  id=\"particle\">\n";
+       file<<"<shape type=\"sphere\">\n";
+    file<<"<bsdf type=\"diffuse\">\n";
+     file<<"<srgb name=\"diffuseReflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+     file<<"</bsdf>\n";
+     file<<"</shape>\n";
+
+     if (subparticules.empty()) {
+       for (auto &p : particules) {
+	 p->exportMitsuba(file);
+       }
+     } else {
+       for (auto &p : subparticules) {
+	 p->exportMitsuba(file);
+       }
+     }
 
     for (auto &o : obstacles) {
       o->exportMitsuba(file);
