@@ -328,5 +328,18 @@ void OpenBoxObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) con
 }
 
 void OpenBoxObstacle::exportMitsuba(std::ofstream & file) const {
-  TEST(false); //TODO
+  //TEST(false); //TODO
+     for (uint i = 0; i < 3 ; ++i) {
+      VEC3 f1 = middle + 0.5*size(i)*v[i];
+      VEC3 f2 = middle - 0.5*size(i)*v[i];
+
+      PlaneObstacle po2(f2, -v[i], size((i+1)%3), size((i+2)%3), v[(i+1)%3], v[(i+2)%3], m_shader);
+      po2.exportMitsuba(file);
+
+      if (i != 2 && i != 1) {
+	PlaneObstacle po1(f1, v[i], size((i+1)%3), size((i+2)%3), v[(i+1)%3], v[(i+2)%3], m_shader);
+	po1.exportMitsuba(file);
+      }
+      
+    }
 }

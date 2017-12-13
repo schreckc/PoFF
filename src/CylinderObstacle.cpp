@@ -2,6 +2,7 @@
 #include "Cylinder.hpp"
 #include "error.hpp"
 #include "utils.hpp"
+#include <fstream>
 //#include <glm/gtc/type_ptr.hpp>
 //#include <glm/gtx/transform.hpp>
 
@@ -84,4 +85,12 @@ void CylinderObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) co
 void CylinderObstacle::exportMitsuba(std::ofstream & file) const {
   INFO(3, "Export boxobstacle in xml format for mitsuba not implemented");
   //  TEST(false); //TODO
+  VEC3 p0 = pos - 10*dir;
+  VEC3 p1 = pos + 10*dir;
+
+  file<<"<shape type=\"cylinder\">\n";
+  file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+  file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+  file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+  file<<"</shape>\n";
 }
