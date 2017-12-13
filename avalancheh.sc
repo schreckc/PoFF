@@ -22,16 +22,6 @@
   <direction> 0 0 1
   <ray> 0.04
  </cylinder>
- <cylinder>
-  <pos> 0.2 0.5 0.3
-  <direction> 0 0 1
-  <ray> 0.04
- </cylinder>
- <cylinder>
-  <pos> 0.8 0.5 0.3
-  <direction> 0 0 1
-  <ray> 0.04
- </cylinder> 
 </obstacles>
 <particules>
  <rotation>
