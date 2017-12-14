@@ -5,6 +5,7 @@
 
 Obstacle::Obstacle(int shader) : Object(shader) {
   friction = mpm_conf::friction_coef_;
+  rotation = MAT3::Identity();
 }
 
 void Obstacle::animate() {

@@ -1667,11 +1667,12 @@ void Simulation::exportMitsuba(std::string file_name) const {
     // file<<"<srgb name=\"diffuseReflectance\" value=\""<<diff_reflectance<<"\"/>\n";
     // file<<"</bsdf>\n";
 
-    file<<"<shape  type=\"shapegroup\"  id=\"particle\">\n";
-       file<<"<shape type=\"sphere\">\n";
+    file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
+    file<<"<shape type=\"sphere\">\n";
     file<<"<bsdf type=\"diffuse\">\n";
      file<<"<srgb name=\"diffuseReflectance\" value=\""<<diff_reflectance<<"\"/>\n";
      file<<"</bsdf>\n";
+     file<<"</shape>\n";
      file<<"</shape>\n";
 
      if (subparticules.empty()) {
@@ -1703,20 +1704,20 @@ void Simulation::exportMitsuba(std::string file_name) const {
      #endif
     file<<"</transform>\n";
     file<<"<sampler type=\"ldsampler\">\n";
-    file<<"<integer name=\"sampleCount\" value=\"64\"/>\n";
+    file<<"<integer name=\"sampleCount\" value=\"16\"/>\n";
     file<<"</sampler>\n";
     file<<"<film type=\"hdrfilm\">\n";
     file<<"<boolean name=\"banner\" value=\"false\"/>\n";
-    file<<"<integer name=\"height\" value=\"720\"/>\n";
+    file<<"<integer name=\"height\" value=\"900\"/>\n";
     file<<"<string name=\"pixelFormat\" value=\"rgb\"/>\n";
-    file<<"<integer name=\"width\" value=\"1280\"/>\n";
+    file<<"<integer name=\"width\" value=\"1200\"/>\n";
     file<<"<rfilter type=\"gaussian\"/>\n";
     file<<"</film>\n";
     file<<"</sensor>\n";
 
 
     file<<"<shape type=\"sphere\">\n";
-    file<<"<point name=\"center\" x=\"30\" y=\"-15\" z=\"30\"/>\n";
+    file<<"<point name=\"center\" x=\"0\" y=\"-15\" z=\"30\"/>\n";
     file<<"<float name=\"radius\" value=\"4.0\"/>\n";
     file<<"<emitter type=\"area\">\n";
     file<<"<spectrum name=\"radiance\" value=\"90\"/>\n";

@@ -43,7 +43,7 @@ void PlaneObstacle::apply(Motion m) {
     VEC3 diff = pos - m.center;
     diff = m.rotation*diff;
     pos = m.center + diff;
-      } else {
+  } else {
     pos += m.translation;
     length *= m.scale;
     width *= m.scale;
@@ -51,9 +51,10 @@ void PlaneObstacle::apply(Motion m) {
   normal = m.rotation*normal;
   v1 = m.rotation*v1;
   v2 = m.rotation*v2;
-     v2.normalize();
-    v1.normalize();
-    normal.normalize();
+  v2.normalize();
+  v1.normalize();
+  normal.normalize();
+  rotation = m.rotation*rotation;
    //   INFO(3, "scale "<<scale);
 }
   
@@ -218,11 +219,13 @@ void PlaneObstacle::rotate(FLOAT angle, VEC3 axe) {
   VEC3 n = utils::rotation(normal, angle, axe);
   normal = n;
   //  INFO(3, normal);
+  rotation = utils::rotation(angle, axe)*rotation;
 }
 
 void PlaneObstacle::exportMitsuba(std::ofstream & file) const {
-  VEC3 axe(1, 0, 0);
-  FLOAT angle = 0;
+  ANGLE_AXIS aa(rotation);
+  VEC3 axe = aa.axis();
+  FLOAT angle = aa.angle();
   FLOAT l = 10*length, w = 10*width;
   if (l == 0) {
     l = 10000;
