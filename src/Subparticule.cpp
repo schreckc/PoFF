@@ -1,6 +1,7 @@
 #include "Subparticule.hpp"
 #include "Sphere.hpp"
 #include "error.hpp"
+#include "Eigen/Geometry" 
 #include <fstream>
 
 Subparticule::Subparticule(int shader) : Object(shader) {
@@ -215,6 +216,10 @@ void Subparticule::eulerStep(VEC3 forces) {
 }
 
 void Subparticule::exportMitsuba(std::ofstream &file) {
+  ANGLE_AXIS rot(rotation);
+  VEC3 axe = rot.axis();
+  FLOAT angle = rot.angle()/M_PI*180;
+  
   // file<<"<shape type=\"sphere\">\n";
   // //  file<<"<point name=\"center\" x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   // file<<"<point name=\"center\" x=\"0\" y=\"0\" z=\"0\"/>\n";
@@ -230,7 +235,8 @@ void Subparticule::exportMitsuba(std::ofstream &file) {
   file<<"<ref id=\"particle\"/>\n";
   file<<"<transform name=\"toWorld\">\n";
   // file<<"<scale x=\""<<valx<<"\" y=\""<<valy<<"\" z=\""<<valz<<"\"/>\n";
-  //file<<"<scale x=\"0.1\" y=\"0.1\" z=\"1\"/>\n";
+   file<<"<scale x=\"0.02\" y=\"0.02\" z=\"0.02\"/>\n";
+   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   file<<"</transform>\n";
   //  file<<"<ref name=\"bsdf\" id=\"particle\"/>\n";

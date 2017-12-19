@@ -328,7 +328,7 @@ void Simulation::exportGrid() const {
     std::string str(ss.str());
     std::ofstream file(str.c_str());
     ERROR(file.good(), "cannot open file \""<<str<<"\"", "");
-    INFO(1, "Export file \""<<str<<"\"");
+    INFO(1, "Export (grid) file \""<<str<<"\"");
     grid.exportGrid(file);
     file.close();
   }
@@ -1356,6 +1356,7 @@ void Simulation::loadScene() {
     //    addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.2, 10);
     //addPurShearingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 20);
     // addTranslatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
+    // addSphereOfCenterOrientedParticules(VEC3(0.5, 0.5, 0.45), 0.1);
     // mpm_conf::anisotropy_on = false;
 
 
@@ -1617,6 +1618,32 @@ void Simulation::addTranslatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT 
 }
 
 
+void Simulation::addSphereOfCenterOrientedParticules(VEC3 center, FLOAT ray) { 
+     PoissonGenerator::PRNG prng;
+     uint nb_part = 10000;
+     std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsC(nb_part, prng, 30);
+     FLOAT volume = 4.0/3.0*M_PI*pow(ray, 3);
+     nb_part = points.size();
+     VEC3 n(0, 0, 1);
+     //	    uint i = 0;
+     for (auto &v: points) {
+       VEC3 dir = (v-VEC3(0.5, 0.5, 0.5));
+       dir.normalize();
+       Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), VEC3(0, 0, 0));
+       particules.push_back(p);
+        p->setAnisotropyValues(1, 1, 0.1);
+
+	VEC3 axe = dir.cross(n);
+	axe.normalize();
+	FLOAT angle = -acos(dir.dot(n));
+
+	
+	p->setAnisotropyRotation(utils::rotation(angle, axe));
+     }
+     
+}
+
+
 void Simulation::fix(VEC3 min, VEC3 max) {
   grid.fix(min, max);
 }
@@ -1655,7 +1682,8 @@ void Simulation::exportMitsuba(std::string file_name) const {
     ERROR(file.good(), "cannot open file \""<<file_name<<"\"", "");
     INFO(1, "Export file \""<<file_name<<"\"");
 
-    std::string diff_reflectance = "#bbcdff";
+    std::string diff_reflectance = "#DBEDFF";
+    //   std::string diff_reflectance = "#a90202";
     std::string integrator = "direct";
     
     file<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
@@ -1670,11 +1698,24 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
     file<<"<shape type=\"sphere\">\n";
     file<<"<bsdf type=\"diffuse\">\n";
-     file<<"<srgb name=\"diffuseReflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+     file<<"<srgb name=\"reflectance\" value=\""<<diff_reflectance<<"\"/>\n";
      file<<"</bsdf>\n";
      file<<"</shape>\n";
      file<<"</shape>\n";
 
+     // file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
+     // file<<"<shape type=\"obj\">\n";
+     // file<<"<string  name=\"filename\"  value=\"bunny.obj\"/>\n";
+     // file<<"<transform name=\"toWorld\">\n";
+     // file<<"<rotate x=\""<<1<<"\" y=\""<<0<<"\" z=\""<<0<<"\" angle=\""<<90<<"\"/>\n";
+     // file<<"</transform>\n";
+     // file<<"<bsdf type=\"diffuse\">\n";
+     //  file<<"<srgb name=\"reflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+     //  file<<"</bsdf>\n";
+     //  file<<"</shape>\n";
+     //  file<<"</shape>\n";
+
+    
      if (subparticules.empty()) {
        for (auto &p : particules) {
 	 p->exportMitsuba(file);
@@ -1704,23 +1745,23 @@ void Simulation::exportMitsuba(std::string file_name) const {
      #endif
     file<<"</transform>\n";
     file<<"<sampler type=\"ldsampler\">\n";
-    file<<"<integer name=\"sampleCount\" value=\"16\"/>\n";
+    file<<"<integer name=\"sampleCount\" value=\"64\"/>\n";
     file<<"</sampler>\n";
     file<<"<film type=\"hdrfilm\">\n";
     file<<"<boolean name=\"banner\" value=\"false\"/>\n";
-    file<<"<integer name=\"height\" value=\"900\"/>\n";
+    file<<"<integer name=\"height\" value=\"720\"/>\n";
     file<<"<string name=\"pixelFormat\" value=\"rgb\"/>\n";
-    file<<"<integer name=\"width\" value=\"1200\"/>\n";
+    file<<"<integer name=\"width\" value=\"1280\"/>\n";
     file<<"<rfilter type=\"gaussian\"/>\n";
     file<<"</film>\n";
     file<<"</sensor>\n";
 
 
     file<<"<shape type=\"sphere\">\n";
-    file<<"<point name=\"center\" x=\"0\" y=\"-15\" z=\"30\"/>\n";
+    file<<"<point name=\"center\" x=\"-15\" y=\"-15\" z=\"50\"/>\n";
     file<<"<float name=\"radius\" value=\"4.0\"/>\n";
     file<<"<emitter type=\"area\">\n";
-    file<<"<spectrum name=\"radiance\" value=\"90\"/>\n";
+    file<<"<spectrum name=\"radiance\" value=\"160\"/>\n";
     file<<"</emitter>\n";
     file<<"</shape>\n";
 
@@ -1738,3 +1779,9 @@ void Simulation::exportMitsuba(std::string file_name) const {
   // }
   // ++nb_file_mitsuba;
 }
+
+
+// <camera>
+//  <position> -0.154144 0.215484 0.548038
+//  <orientation> 0.968746 0.18285 -0.167624
+// </camera>

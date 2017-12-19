@@ -136,13 +136,13 @@ void Particule::draw(glm::mat4 m, int s) {
 
 
       
-      //valx = 0.1; valy = 0.1;  valz = 0.4;
+       valx = 0.02; valy = 0.02;  valz = 1.0;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
       //valx = 1; valy = 1;  valz = 1;
       glm::mat3 D;
-      D[0] = glm::vec3(3*valx, 0, 0);
-      D[1] = glm::vec3(0, 3*valy, 0);
-      D[2] = glm::vec3(0, 0, 3*valz);
+      D[0] = glm::vec3(valx, 0, 0);
+      D[1] = glm::vec3(0, valy, 0);
+      D[2] = glm::vec3(0, 0, valz);
 
       glm::mat3 S = R*D;
       //glm::mat3 S = R;
@@ -153,9 +153,9 @@ void Particule::draw(glm::mat4 m, int s) {
     
       Sphere sp(0.01, m_shader);
       if (fixed) {
-	sp.setColor(0, 0, 0);
+      	sp.setColor(0, 0, 0);
       } else {
-	sp.setColor(color(0), color(1), color(2));
+      	sp.setColor(color(0), color(1), color(2));
       }
       int cur_shader = m_shader;
       if (m_shader == -1) {
@@ -2036,7 +2036,7 @@ void Particule::exportMitsuba(std::ofstream &file) {
   file<<"<ref id=\"particle\"/>\n";
   file<<"<transform name=\"toWorld\">\n";
   // file<<"<scale x=\""<<valx<<"\" y=\""<<valy<<"\" z=\""<<valz<<"\"/>\n";
-  file<<"<scale x=\"0.02\" y=\"0.02\" z=\"0.02\"/>\n";
+  file<<"<scale x=\"0.5\" y=\"0.5\" z=\"0.5\"/>\n";
   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   file<<"</transform>\n";

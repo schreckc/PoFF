@@ -788,6 +788,7 @@ FLOAT utils::signedAngle(VEC2 d1, VEC2 d2) {
   return a;
 }
 
+
 VEC3 utils::bissectrice(VEC3 d1, VEC3 d2, VEC3 normal) {
   VEC3 biss(0, 0, 0);
   if (d1.squaredNorm() != 0 && d2.squaredNorm() != 0) { 

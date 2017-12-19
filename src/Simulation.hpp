@@ -91,6 +91,8 @@ public :
   void addPurShearingCubeOfParticules(VEC3 center, FLOAT ray, FLOAT speed);
   void addTranslatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT speed);
 
+  void addSphereOfCenterOrientedParticules(VEC3 center, FLOAT ray);
+
   void fix(VEC3 min, VEC3 max);
   void move(VEC3 min, VEC3 max, VEC3 trans);
 

@@ -18,6 +18,9 @@ PlaneObstacle::PlaneObstacle(VEC3 p, VEC3 n, FLOAT l, FLOAT w, int shader) : Obs
     v2.normalize();
     v1.normalize();
   }
+  rotation.col(1) = v1;
+  rotation.col(0) = v2;
+  rotation.col(2) = normal;
 }
 
 PlaneObstacle::PlaneObstacle(VEC3 p, VEC3 n, FLOAT l, FLOAT w, VEC3 d1, VEC3 d2, int shader) : Obstacle(shader) {
@@ -29,6 +32,11 @@ PlaneObstacle::PlaneObstacle(VEC3 p, VEC3 n, FLOAT l, FLOAT w, VEC3 d1, VEC3 d2,
 
   v1 = d1;
   v2 = d2;
+  v1.normalize();
+  v2.normalize();
+  rotation.col(1) = v1;
+  rotation.col(0) = v2;
+  rotation.col(2) = normal;
 }
 
 PlaneObstacle::~PlaneObstacle() {}
@@ -225,21 +233,80 @@ void PlaneObstacle::rotate(FLOAT angle, VEC3 axe) {
 void PlaneObstacle::exportMitsuba(std::ofstream & file) const {
   ANGLE_AXIS aa(rotation);
   VEC3 axe = aa.axis();
-  FLOAT angle = aa.angle();
-  FLOAT l = 10*length, w = 10*width;
+  FLOAT angle = aa.angle()/M_PI*180;
+  FLOAT l = 5*length, w = 5*width;
+  std::string color = "FFD1BC";
   if (l == 0) {
     l = 10000;
     w = 10000;
+    //    color = "FFD18C";
+    color = "FFFFE0";
   }
-  //  getRotation(axe, angle);
+
+  // INFO(3, "rotation\n"<<axe);
+  // INFO(3, "angle "<<angle);
+  
   file<<"<shape type=\"rectangle\">\n";
   file<<"<transform name=\"toWorld\">\n";
-  file<<"<scale x=\""<<l<<"\" y=\""<<w<<"\" z=\"1\"/>\n";
-  file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
+  file<<"<scale x=\""<<w<<"\" y=\""<<l<<"\" z=\"1\"/>\n";
   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
+  file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   file<<"</transform>";
+  file<<"<bsdf  type=\"twosided\">\n";
   file<<"<bsdf type=\"diffuse\">\n";
-  file<<"<srgb name=\"reflectance\" value=\"#FFD18C\"/>\n";
+  file<<"<srgb name=\"reflectance\" value=\"#"<<color<<"\"/>\n";
+  file<<"</bsdf>\n";
   file<<"</bsdf>\n";
   file<<"</shape>\n";
 }
+
+/*
+<shape type="rectangle">
+<transform name="toWorld">
+<scale x="10000" y="10000" z="1"/>
+<rotate x="1" y="0" z="0" angle="0"/>
+<translate x="5" y="5" z="3"/>
+</transform><bsdf  type="twosided">
+<bsdf type="plastic">
+  <srgb name="diffuseReflectance" value="#FFD1BC"/>
+  <float  name="intIOR"  value="1.9"/>
+</bsdf>
+</bsdf>
+</shape>
+<sensor type="perspective">
+<float name="focusDistance" value="2.78088"/>
+<float name="fov" value="64"/>
+<string name="fovAxis" value="x"/>
+<transform name="toWorld">
+<lookat target="6.38918, 2.34948, 1.99554" origin="-0.826397, 7.95169, 6.0638" up="0, 0, 1"/>
+</transform>
+<sampler type="ldsampler">
+<integer name="sampleCount" value="16"/>
+</sampler>
+<film type="hdrfilm">
+<boolean name="banner" value="false"/>
+<integer name="height" value="720"/>
+<string name="pixelFormat" value="rgb"/>
+<integer name="width" value="1280"/>
+<rfilter type="gaussian"/>
+</film>
+</sensor>
+<shape type="sphere">
+<point name="center" x="-30" y="-15" z="50"/>
+<float name="radius" value="4.0"/>
+<emitter type="area">
+<spectrum name="radiance" value="500"/>
+</emitter>
+</shape>
+<emitter type="sky">
+<transform name="toWorld">
+<rotate x="1" angle="90"/>
+</transform>
+<float name="scale" value="4"/>
+<vector name="sunDirection" x="0" y="40" z="20"/>
+</emitter>
+</scene>
+
+
+<lookat target="0.0132549, 4.5354, 2.93769" origin="-9.93611, 5.24607, 3.64836" up="0, 0, 1"/>
+*/

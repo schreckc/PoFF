@@ -22,7 +22,7 @@
 
 using namespace glm;
 
-Scene* Scene::SCENE(new Scene("test", 2400, 1800));
+Scene* Scene::SCENE(new Scene("test", 2560, 1440));
 
 void Scene::animateScene() {
   SCENE->animationLoop();

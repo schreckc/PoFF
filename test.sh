@@ -349,9 +349,9 @@ export OMP_PROC_BIND=true
 
 #rm -r test_wood
 #mkdir test_wood
-#./poff_no_graph -l test_wood2.sc -s broken_cuboidv.sc -e test_wood/testv_ -es 10 -stop 15000
-#./poff_no_graph -l test_wood2.sc -s broken_cuboidh.sc -e test_wood/testh_ -es 10 -stop 15000
-#./poff_no_graph -l test_wood2.sc -s broken_cuboidd.sc -e test_wood/testd_ -es 10 -stop 15000
+#./poff -l test_wood2.sc -s broken_cuboid_subh.sc -e test_wood/testh_ -es 50 -stop 50000
+#./poff_no_graph -l test_wood2.sc -s broken_cuboid_subv.sc -e test_wood/testv_ -es 50 -stop 20000
+#./poff_no_graph -l test_wood2.sc -s broken_cuboid_subd.sc -e test_wood/testd_ -es 50 -stop 20000
 
 #mkdir column_sub_g
 #./poff_no_graph -s column_testh.sc -l test_sand_fall.conf -eg column_sub_g/testh_ -stop 1000
@@ -375,7 +375,19 @@ export OMP_PROC_BIND=true
 #./poff_no_graph -l test_sand_fall.conf -s avalanchev.sc -e avalanche/testv_ -stop 3000
 
 
-#./poff -l mat0.conf -s columnd.sc -e test/test0_  -stop 600 -r
+./poff -l mat0.conf -s columnv.sc -e test/test0_ -es 5 -stop 5000 -r
+./poff -l mat1.conf -s columnv.sc -e test/test1_ -es 5 -stop 5000 -r
+./poff -l mat2.conf -s columnv.sc -e test/test2_ -es 5 -stop 5000 -r
+./poff -l mat3.conf -s columnv.sc -e test/test3_ -es 5 -stop 5000 -r
+./poff -l mat3.conf -s columnv.sc -e test/test4_ -es 5 -stop 5000 -r
+
+./poff -l mat0.conf -s columnd.sc -e test/testd0_ -es 5 -stop 5000 -r
+./poff -l mat1.conf -s columnd.sc -e test/testd1_ -es 5 -stop 5000 -r
+./poff -l mat2.conf -s columnd.sc -e test/testd2_ -es 5 -stop 5000 -r
+./poff -l mat3.conf -s columnd.sc -e test/testd3_ -es 5 -stop 5000 -r
+./poff -l mat4.conf -s columnd.sc -e test/testd4_ -es 5 -stop 5000 -r
+
+
 #./poff -l mat_y1.conf -s columnd.sc -e test/test_y1_ -stop 600 -r
 #./poff -l mat_y2.conf -s columnd.sc -e test/test_y2_ -stop 600 -r
 #./poff -l mat_y3.conf -s columnd.sc -e test/test_y3_ -stop 600 -r
@@ -386,7 +398,7 @@ export OMP_PROC_BIND=true
 #./poff -l mat_a3.conf -s columnd.sc -e test/test_a3_ -stop 600 -r
 #./poff -l mat_a4.conf -s columnd.sc -e test/test_a4_ -stop 600 -r
 
-#./poff -l mat0.conf -s columnh.sc -e test/testh0_  -stop 600 -r
+#./poff -l mat0.conf -s columnh.sc -e test/testh1_  -es 100-stop 600 -r
 #./poff -l mat_y1.conf -s columnh.sc -e test/testh_y1_ -stop 600 -r
 #./poff -l mat_y2.conf -s columnh.sc -e test/testh_y2_ -stop 600 -r
 #./poff -l mat_y3.conf -s columnh.sc -e test/testh_y3_ -stop 600 -r
@@ -396,13 +408,18 @@ export OMP_PROC_BIND=true
 #./poff -l mat_a2.conf -s columnh.sc -e test/testh_a2_ -stop 600 -r
 #./poff -l mat_a3.conf -s columnh.sc -e test/testh_a3_ -stop 600 -r
 
-./poff -l mat0.conf -s columnv.sc -e test/testv0_  -stop 600 -r
-./poff -l mat_y1.conf -s columnv.sc -e test/testv_y1_ -stop 600 -r
-./poff -l mat_y2.conf -s columnv.sc -e test/testv_y2_ -stop 600 -r
-./poff -l mat_y3.conf -s columnv.sc -e test/testv_y3_ -stop 600 -r
-./poff -l mat_p1.conf -s columnv.sc -e test/testv_p1_ -stop 600 -r
-./poff -l mat_p2.conf -s columnv.sc -e test/testv_p2_ -stop 600 -r
-./poff -l mat_a1.conf -s columnv.sc -e test/testv_a1_ -stop 600 -r
-./poff -l mat_a3.conf -s columnv.sc -e test/testv_a3_ -stop 600 -r
+#./poff -l mat0.conf -s columnv.sc -e test/testv0_  -stop 600 -r
+#./poff -l mat_y1.conf -s columnv.sc -e test/testv_y1_ -stop 600 -r
+#./poff -l mat_y2.conf -s columnv.sc -e test/testv_y2_ -stop 600 -r
+#./poff -l mat_y3.conf -s columnv.sc -e test/testv_y3_ -stop 600 -r
+#./poff -l mat_p1.conf -s columnv.sc -e test/testv_p1_ -stop 600 -r
+#./poff -l mat_p2.conf -s columnv.sc -e test/testv_p2_ -stop 600 -r
+#./poff -l mat_a1.conf -s columnv.sc -e test/testv_a1_ -stop 600 -r
+#./poff -l mat_a3.conf -s columnv.sc -e test/testv_a3_ -stop 600 -r
 
 
+#rm -r test_wood
+#mkdir test_wood
+#./poff -l test_wood2.sc -s broken_cuboid_subh.sc -e test_wood/testh_ -es 50 -stop 50000
+#./poff_no_graph -l test_wood2.sc -s broken_cuboid_subv.sc -e test_wood/testv_ -es 50 -stop 20000
+#./poff_no_graph -l test_wood2.sc -s broken_cuboid_subd.sc -e test_wood/testd_ -es 50 -stop 20000
