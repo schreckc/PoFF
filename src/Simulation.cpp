@@ -1356,7 +1356,7 @@ void Simulation::loadScene() {
     //    addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.2, 10);
     //addPurShearingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 20);
     // addTranslatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
-    // addSphereOfCenterOrientedParticules(VEC3(0.5, 0.5, 0.45), 0.1);
+     addSphereOfCenterOrientedParticules(VEC3(0.5, 0.5, 0.3), 0.2);
     // mpm_conf::anisotropy_on = false;
 
 
@@ -1620,7 +1620,8 @@ void Simulation::addTranslatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT 
 
 void Simulation::addSphereOfCenterOrientedParticules(VEC3 center, FLOAT ray) { 
      PoissonGenerator::PRNG prng;
-     uint nb_part = 10000;
+     uint nb_part = 50000;
+     uint nb_sub = 200000;
      std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsC(nb_part, prng, 30);
      FLOAT volume = 4.0/3.0*M_PI*pow(ray, 3);
      nb_part = points.size();
@@ -1629,18 +1630,32 @@ void Simulation::addSphereOfCenterOrientedParticules(VEC3 center, FLOAT ray) {
      for (auto &v: points) {
        VEC3 dir = (v-VEC3(0.5, 0.5, 0.5));
        dir.normalize();
-       Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), VEC3(0, 0, 0));
+       Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), VEC3(0, 0, -3));
        particules.push_back(p);
         p->setAnisotropyValues(1, 1, 0.1);
 
 	VEC3 axe = dir.cross(n);
 	axe.normalize();
-	FLOAT angle = -acos(dir.dot(n));
-
+	FLOAT angle = -acos(dir.dot(n));// + M_PI/2.0;
 	
 	p->setAnisotropyRotation(utils::rotation(angle, axe));
      }
-     
+     points.clear();
+     points = PoissonGenerator::GeneratePoissonPointsC(nb_sub, prng, 30);
+     nb_sub = points.size();
+       //	    uint i = 0;
+     for (auto &v: points) {
+       VEC3 dir = (v-VEC3(0.5, 0.5, 0.5));
+       dir.normalize();
+       Subparticule *p = new Subparticule(volume*mpm_conf::density_/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, -3));
+       subparticules.push_back(p);
+  
+	VEC3 axe = dir.cross(n);
+	axe.normalize();
+	FLOAT angle = -acos(dir.dot(n)) + M_PI/2.0;
+	MAT3 rot = utils::rotation(angle, axe);
+	p->rotate(rot);
+     }
 }
 
 
@@ -1682,8 +1697,9 @@ void Simulation::exportMitsuba(std::string file_name) const {
     ERROR(file.good(), "cannot open file \""<<file_name<<"\"", "");
     INFO(1, "Export file \""<<file_name<<"\"");
 
-    std::string diff_reflectance = "#DBEDFF";
-    //   std::string diff_reflectance = "#a90202";
+        std::string diff_reflectance = "#dda824"; // yellowy brownish
+    //    std::string diff_reflectance = "#DBEDFF"; // dull blue
+    //   std::string diff_reflectance = "#a90202"; //brownish
     std::string integrator = "direct";
     
     file<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";

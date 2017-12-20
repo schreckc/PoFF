@@ -136,7 +136,7 @@ void Particule::draw(glm::mat4 m, int s) {
 
 
       
-       valx = 0.02; valy = 0.02;  valz = 1.0;
+      valx = 0.02; valy = 0.02;  valz = 0.5;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
       //valx = 1; valy = 1;  valz = 1;
       glm::mat3 D;
@@ -2036,10 +2036,12 @@ void Particule::exportMitsuba(std::ofstream &file) {
   file<<"<ref id=\"particle\"/>\n";
   file<<"<transform name=\"toWorld\">\n";
   // file<<"<scale x=\""<<valx<<"\" y=\""<<valy<<"\" z=\""<<valz<<"\"/>\n";
-  file<<"<scale x=\"0.5\" y=\"0.5\" z=\"0.5\"/>\n";
+  file<<"<scale x=\"0.005\" y=\"0.005\" z=\"0.05\"/>\n";
   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   file<<"</transform>\n";
   // file<<"<ref name=\"bsdf\" id=\"particle\"/>\n";
   file<<"</shape>\n";
 }
+
+

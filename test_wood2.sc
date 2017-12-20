@@ -4,7 +4,7 @@
 <grid_spacing> 0.01
 <young_modulus_vec> 1e5 1e5 5e4
 <poisson_ratio_vec> 0.1 0.1 0.4
-<time_step> 0.001 
+<time_step> 0.0002 
 <density> 80
 <gravity> 0 0 -9.81
 <friction> 1
