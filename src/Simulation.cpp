@@ -1697,8 +1697,8 @@ void Simulation::exportMitsuba(std::string file_name) const {
     ERROR(file.good(), "cannot open file \""<<file_name<<"\"", "");
     INFO(1, "Export file \""<<file_name<<"\"");
 
-        std::string diff_reflectance = "#dda824"; // yellowy brownish
-    //    std::string diff_reflectance = "#DBEDFF"; // dull blue
+    //   std::string diff_reflectance = "#dda824"; // yellowy brownish
+        std::string diff_reflectance = "#DBEDFF"; // dull blue
     //   std::string diff_reflectance = "#a90202"; //brownish
     std::string integrator = "direct";
     
@@ -1711,13 +1711,16 @@ void Simulation::exportMitsuba(std::string file_name) const {
     // file<<"<srgb name=\"diffuseReflectance\" value=\""<<diff_reflectance<<"\"/>\n";
     // file<<"</bsdf>\n";
 
-    file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
+    /** WOOD ***/
+        file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
     file<<"<shape type=\"sphere\">\n";
     file<<"<bsdf type=\"diffuse\">\n";
      file<<"<srgb name=\"reflectance\" value=\""<<diff_reflectance<<"\"/>\n";
      file<<"</bsdf>\n";
      file<<"</shape>\n";
      file<<"</shape>\n";
+     /* END WOOD */
+
 
      // file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
      // file<<"<shape type=\"obj\">\n";
@@ -1745,7 +1748,17 @@ void Simulation::exportMitsuba(std::string file_name) const {
     for (auto &o : obstacles) {
       o->exportMitsuba(file);
     }
- 
+
+    /*
+    VEC3 p0(0.5, 0, 0.62);
+    VEC3 p1(0.5, 0.25, 0.62);
+    FLOAT ray = 0.15;
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+    file<<"</shape>\n";
+    */
     
     file<<"<sensor type=\"perspective\">\n";
     file<<"<float name=\"focusDistance\" value=\"2.78088\"/>\n";
