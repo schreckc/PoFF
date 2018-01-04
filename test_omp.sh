@@ -29,5 +29,8 @@ export OMP_PROC_BIND=true
 
 
 #run the respective binary through SLURM's srun
-CMD="./poff_no_graph -l test_sand_fall.conf -s truck.sc -e truck/test_ -es 10 -stop 3000"
-srun --cpu_bind=verbose $CMD
+#CMD="./poff_no_graph -l test_sand_fall.conf -s truck.sc -e truck/test_ -es 10 -stop 3000"
+#srun --cpu_bind=verbose $CMD
+
+module load mitsuba
+srun --cpu_bind=verbose mitsuba mat0_mit/test0001.xml
