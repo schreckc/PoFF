@@ -136,7 +136,7 @@ void Particule::draw(glm::mat4 m, int s) {
 
 
       
-      valx = 0.2; valy = 0.2;  valz = 0.8;
+      valx = 0.1; valy = 0.1;  valz = 0.8;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
       //valx = 1; valy = 1;  valz = 1;
       glm::mat3 D;
@@ -878,10 +878,10 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     // // update orientation
 
  
- /* MAT3 W = 0.5/mpm_conf::cheat_damping_*(t - t.transpose()); // skew-sym part of velocity grad
+ MAT3 W = 0.5/mpm_conf::cheat_damping_*(t - t.transpose()); // skew-sym part of velocity grad
  MAT3 D = 0.5/mpm_conf::cheat_damping_*(t + t.transpose()); // sym part of velocity grad, strain rate tensor
   D = rotation.transpose()*D*rotation;
- FLOAT width = 1, length = 1;
+ FLOAT width = 1, length = 2;
  FLOAT l = (length/width - 1)/(length/width + 1); //ellongation of the ellipsoidal object
 
 
@@ -2036,7 +2036,8 @@ void Particule::exportMitsuba(std::ofstream &file) {
   file<<"<ref id=\"particle\"/>\n";
   file<<"<transform name=\"toWorld\">\n";
   // file<<"<scale x=\""<<valx<<"\" y=\""<<valy<<"\" z=\""<<valz<<"\"/>\n";
-  file<<"<scale x=\"0.02\" y=\"0.02\" z=\"0.02\"/>\n";
+  // file<<"<scale x=\"0.015\" y=\"0.015\" z=\"0.015\"/>\n";
+  file<<"<scale x=\"0.008\" y=\"0.008\" z=\"0.1\"/>\n";
   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   file<<"</transform>\n";

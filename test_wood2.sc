@@ -7,7 +7,7 @@
 <time_step> 0.0002 
 <density> 80
 <gravity> 0 0 -9.81
-<friction> 1
+<friction> 0
 <display_sphere> 1
 <elastic_mode> 0
 <plastic_mode> 2

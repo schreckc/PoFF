@@ -639,6 +639,12 @@ void randomRotation(MAT3 & R) {
   R.col(2) = z;
 }
 
+void smallRandomRotation(MAT3 & R) {
+  VEC3 dir((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
+  FLOAT angle = 0.1*(FLOAT)rand()/(FLOAT)RAND_MAX;
+  R = utils::rotation(angle, dir);
+}
+
 void Simulation::loadScene() {
     std::ifstream file(scene_path.c_str());
       std::string line;
@@ -1356,10 +1362,18 @@ void Simulation::loadScene() {
     //    addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.2, 10);
     //addPurShearingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 20);
     // addTranslatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
-     addSphereOfCenterOrientedParticules(VEC3(0.5, 0.5, 0.3), 0.2);
+    //     addSphereOfCenterOrientedParticules(VEC3(0.5, 0.5, 0.3), 0.2);
     // mpm_conf::anisotropy_on = false;
-
-
+     // for (auto &p: particules) {
+     //   MAT3 r;
+     //   smallRandomRotation(r);
+     //   p->rotate(r);
+     // }
+     // for (auto &p: subparticules) {
+     //   MAT3 r;
+     //   smallRandomRotation(r);
+     //   p->rotate(r);
+     // }
     
 
     // // // TEST
@@ -1650,11 +1664,11 @@ void Simulation::addSphereOfCenterOrientedParticules(VEC3 center, FLOAT ray) {
        Subparticule *p = new Subparticule(volume*mpm_conf::density_/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, -3));
        subparticules.push_back(p);
   
-	VEC3 axe = dir.cross(n);
-	axe.normalize();
-	FLOAT angle = -acos(dir.dot(n)) + M_PI/2.0;
-	MAT3 rot = utils::rotation(angle, axe);
-	p->rotate(rot);
+     	VEC3 axe = dir.cross(n);
+     	axe.normalize();
+     	FLOAT angle = -acos(dir.dot(n));// + M_PI/2.0;
+     	MAT3 rot = utils::rotation(angle, axe);
+     	p->rotate(rot);
      }
 }
 
@@ -1697,8 +1711,8 @@ void Simulation::exportMitsuba(std::string file_name) const {
     ERROR(file.good(), "cannot open file \""<<file_name<<"\"", "");
     INFO(1, "Export file \""<<file_name<<"\"");
 
-    //   std::string diff_reflectance = "#dda824"; // yellowy brownish
-        std::string diff_reflectance = "#DBEDFF"; // dull blue
+       std::string diff_reflectance = "#dda824"; // yellowy brownish
+    //    std::string diff_reflectance = "#DBEDFF"; // dull blue
     //   std::string diff_reflectance = "#a90202"; //brownish
     std::string integrator = "direct";
     
