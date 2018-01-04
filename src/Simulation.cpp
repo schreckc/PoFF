@@ -1784,7 +1784,9 @@ void Simulation::exportMitsuba(std::string file_name) const {
 
      file<<"<lookat target=\""<<10*target[0]<<", "<<10*target[1]<<", "<<10*target[2]<<"\" origin=\""<<10*pos[0]<<", "<<10*pos[1]<<", "<<10*pos[2]<<"\" up=\""<<up[0]<<", "<<up[1]<<", "<<up[2] <<"\"/>\n";
      #else
-     file<<"<lookat target=\"0.203847, 3.68133, 4.82679\" origin=\"-9.72093, 4.64086, 5.58709\" up=\"0, 0, 1\"/>\n";
+     file<<"<lookat target=\"9.19033, 6.21065, 3.34206\" origin=\"-0.241074, 3.25843, 4.86951\" up=\"0, 0, 1\"/>\n";
+     //     file<<"<lookat target=\"6.85785, 5.42408, 3.87225\" origin=\"-2.57355, 2.47186, 5.3997\" up=\"0, 0, 1\"/>\n";
+	//     file<<"<lookat target=\"0.203847, 3.68133, 4.82679\" origin=\"-9.72093, 4.64086, 5.58709\" up=\"0, 0, 1\"/>\n";
      #endif
     file<<"</transform>\n";
     file<<"<sampler type=\"ldsampler\">\n";

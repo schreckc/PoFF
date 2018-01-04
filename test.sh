@@ -2,10 +2,10 @@
 #
 #$ -S /bin/bash
 #$ -N omptest
-#$ -pe openmp 16
+#$ -pe openmp 90
 #$ -l h_vmem=2G
 
-export OMP_NUM_THREADS=7  # gets number from -pe
+export OMP_NUM_THREADS=90  # gets number from -pe
 ### for performance reasons, you might want to use some agressive scheduling ###
 export OMP_WAIT_POLICY=active
 export OMP_DYNAMIC=false
@@ -371,21 +371,21 @@ export OMP_PROC_BIND=true
 #mkdir avalanche
 #./poff_no_graph -l test_sand_fall_iso.conf -s avalanche.sc -e avalanche/test_ -stop 3000
 #./poff_no_graph -l test_sand_fall.conf -s avalanched.sc -e avalanche/testd_ -stop 3000
-#./poff_no_graph -l test_sand_fall.conf -s avalancheh.sc -e avalanche/testh_ -stop 3000
+#./poff_no_graph -l mat_rod.conf -s avalancheh.sc -e avalanche/testh_ -stop 3000
 #./poff_no_graph -l test_sand_fall.conf -s avalanchev.sc -e avalanche/testv_ -stop 3000
 
 
-./poff -l mat0.conf -s columnv.sc -e test/test0_ -es 5 -stop 5000 -r
-./poff -l mat1.conf -s columnv.sc -e test/test1_ -es 5 -stop 5000 -r
-./poff -l mat2.conf -s columnv.sc -e test/test2_ -es 5 -stop 5000 -r
-./poff -l mat3.conf -s columnv.sc -e test/test3_ -es 5 -stop 5000 -r
-./poff -l mat3.conf -s columnv.sc -e test/test4_ -es 5 -stop 5000 -r
+#./poff_no_graph -l mat0.conf -s columnv.conf -e test/test0_ -es 10 -stop 10000
+#./poff_no_graph -l mat1.conf -s columnv.conf -e test/test1_ -es 10 -stop 10000
+#./poff_no_graph -l mat2.conf -s columnv.conf -e test/test2_ -es 10 -stop 10000
+#./poff_no_graph -l mat3.conf -s columnv.conf -e test/test3_ -es 10 -stop 10000
+#./poff_no_graph -l mat3.conf -s columnv.conf -e test/test4_ -es 10 -stop 10000
 
-./poff -l mat0.conf -s columnd.sc -e test/testd0_ -es 5 -stop 5000 -r
-./poff -l mat1.conf -s columnd.sc -e test/testd1_ -es 5 -stop 5000 -r
-./poff -l mat2.conf -s columnd.sc -e test/testd2_ -es 5 -stop 5000 -r
-./poff -l mat3.conf -s columnd.sc -e test/testd3_ -es 5 -stop 5000 -r
-./poff -l mat4.conf -s columnd.sc -e test/testd4_ -es 5 -stop 5000 -r
+#./poff_no_graph -l mat0.conf -s columnd.conf -e test/testd0_ -es 10 -stop 10000
+#./poff_no_graph -l mat1.conf -s columnd.conf -e test/testd1_ -es 10 -stop 10000
+#./poff_no_graph -l mat2.conf -s columnd.conf -e test/testd2_ -es 10 -stop 10000
+#./poff_no_graph -l mat3.conf -s columnd.conf -e test/testd3_ -es 10 -stop 10000
+#./poff_no_graph -l mat4.conf -s columnd.conf -e test/testd4_ -es 10 -stop 10000
 
 
 #./poff -l mat_y1.conf -s columnd.sc -e test/test_y1_ -stop 600 -r
