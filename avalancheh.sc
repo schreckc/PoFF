@@ -37,6 +37,6 @@
   <x> 0.3 0.7
   <y> 0.05 0.25
   <z> 0.5 0.8
-  <nb particules> 20000
+  <nb particules> 50000
  </cuboid>
 </particules>

@@ -1763,16 +1763,51 @@ void Simulation::exportMitsuba(std::string file_name) const {
       o->exportMitsuba(file);
     }
 
-    /*
-    VEC3 p0(0.5, 0, 0.62);
-    VEC3 p1(0.5, 0.25, 0.62);
-    FLOAT ray = 0.15;
+    
+    VEC3 p0(0.5, 0.2-time*0.0005, 0.65);
+    VEC3 p1(0.5, 0.25-time*0.0005, 0.65);
+    FLOAT ray = 0.12;
     file<<"<shape type=\"cylinder\">\n";
     file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
     file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
     file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
     file<<"</shape>\n";
-    */
+        file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  x=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  x=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"</shape>\n";
+    p0= VEC3(0.5, 0.8+time*0.0005, 0.65);
+    p1 = VEC3(0.5, 0.75+time*0.0005, 0.65);
+    ray = 0.12;
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  x=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  x=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"</shape>\n";
     
     file<<"<sensor type=\"perspective\">\n";
     file<<"<float name=\"focusDistance\" value=\"2.78088\"/>\n";

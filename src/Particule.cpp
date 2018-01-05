@@ -136,7 +136,7 @@ void Particule::draw(glm::mat4 m, int s) {
 
 
       
-      valx = 0.1; valy = 0.1;  valz = 0.1;
+      valx = 0.2; valy = 0.2;  valz = 1.8;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
       //valx = 1; valy = 1;  valz = 1;
       glm::mat3 D;
@@ -881,7 +881,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  MAT3 W = 0.5/mpm_conf::cheat_damping_*(t - t.transpose()); // skew-sym part of velocity grad
  MAT3 D = 0.5/mpm_conf::cheat_damping_*(t + t.transpose()); // sym part of velocity grad, strain rate tensor
   D = rotation.transpose()*D*rotation;
- FLOAT width = 1, length = 1;
+ FLOAT width = 1, length = 1.1;
  FLOAT l = (length/width - 1)/(length/width + 1); //ellongation of the ellipsoidal object
 
 
