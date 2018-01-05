@@ -18,7 +18,7 @@
   <max pos> 0.72 0.98 0.98
  </box>
  <cylinder>
-  <pos> 0.4 0.4 0.3
+  <pos> 0.3 0.4 0.3
   <direction> 0 0 1
   <ray> 0.04
  </cylinder>
@@ -38,6 +38,5 @@
   <y> 0.05 0.25
   <z> 0.5 0.8
   <nb particules> 20000
-  <nb subparticules> 400000
  </cuboid>
 </particules>
