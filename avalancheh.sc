@@ -14,8 +14,8 @@
   <length> 1.02
  </plane>
  <box>
-  <min pos> 0.28 0.02 0.02
-  <max pos> 0.72 0.98 0.98
+  <min pos> 0.25 0.02 0.02
+  <max pos> 0.75 0.98 0.98
  </box>
  <cylinder>
   <pos> 0.3 0.4 0.3

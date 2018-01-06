@@ -207,8 +207,8 @@ void Subparticule::eulerStep(VEC3 forces) {
   // INFO(3, "prev vel "<<vel(0)<<" "<<vel(1)<<" "<<vel(2));
   // INFO(3, "prev pos "<<pos(0)<<" "<<pos(1)<<" "<<pos(2));
   VEC3 a = forces/mass + mpm_conf::gravity_;
-  pos += mpm_conf::dt_*vel;
   vel += mpm_conf::dt_*a;
+  pos += mpm_conf::dt_*vel;
   FLOAT h = mpm_conf::grid_spacing_;
   cell = Vector3i((int)(pos(0)/h), (int)(pos(1)/h), (int)(pos(2)/h));   
   // INFO(3, "new vel "<<vel(0)<<" "<<vel(1)<<" "<<vel(2));

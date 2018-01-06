@@ -450,7 +450,7 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 	}
 	if (active_nodes[ind]) {
 	   IS_DEF(velocities[ind](0));
-	   if (masses[ind] > 1e-5*mpm_conf::dt_) {
+	   if (masses[ind] > 1e-3*mpm_conf::dt_) {
 	    //  IS_DEF(f(0));
 	    if (std::isnan(f(0)) || std::isinf(f(0))) {
 	      f = VEC3(0, 0, 0);
@@ -865,7 +865,7 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
       }
     }
     //  INFO(3, "total weigth  "<<total_weigth);
-    if (total_masse > 0.1*mpm_conf::density_*s3) {
+    if (total_masse > 0.01*mpm_conf::density_*s3) {
       /* Rotation */
       MAT3 A = MAT3::Zero(3, 3);
       FLOAT sum = 0;
