@@ -458,8 +458,9 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 	    velocities[ind] -= mpm_conf::dt_*f + mpm_conf::dt_*mpm_conf::damping_*velocities[ind];
 	    velocities[ind] /= masses[ind];
 	  } else {
-	     
+	     //    active_nodes[ind] = false;
 	    velocities[ind] = VEC3(0, 0, 0);
+	    masses[ind] = 0;
 	  }
 	  IS_DEF(velocities[ind](0));
 	  velocities[ind] += mpm_conf::dt_*mpm_conf::gravity_;
@@ -848,7 +849,11 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
     	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
 	      if (k >= 0 && k <= (int)k_max) {
 		uint ind = index(i, j, k);
-		if (active_nodes[ind]) {
+		if (!active_nodes[ind]) {
+		  velocities[ind] = VEC3(0, 0, 0);
+		  masses[ind] = 0;
+		}
+		//if (active_nodes[ind]) {
 		  FLOAT w = p->weight(Vector3i(i, j, k));
 		  vel += w*velocities[ind];
 		  vel_flip += w*(velocities[ind] - prev_velocities[ind]);
@@ -857,7 +862,7 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
 		  //INFO(3, w);
 		  total_masse += w*masses[ind];
 		  total_weigth += w;
-		}
+		  //}
 	      }
 	    }
 	  }
