@@ -2,10 +2,10 @@
 #
 #$ -S /bin/bash
 #$ -N omptest
-#$ -pe openmp 90
+#$ -pe openmp 8
 #$ -l h_vmem=2G
 
-export OMP_NUM_THREADS=90  # gets number from -pe
+export OMP_NUM_THREADS=8  # gets number from -pe
 ### for performance reasons, you might want to use some agressive scheduling ###
 export OMP_WAIT_POLICY=active
 export OMP_DYNAMIC=false
@@ -423,3 +423,21 @@ export OMP_PROC_BIND=true
 #./poff -l test_wood2.sc -s broken_cuboid_subh.sc -e test_wood/testh_ -es 50 -stop 50000
 #./poff_no_graph -l test_wood2.sc -s broken_cuboid_subv.sc -e test_wood/testv_ -es 50 -stop 20000
 #./poff_no_graph -l test_wood2.sc -s broken_cuboid_subd.sc -e test_wood/testd_ -es 50 -stop 20000
+
+./poff -l test_wood/test_wood0.sc -s test_wood/broken_cuboid3h.sc -e stretch/testh_ -es 1 -stop 600 -r
+#./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3v.sc -e stretch2/testv_ -es 1 -stop 600 -r
+#./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3d.sc -e stretch2/testd_ -es 1 -stop 600 -r
+
+./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3h.sc -e stretch2/testh_ -es 1 -stop 600 -r
+#./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3v.sc -e stretch2/testv_ -es 1 -stop 600 -r
+#./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3d.sc -e stretch2/testd_ -es 1 -stop 600 -r
+
+#mkdir stretch stretch3
+./poff -l test_wood/test_wood2.sc -s test_wood/broken_cuboid3h.sc -e stretch3/testh_ -es 1 -stop 600 -r
+#./poff -l test_wood/test_wood2.sc -s test_wood/broken_cuboid3v.sc -e stretch3/testv_ -es 1 -stop 600 -r
+#./poff -l test_wood/test_wood2.sc -s test_wood/broken_cuboid3d.sc -e stretch3/testd_ -es 1 -stop 600 -r
+
+#mkdir stretch stretch4
+./poff -l test_wood/test_wood3.sc -s test_wood/broken_cuboid3h.sc -e stretch4/testh_ -es 1 -stop 600 -r
+#./poff -l test_wood/test_wood3.sc -s test_wood/broken_cuboid3v.sc -e stretch4/testv_ -es 1 -stop 600 -r
+#./poff -l test_wood/test_wood3.sc -s test_wood/broken_cuboid3d.sc -e stretch4/testd_ -es 1 -stop 600 -r

@@ -401,7 +401,7 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
       ++nb_ac;
     }
   }
-  
+   FLOAT s3 = pow(mpm_conf::grid_spacing_, 3);
   //    INFO(2, "Part 2 Grid");
   // INFO(3, particules.front()->getVelocity());
   FLOAT s2 = mpm_conf::grid_spacing_*mpm_conf::grid_spacing_;
@@ -450,7 +450,7 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 	}
 	if (active_nodes[ind]) {
 	   IS_DEF(velocities[ind](0));
-	   if (masses[ind] > 1e-3*mpm_conf::dt_) {
+	   if (masses[ind] > 1e-2*mpm_conf::dt_) {
 	    //  IS_DEF(f(0));
 	    if (std::isnan(f(0)) || std::isinf(f(0))) {
 	      f = VEC3(0, 0, 0);
@@ -865,7 +865,7 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
       }
     }
     //  INFO(3, "total weigth  "<<total_weigth);
-    if (total_masse > 0.01*mpm_conf::density_*s3) {
+    if (total_masse > 0.05*mpm_conf::density_*s3) {
       /* Rotation */
       MAT3 A = MAT3::Zero(3, 3);
       FLOAT sum = 0;
@@ -892,7 +892,9 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
        MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
        p->rotate(rot);
       //         INFO(3, "vel\n"<<vel);
-
+       if (vel.norm() > 2) {
+	 vel = VEC3(0, 0, 0);
+       }
       if (mpm_conf::method_ == mpm_conf::apic_ || mpm_conf::method_ == mpm_conf::pic_) {
 	p->update(pos, vel);
       } else if (mpm_conf::method_ == mpm_conf::flip_) {
