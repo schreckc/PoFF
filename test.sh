@@ -424,20 +424,31 @@ export OMP_PROC_BIND=true
 #./poff_no_graph -l test_wood2.sc -s broken_cuboid_subv.sc -e test_wood/testv_ -es 50 -stop 20000
 #./poff_no_graph -l test_wood2.sc -s broken_cuboid_subd.sc -e test_wood/testd_ -es 50 -stop 20000
 
-#./poff -l test_wood/test_wood0.sc -s test_wood/broken_cuboid3h.sc -e stretch/testh2_ -es 1 -stop 600 -r
+./poff -l test_wood/test_wood0.sc -s test_wood/broken_cuboid3h.sc -e stretch/testh_ -es 1 -stop 600 -r
+./poff -l test_wood/test_wood0.sc -s test_wood/broken_cuboid3d.sc -e stretch/testd_ -es 1 -stop 600 -r
+./poff -l test_wood/test_wood0.sc -s test_wood/broken_cuboid3v.sc -e stretch/testv_ -es 1 -stop 600 -r
+
+./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3h.sc -e stretch2/testh_ -es 1 -stop 600 -r
 ./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3v.sc -e stretch2/testv_ -es 1 -stop 600 -r
 ./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3d.sc -e stretch2/testd_ -es 1 -stop 600 -r
 
 ./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3h.sc -e stretch2/testh_ -es 1 -stop 600 -r
-#./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3v.sc -e stretch2/testv_ -es 1 -stop 600 -r
-#./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3d.sc -e stretch2/testd_ -es 1 -stop 600 -r
+./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3v.sc -e stretch2/testv_ -es 1 -stop 600 -r
+./poff -l test_wood/test_wood.sc -s test_wood/broken_cuboid3d.sc -e stretch2/testd_ -es 1 -stop 600 -r
 
 #mkdir stretch stretch3
 ./poff -l test_wood/test_wood2.sc -s test_wood/broken_cuboid3h.sc -e stretch3/testh_ -es 1 -stop 600 -r
-#./poff -l test_wood/test_wood2.sc -s test_wood/broken_cuboid3v.sc -e stretch3/testv_ -es 1 -stop 600 -r
-#./poff -l test_wood/test_wood2.sc -s test_wood/broken_cuboid3d.sc -e stretch3/testd_ -es 1 -stop 600 -r
+./poff -l test_wood/test_wood2.sc -s test_wood/broken_cuboid3v.sc -e stretch3/testv_ -es 1 -stop 600 -r
+./poff -l test_wood/test_wood2.sc -s test_wood/broken_cuboid3d.sc -e stretch3/testd_ -es 1 -stop 600 -r
 
 #mkdir stretch stretch4
 ./poff -l test_wood/test_wood3.sc -s test_wood/broken_cuboid3h.sc -e stretch4/testh_ -es 1 -stop 600 -r
-#./poff -l test_wood/test_wood3.sc -s test_wood/broken_cuboid3v.sc -e stretch4/testv_ -es 1 -stop 600 -r
-#./poff -l test_wood/test_wood3.sc -s test_wood/broken_cuboid3d.sc -e stretch4/testd_ -es 1 -stop 600 -r
+./poff -l test_wood/test_wood3.sc -s test_wood/broken_cuboid3v.sc -e stretch4/testv_ -es 1 -stop 600 -r
+./poff -l test_wood/test_wood3.sc -s test_wood/broken_cuboid3d.sc -e stretch4/testd_ -es 1 -stop 600 -r
+
+mkdir stretch stretch5
+./poff -l test_wood/test_wood4.sc -s test_wood/broken_cuboid3h.sc -e stretch5/testh_ -es 1 -stop 600 -r
+./poff -l test_wood/test_wood4.sc -s test_wood/broken_cuboid3v.sc -e stretch5/testv_ -es 1 -stop 600 -r
+./poff -l test_wood/test_wood4.sc -s test_wood/broken_cuboid3d.sc -e stretch5/testd_ -es 1 -stop 600 -r
+
+
