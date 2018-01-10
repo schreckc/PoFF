@@ -3,14 +3,14 @@
   <rotation>
    <axe> 1 0 0
    <angle> -1.5
-   <center> 0.5 0.5 0.5
+   <center> 0.5 0.65 0.2
   </rotation>
-  <begin> 0.1
-  <end> 0.6
+  <begin> 0.2
+  <end> 0.7
  </motion> 
  <open box>
-  <min pos> 0.3 0.2 0.5
-  <max pos> 0.7 0.8 0.7
+  <min pos> 0.3 0.05 0.2
+  <max pos> 0.7 0.65 0.4
  </open box>
 </obstacles>
 <obstacles>
@@ -30,8 +30,12 @@
  </rotation>
  <cuboid> 
   <x> 0.3 0.7
-  <y> 0.2 0.7
-  <z> 0.50 0.65
-  <nb particules> 50000
+  <y> 0.05 0.5
+  <z> 0.2 0.35
+  <nb particules> 20000
  </cuboid>
 </particules>
+<camera>
+ <position> 0.0123941 1.10849 1.0008
+ <orientation> 0.331476 -0.656801 -0.677301
+</camera>

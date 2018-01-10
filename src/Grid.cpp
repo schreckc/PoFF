@@ -450,7 +450,7 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 	}
 	if (active_nodes[ind]) {
 	   IS_DEF(velocities[ind](0));
-	   if (masses[ind] > 1e-5*mpm_conf::dt_) {
+	   if (masses[ind] > 1e-8*mpm_conf::dt_) {
 	    //  IS_DEF(f(0));
 	    if (std::isnan(f(0)) || std::isinf(f(0))) {
 	      f = VEC3(0, 0, 0);

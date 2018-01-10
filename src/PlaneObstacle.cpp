@@ -18,8 +18,8 @@ PlaneObstacle::PlaneObstacle(VEC3 p, VEC3 n, FLOAT l, FLOAT w, int shader) : Obs
     v2.normalize();
     v1.normalize();
   }
-  rotation.col(1) = v1;
-  rotation.col(0) = v2;
+  rotation.col(0) = v1;
+  rotation.col(1) = v2;
   rotation.col(2) = normal;
 }
 
@@ -235,7 +235,8 @@ void PlaneObstacle::exportMitsuba(std::ofstream & file) const {
   VEC3 axe = aa.axis();
   FLOAT angle = aa.angle()/M_PI*180;
   FLOAT l = 5*length, w = 5*width;
-  std::string color = "FFD1BC";
+  //std::string color = "FFD1BC";
+  std::string color = "aaaaaa";
   if (l == 0) {
     l = 10000;
     w = 10000;
@@ -248,7 +249,7 @@ void PlaneObstacle::exportMitsuba(std::ofstream & file) const {
   
   file<<"<shape type=\"rectangle\">\n";
   file<<"<transform name=\"toWorld\">\n";
-  file<<"<scale x=\""<<w<<"\" y=\""<<l<<"\" z=\"1\"/>\n";
+  file<<"<scale x=\""<<l<<"\" y=\""<<w<<"\" z=\"1\"/>\n";
   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   file<<"</transform>";

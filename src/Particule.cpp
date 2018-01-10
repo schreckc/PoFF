@@ -136,7 +136,7 @@ void Particule::draw(glm::mat4 m, int s) {
 
 
       
-      valx = 0.2; valy = 0.2;  valz = 1.8;
+      valx = 0.08; valy = 0.08;  valz = 1.0;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
       //valx = 1; valy = 1;  valz = 1;
       glm::mat3 D;
@@ -881,7 +881,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  MAT3 W = 0.5/mpm_conf::cheat_damping_*(t - t.transpose()); // skew-sym part of velocity grad
  MAT3 D = 0.5/mpm_conf::cheat_damping_*(t + t.transpose()); // sym part of velocity grad, strain rate tensor
   D = rotation.transpose()*D*rotation;
- FLOAT width = 1, length = 1;
+ FLOAT width = 1, length = 3;
  FLOAT l = (length/width - 1)/(length/width + 1); //ellongation of the ellipsoidal object
 
 
@@ -1045,21 +1045,35 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
      //INFO(3, "cnew "<<c_new(i));
    }
 
-   // axes.col(0) = axes.col(1).cross(axes.col(2));
-   // axes.col(1) = axes.col(2).cross(axes.col(0));
+    // axes.col(0) = axes.col(1).cross(axes.col(2));
+    // axes.col(1) = axes.col(2).cross(axes.col(0));
    
-    for (uint i = 0; i < 3; ++i) {
-      axes.col(i).normalize();
-    }
-  
-    //INFO(3, "\naxes\n"<<axes);
- //    INFO(3, "\naxes*axes\n"<<axes*axes.transpose());
+   for (uint i = 0; i < 3; ++i) {
+     axes.col(i).normalize();
+   }
+    // HouseholderQR<MAT3> decomp(axes);
+    // MAT3 Q = decomp.householderQ();
+    // axes = Q;
+
+   ANGLE_AXIS aa(axes);
+   
+   //   if (fabs(aa.angle()) < 0.1) {
+   //   INFO(3,  "angle axe "<< aa.angle()<<"\n"<<aa.axis());
+   //   //INFO(3, "\naxes\n"<<axes);
+   //   INFO(3, "\naxes*axes\n"<<axes*axes.transpose());
+   // }
+   axes = aa.toRotationMatrix();
+   
+    // INFO(3, "\naxes*axes\n"<<axes*axes.transpose());
+    // axes.col(0) = axes.col(1).cross(axes.col(2));
+    // axes.col(1) = axes.col(2).cross(axes.col(0));
+    
  //  // INFO(3, "\nrotation\n"<<rotation);
- //  //  INFO(3, "\nrotation\n"<<rotation*rotation.transpose());
-   if (ok) {
+    //  INFO(3, "\nrotation\n"<<rotation*rotation.transpose());
+   if (ok && fabs(aa.angle()) < 0.1) {
      rotation = axes*rotation;
      //     INFO(3, "val "<<a(0)<<" "<<a(1)<<" "<<a(2));
-     
+     //  INFO(3, "\nrotation\n"<<rotation*rotation.transpose());
      // INFO(3, "\nrotation\n"<<rotation);
       valx = c_new(0);//a(0);
       valy = c_new(1);//a(1);
@@ -2036,8 +2050,9 @@ void Particule::exportMitsuba(std::ofstream &file) {
   file<<"<ref id=\"particle\"/>\n";
   file<<"<transform name=\"toWorld\">\n";
   // file<<"<scale x=\""<<valx<<"\" y=\""<<valy<<"\" z=\""<<valz<<"\"/>\n";
-  // file<<"<scale x=\"0.015\" y=\"0.015\" z=\"0.015\"/>\n";
-  file<<"<scale x=\"0.008\" y=\"0.008\" z=\"0.1\"/>\n";
+  //   file<<"<scale x=\"0.015\" y=\"0.015\" z=\"0.015\"/>\n";
+  // file<<"<scale x=\"0.005\" y=\"0.005\" z=\"0.005\"/>\n";
+   //file<<"<scale x=\"0.008\" y=\"0.008\" z=\"0.1\"/>\n";
   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   file<<"</transform>\n";

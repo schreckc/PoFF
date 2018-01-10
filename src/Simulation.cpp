@@ -1359,7 +1359,7 @@ void Simulation::loadScene() {
     // addExtendingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
     // addSimpleShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
     // addSimpleShearingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
-    //    addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.2, 10);
+    //addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.2, 10);
     //addPurShearingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 20);
     // addTranslatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
     //     addSphereOfCenterOrientedParticules(VEC3(0.5, 0.5, 0.3), 0.2);
@@ -1711,9 +1711,10 @@ void Simulation::exportMitsuba(std::string file_name) const {
     ERROR(file.good(), "cannot open file \""<<file_name<<"\"", "");
     INFO(1, "Export file \""<<file_name<<"\"");
 
-       std::string diff_reflectance = "#dda824"; // yellowy brownish
-    //    std::string diff_reflectance = "#DBEDFF"; // dull blue
+    //   std::string diff_reflectance = "#dda824"; // yellowy brownish
+    std::string diff_reflectance = "#DBEDFF"; // dull blue
     //   std::string diff_reflectance = "#a90202"; //brownish
+       std::string truck_color = "#aaaaaa";
     std::string integrator = "direct";
     
     file<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
@@ -1726,6 +1727,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     // file<<"</bsdf>\n";
 
     /** WOOD ***/
+    /*
         file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
     file<<"<shape type=\"sphere\">\n";
     file<<"<bsdf type=\"diffuse\">\n";
@@ -1735,27 +1737,29 @@ void Simulation::exportMitsuba(std::string file_name) const {
      file<<"</shape>\n";
      /* END WOOD */
 
-
-     // file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
-     // file<<"<shape type=\"obj\">\n";
-     // file<<"<string  name=\"filename\"  value=\"bunny.obj\"/>\n";
-     // file<<"<transform name=\"toWorld\">\n";
-     // file<<"<rotate x=\""<<1<<"\" y=\""<<0<<"\" z=\""<<0<<"\" angle=\""<<90<<"\"/>\n";
-     // file<<"</transform>\n";
-     // file<<"<bsdf type=\"diffuse\">\n";
-     //  file<<"<srgb name=\"reflectance\" value=\""<<diff_reflectance<<"\"/>\n";
-     //  file<<"</bsdf>\n";
-     //  file<<"</shape>\n";
-     //  file<<"</shape>\n";
-
+    /** mesh **/
+     
+     file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
+     file<<"<shape type=\"obj\">\n";
+     file<<"<string  name=\"filename\"  value=\"dragon.obj\"/>\n";
+     file<<"<transform name=\"toWorld\">\n";
+      file<<"<scale x=\"0.015\" y=\"0.015\" z=\"0.015\"/>\n";
+     file<<"<rotate x=\""<<1<<"\" y=\""<<0<<"\" z=\""<<0<<"\" angle=\""<<90<<"\"/>\n";
+     file<<"</transform>\n";
+     file<<"<bsdf type=\"diffuse\">\n";
+      file<<"<srgb name=\"reflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+      file<<"</bsdf>\n";
+      file<<"</shape>\n";
+      file<<"</shape>\n";
+      /* end mesh*/
     
      if (subparticules.empty()) {
        for (auto &p : particules) {
-	 p->exportMitsuba(file);
+     	 p->exportMitsuba(file);
        }
      } else {
        for (auto &p : subparticules) {
-	 p->exportMitsuba(file);
+     	 p->exportMitsuba(file);
        }
      }
 
@@ -1763,7 +1767,8 @@ void Simulation::exportMitsuba(std::string file_name) const {
       o->exportMitsuba(file);
     }
 
-    
+    /*** stretch ***/
+    /*
     VEC3 p0(0.5, 0.2-time*0.0005, 0.65);
     VEC3 p1(0.5, 0.25-time*0.0005, 0.65);
     FLOAT ray = 0.12;
@@ -1808,6 +1813,298 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
     file<<"</transform>\n";
     file<<"</shape>\n";
+    /* end stetch */
+
+    /*** truck ***/
+    /*
+    file<<"<bsdf type=\"twosided\" id=\"truck\">\n";
+    file<<"<bsdf type=\"diffuse\">\n";
+    file<<"<srgb name=\"diffuseReflectance\" value=\""<<truck_color<<"\"/>\n";
+    file<<"</bsdf>\n";
+    file<<"</bsdf>\n";
+    
+    VEC3 p0(0.26, 0.13, 0.18);
+    VEC3 p1(0.3, 0.13, 0.18);
+    FLOAT ray = 0.08;
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+        file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+
+    p0 = VEC3(0.26, 0.57, 0.18);
+    p1 = VEC3(0.3, 0.57, 0.18);
+    ray = 0.08;
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+        file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+
+    p0 = VEC3(0.74, 0.57, 0.18);
+    p1 = VEC3(0.7, 0.57, 0.18);
+    ray = 0.08;
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+        file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+
+    p0 = VEC3(0.74, 0.13, 0.18);
+    p1 = VEC3(0.7, 0.13, 0.18);
+    ray = 0.08;
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+        file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+
+    p0 = VEC3(0.5, 0.0, 0.18);
+    p1 = VEC3(0.5, 0.64, 0.18);
+    ray = 0.01;
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate x=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate x=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+
+    p0 = VEC3(0.3, 0.13, 0.18);
+    p1 = VEC3(0.7, 0.13, 0.18);
+    ray = 0.01;
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+
+     p0 = VEC3(0.3, 0.57, 0.18);
+    p1 = VEC3(0.7, 0.57, 0.18);
+    ray = 0.01;
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    
+    file<<"<shape  type=\"cube\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<scale x=\"1.7\" y=\"0.7\" z=\"0.85\" />\n";
+    file<<"<translate x=\""<<5<<"\" y=\""<<-2.45<<"\" z=\""<<2.85<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"cube\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<scale x=\"1.7\" y=\"1\" z=\"1.25\" />\n";
+    file<<"<translate x=\""<<5<<"\" y=\""<<-1.2<<"\" z=\""<<3.25<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+
+    p0 = VEC3(0.26, -0.12, 0.18);
+    p1 = VEC3(0.3, -0.12, 0.18);
+    ray = 0.08;
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+
+    p0 = VEC3(0.74, -0.12, 0.18);
+    p1 = VEC3(0.7, -0.12, 0.18);
+    ray = 0.08;
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+        file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
+    file<<"<scale  value=\""<<10*ray<<"\"/>\n";
+    file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    
+    /* end truck */
+
+    /*** avalanche **/
+    std::string color = "aaaaaa";
+    file<<"<shape type=\"rectangle\">\n";
+  file<<"<transform name=\"toWorld\">\n";
+  file<<"<scale x=\""<<6<<"\" y=\""<<10<<"\" z=\"1\"/>\n";
+  file<<"<rotate y =\"1\" angle=\"90\"/>\n";
+  file<<"<rotate x=\"-1\" y=\"0\" z=\"0\" angle=\"26.5651\"/>\n";
+  file<<"<translate x=\"1.8\"/>\n";
+  file<<"</transform>";
+  file<<"<bsdf  type=\"twosided\">\n";
+  file<<"<bsdf type=\"diffuse\">\n";
+  file<<"<srgb name=\"reflectance\" value=\"#"<<color<<"\"/>\n";
+  file<<"</bsdf>\n";
+  file<<"</bsdf>\n";
+  file<<"</shape>\n";
+  file<<"<shape type=\"rectangle\">\n";
+   file<<"<transform name=\"toWorld\">\n";
+   file<<"<scale x=\""<<6<<"\" y=\""<<10<<"\" z=\"1\"/>\n";
+   file<<"<rotate y =\"1\" angle=\"90\"/>\n";
+   file<<"<rotate x=\"-1\" y=\"0\" z=\"0\" angle=\"26.5651\"/>\n";
+   file<<"<translate x=\"8.2\"/>\n";
+   file<<"</transform>";
+   file<<"<bsdf  type=\"twosided\">\n";
+   file<<"<bsdf type=\"diffuse\">\n";
+   file<<"<srgb name=\"reflectance\" value=\"#"<<color<<"\"/>\n";
+   file<<"</bsdf>\n";
+   file<<"</bsdf>\n";
+   file<<"</shape>\n";
+
+    /* end avalanche */
+    
     
     file<<"<sensor type=\"perspective\">\n";
     file<<"<float name=\"focusDistance\" value=\"2.78088\"/>\n";
