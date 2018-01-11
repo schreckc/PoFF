@@ -2102,7 +2102,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
 
     /*** avalanche **/
     
-    std::string color = "aaaaaa";
+    std::string color = "bbbbbb";
     file<<"<shape type=\"rectangle\">\n";
   file<<"<transform name=\"toWorld\">\n";
   file<<"<scale x=\""<<6<<"\" y=\""<<10<<"\" z=\"1\"/>\n";
@@ -2162,7 +2162,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
 
 
     file<<"<shape type=\"sphere\">\n";
-    file<<"<point name=\"center\" x=\"-15\" y=\"-15\" z=\"50\"/>\n";
+    file<<"<point name=\"center\" x=\"-15\" y=\"15\" z=\"50\"/>\n";
     file<<"<float name=\"radius\" value=\"4.0\"/>\n";
     file<<"<emitter type=\"area\">\n";
     file<<"<spectrum name=\"radiance\" value=\"160\"/>\n";

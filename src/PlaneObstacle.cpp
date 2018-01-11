@@ -236,7 +236,7 @@ void PlaneObstacle::exportMitsuba(std::ofstream & file) const {
   FLOAT angle = aa.angle()/M_PI*180;
   FLOAT l = 5*length, w = 5*width;
   //std::string color = "FFD1BC";
-  std::string color = "aaaaaa";
+  std::string color = "bbbbbb";
   if (l == 0) {
     l = 10000;
     w = 10000;
