@@ -1711,10 +1711,10 @@ void Simulation::exportMitsuba(std::string file_name) const {
     ERROR(file.good(), "cannot open file \""<<file_name<<"\"", "");
     INFO(1, "Export file \""<<file_name<<"\"");
 
-    std::string diff_reflectance = "#dda824"; // yellowy brownish
-    // std::string diff_reflectance = "#DBEDFF"; // dull blue
+    // std::string diff_reflectance = "#dda824"; // yellowy brownish
+     std::string diff_reflectance = "#DBEDFF"; // dull blue
     //   std::string diff_reflectance = "#a90202"; //brownish
-       std::string truck_color = "#aaaaaa";
+    std::string truck_color = "#aaaaaa";
     std::string integrator = "direct";
     
     file<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
@@ -1744,7 +1744,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
      file<<"<string  name=\"filename\"  value=\"dragon.obj\"/>\n";
      file<<"<transform name=\"toWorld\">\n";
       file<<"<scale x=\"0.015\" y=\"0.015\" z=\"0.015\"/>\n";
-     file<<"<rotate x=\""<<1<<"\" y=\""<<0<<"\" z=\""<<0<<"\" angle=\""<<90<<"\"/>\n";
+      //file<<"<rotate x=\""<<1<<"\" y=\""<<0<<"\" z=\""<<0<<"\" angle=\""<<90<<"\"/>\n";
      file<<"</transform>\n";
      file<<"<bsdf type=\"diffuse\">\n";
       file<<"<srgb name=\"reflectance\" value=\""<<diff_reflectance<<"\"/>\n";
@@ -1816,6 +1816,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     /* end stetch */
 
     /*** bend */
+    /*
     VEC3 p0(0.5, 0.18, 0.85);
     VEC3 p1(0.5, 0.24, 0.85);
     FLOAT ray = 0.12;
@@ -2100,7 +2101,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     /* end truck */
 
     /*** avalanche **/
-    /*
+    
     std::string color = "aaaaaa";
     file<<"<shape type=\"rectangle\">\n";
   file<<"<transform name=\"toWorld\">\n";

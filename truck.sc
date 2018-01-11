@@ -33,6 +33,7 @@
   <y> 0.05 0.5
   <z> 0.2 0.35
   <nb particules> 20000
+  <nb subparticules> 200000
  </cuboid>
 </particules>
 <camera>

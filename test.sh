@@ -450,8 +450,15 @@ export OMP_PROC_BIND=true
 #./poff -l test_bend/test_wood2.sc -s test_bend/broken_cuboidh.sc -e bend/testh_ -es 5 -stop 10000 
 #./poff -s avalancheh.sc -l test_sand_fall.conf -e avalanche/test_mix -stop 10000 -es 5 -r
 #make
-./poff -s avalancheh.sc -l test_sand_fall.conf -e avalanche/test_ -stop 10000 -es 5 -r
-./poff -s avalancheh.sc -l test_sand_fall.conf -e avalanche/test2_ -stop 10000 -es 5 -r
-./poff -s avalancheh.sc -l test_sand_fall.conf -e avalanche/test3_ -stop 10000 -es 5 -r
-make
-./poff -s avalancheh.sc -l test_sand_fall.conf -e avalanche/test4_ -stop 10000 -es 5 -r
+#./poff -s avalancheh.sc -l test_sand_fall.conf -e avalanche/test_ -stop 10000 -es 5 -r
+#./poff -s avalancheh.sc -l test_sand_fall.conf -e avalanche/test2_ -stop 10000 -es 5 -r
+#./poff -s avalancheh.sc -l test_sand_fall.conf -e avalanche/test3_ -stop 10000 -es 5 -r
+#make
+#./poff -s avalancheh.sc -l test_sand_fall.conf -e avalanche/test4_ -stop 10000 -es 5 -r
+
+#mkdir truck
+#./poff -s truckh.sc -l test_truck.conf -e truck/testh_ -stop 2500 -es 1 -r
+./poff -s truckv.sc -l test_truck.conf -e truck/testv_ -stop 2500 -es 1 -r
+#./poff -s truckd.sc -l test_truck.conf -e truck/testd_ -stop 2500 -es 1 -r
+#./poff -s truckd2.sc -l test_truck.conf -e truck/testd2_ -stop 2500 -es 1 -r
+#./poff -s truckd3.sc -l test_truck.conf -e truck/testd3_ -stop 2500 -es 1 -r

@@ -881,7 +881,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  MAT3 W = 0.5/mpm_conf::cheat_damping_*(t - t.transpose()); // skew-sym part of velocity grad
  MAT3 D = 0.5/mpm_conf::cheat_damping_*(t + t.transpose()); // sym part of velocity grad, strain rate tensor
   D = rotation.transpose()*D*rotation;
- FLOAT width = 1, length = 3;
+ FLOAT width = 1, length = 1;
  FLOAT l = (length/width - 1)/(length/width + 1); //ellongation of the ellipsoidal object
 
 
@@ -2052,7 +2052,7 @@ void Particule::exportMitsuba(std::ofstream &file) {
   // file<<"<scale x=\""<<valx<<"\" y=\""<<valy<<"\" z=\""<<valz<<"\"/>\n";
   //   file<<"<scale x=\"0.015\" y=\"0.015\" z=\"0.015\"/>\n";
   // file<<"<scale x=\"0.005\" y=\"0.005\" z=\"0.005\"/>\n";
-  file<<"<scale x=\"0.008\" y=\"0.008\" z=\"0.1\"/>\n";
+   file<<"<scale x=\"0.02\" y=\"0.02\" z=\"0.1\"/>\n";
   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   file<<"</transform>\n";
