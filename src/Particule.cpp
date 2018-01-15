@@ -41,6 +41,7 @@ Particule::Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n, VEC3 velo, int shade
   // axez = VEC3(0, 0, 1);
 
   axes = MAT3::Identity();
+  mix_rot = MAT3::Identity();
 
   valx = 1;
   valy = 1;
@@ -136,9 +137,9 @@ void Particule::draw(glm::mat4 m, int s) {
 
 
       
-      valx = 0.08; valy = 0.08;  valz = 1.0;
+      //valx = 0.08; valy = 0.08;  valz = 1.0;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
-      //valx = 1; valy = 1;  valz = 1;
+      valx = 0.2; valy = 0.2;  valz = 1.0;
       glm::mat3 D;
       D[0] = glm::vec3(valx, 0, 0);
       D[1] = glm::vec3(0, valy, 0);
@@ -881,7 +882,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  MAT3 W = 0.5/mpm_conf::cheat_damping_*(t - t.transpose()); // skew-sym part of velocity grad
  MAT3 D = 0.5/mpm_conf::cheat_damping_*(t + t.transpose()); // sym part of velocity grad, strain rate tensor
   D = rotation.transpose()*D*rotation;
- FLOAT width = 1, length = 1;
+ FLOAT width = 1, length = 1.05;
  FLOAT l = (length/width - 1)/(length/width + 1); //ellongation of the ellipsoidal object
 
 
@@ -1071,6 +1072,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  //  // INFO(3, "\nrotation\n"<<rotation);
     //  INFO(3, "\nrotation\n"<<rotation*rotation.transpose());
    if (ok && fabs(aa.angle()) < 0.1) {
+     mix_rot = axes;
      rotation = axes*rotation;
      //     INFO(3, "val "<<a(0)<<" "<<a(1)<<" "<<a(2));
      //  INFO(3, "\nrotation\n"<<rotation*rotation.transpose());
@@ -1760,6 +1762,9 @@ VEC3 Particule::getAnisotropy() const {
   return VEC3(valx, valy, valz);
 }
 
+MAT3 Particule::getMixRot() const {
+   return mix_rot;
+}
 
 // void Particule::anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 V) {
 //   VEC3 mult = mpm_conf::anisotropy_values_;

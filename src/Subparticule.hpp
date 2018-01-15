@@ -38,6 +38,7 @@ public :
   Vector3i getCell() const;
   
   void rotate(MAT3 &rot);
+  MAT3 setRotation(MAT3 &rot);
   MAT3 getRotation() const;
 
   void update(VEC3 &p, VEC3 &vel);

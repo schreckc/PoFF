@@ -211,6 +211,7 @@ void Simulation::oneStep() {
   grid.gridToSubparticules(subparticules);
   grid.gridToParticules(particules);
 
+  grid.smoothRotation(particules, subparticules);
    // for (auto & ob : obstacles) {
    //   grid.initCollision(ob); //set for each node previous distance to the closest obstacle
    // }

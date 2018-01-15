@@ -24,7 +24,7 @@ void Obstacle::animate(FLOAT t) {
   for (auto& m : motions) {
     if (m.isRunning(t)) {
       apply(m);
-    INFO(3, "animate obs "<<t);
+      //    INFO(3, "animate obs "<<t);
       }
   }
   // #endif

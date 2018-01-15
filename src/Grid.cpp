@@ -60,7 +60,8 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, int shader)
   cells = std::vector<std::list<Particule*> >(nb_cells);
   distance_collision = std::vector<FLOAT>(nb_nodes);
   //  second_der = std::vector<std::vector<MAT3> >(nb_nodes);
-
+    rotations = std::vector<MAT3>(nb_nodes);
+  
   // for (uint i = 0; i <= nb_nodes; ++i) {
   //   second_der[i] = std::vector<MAT3>(nb_nodes);
   // }
@@ -72,6 +73,7 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, int shader)
 	velocities[index(i, j, k)] = VEC3(0, 0, 0);
 	fixed_velocities[index(i, j, k)] = VEC3(0, 0, 0);
 	fixed_nodes[index(i, j, k)] = false;
+	rotations[index(i, j, k)] = MAT3::Zero();
       }
     }
   }
@@ -315,6 +317,7 @@ void Grid::nextStep() {
     inter_velocities[i] = VEC3(0, 0, 0);
     prev_velocities[i] = velocities[i]; 
     velocities[i] = VEC3(0, 0, 0);
+    rotations[i] = MAT3::Zero();
   }
   //  INFO(3, "nb cells "<<nb_cells<<" "<<cells.size());
   //#pragma omp parallel for
@@ -385,6 +388,70 @@ void Grid::smoothVelocity() {
   }
 	
 }
+
+void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subparticule*> & subparticules) {
+#pragma omp parallel for
+    for (int i = 0; i <= (int)i_max; ++i) {
+    for (int j = 0; j <= (int)j_max; ++j) {
+      for (int k = 0; k <= (int)k_max; ++k) {
+	uint ind = index(i, j, k);
+	VEC3 f(0, 0, 0);
+	for (int l = i - 2; l < i + 2; ++l) {
+	  if (l >= 0 && l < (int)i_max) {
+	    for (int m = j - 2; m < j + 2; ++m) {
+	      if (m >= 0 && m < (int)j_max) {
+		for (int n = k - 2; n < k + 2; ++n) {
+		  if (n >= 0 && n < (int)k_max) {
+		    uint indc = l*j_max*k_max + m*(k_max) + n;
+		    for (auto& p : cells[indc]) {
+	
+		      FLOAT w = p->weight(Vector3i(i, j, k));
+		      if (active_nodes[ind]) {
+			rotations[ind] += w*p->getMixRot();
+		      }
+		    }
+		  }
+		}
+	      }
+	    }
+	  }
+	}
+	HouseholderQR<MAT3> decomp(rotations[ind]);
+      	MAT3 Q = decomp.householderQ();
+	rotations[ind] = Q;
+      }
+    }
+    }
+
+#pragma omp parallel for
+     for (uint ip = 0; ip < subparticules.size(); ++ip) {
+    Subparticule *p = subparticules[ip];
+    Vector3i cell = p->getCell();
+    MAT3 rot = MAT3::Zero();
+      for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
+      if (i >= 0 && i <= (int)i_max) {
+    	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
+    	  if (j >= 0 && j <= (int)j_max) {
+    	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
+	      if (k >= 0 && k <= (int)k_max) {
+		uint ind = index(i, j, k);
+		if (!active_nodes[ind]) {
+		  rotations[ind] = MAT3::Zero();
+		}
+		FLOAT w = p->weight(Vector3i(i, j, k));
+		rot += w*rotations[ind];
+	      }
+	    }
+	  }
+	}
+      }
+      }
+      HouseholderQR<MAT3> decomp(rot);
+      MAT3 Q = decomp.householderQ();
+      p->rotate(Q);
+     }
+}
+  
 
 void Grid::particulesToGrid(std::vector<Particule*> & particules) {
   for (auto &p : particules) {

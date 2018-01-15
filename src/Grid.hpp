@@ -40,7 +40,8 @@ private :
   std::vector<std::list<Particule*> > cells;
   std::vector<FLOAT> distance_collision;
   std::vector< std::vector<MAT3>> second_der;
-   
+  std::vector<MAT3> rotations;
+  
   inline uint index(uint i, uint j, uint k) const;
   Vector3i nodeFromIndex(int ind) const;
 public :
@@ -62,6 +63,7 @@ public :
   void nextStep(); //reset values in vectors
   void smoothVelocity();
 
+  void smoothRotation(std::vector<Particule*> & particules, std::vector<Subparticule*> & subparticules);
   void particulesToGrid(std::vector<Particule*> & particules);
   void particulesToGridImplicite(std::vector<Particule*> & particules);
   void gridToParticules(std::vector<Particule*> & particules);

@@ -166,6 +166,10 @@ void Subparticule::rotate(MAT3 & rot) {
   rotation = rot*rotation;
 }
 
+MAT3 Subparticule::setRotation(MAT3 &rot) {
+  rotation = rot;
+}
+
 MAT3 Subparticule::getRotation() const {
   return rotation;
 }

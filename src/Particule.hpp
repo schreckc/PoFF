@@ -69,6 +69,8 @@ private :
   MAT3 orientation;
 
   MAT3 prevD;
+  MAT3 mix_rot;
+  
  mutable MAT3 forceIncrement;
   VEC3 energy_der;
   Tensor energy_second_der;
@@ -147,6 +149,8 @@ public:
 
   MAT3 getRotation() const;
   VEC3 getAnisotropy() const;
+
+  MAT3 getMixRot()const;
   
   void anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U);
   
