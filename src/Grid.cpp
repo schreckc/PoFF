@@ -407,7 +407,10 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 	
 		      FLOAT w = p->weight(Vector3i(i, j, k));
 		      if (active_nodes[ind]) {
-			rotations[ind] += w*p->getMixRot();
+			MAT3 r = p->getMixRot();
+			ANGLE_AXIS aa(r);
+			FLOAT angle = w*aa.angle();
+			rotations[ind] += aa.toRotationMatrix();//w*p->getMixRot();
 		      }
 		    }
 		  }
@@ -439,7 +442,11 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 		  rotations[ind] = MAT3::Zero();
 		}
 		FLOAT w = p->weight(Vector3i(i, j, k));
-		rot += w*rotations[ind];
+		MAT3 r = rotations[ind];
+		ANGLE_AXIS aa(r);
+		FLOAT angle = w*aa.angle();
+		rot += aa.toRotationMatrix();
+		//rot += w*rotations[ind];
 	      }
 	    }
 	  }
