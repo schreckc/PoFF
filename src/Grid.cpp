@@ -398,11 +398,11 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 	if (active_nodes[ind]) {
 	// QUATERNION q(MAT3::Identity());
 	// FLOAT we = 0;
-	for (int l = i - 1; l < i + 1; ++l) {
+	for (int l = i - 2; l < i + 2; ++l) {
 	  if (l >= 0 && l < (int)i_max) {
-	    for (int m = j - 1; m < j + 1; ++m) {
+	    for (int m = j - 2; m < j + 2; ++m) {
 	      if (m >= 0 && m < (int)j_max) {
-		for (int n = k - 1; n < k + 1; ++n) {
+		for (int n = k - 2; n < k + 2; ++n) {
 		  if (n >= 0 && n < (int)k_max) {
 		    uint indc = l*j_max*k_max + m*(k_max) + n;
 		    for (auto& p : cells[indc]) {
@@ -447,11 +447,11 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
     // QUATERNION q(MAT3::Identity());
     // FLOAT we = 0;
     MAT3 rot = MAT3::Zero();
-      for (int i = cell(0) - 1; i <= cell(0) + 1; ++i) {
+      for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
       if (i >= 0 && i <= (int)i_max) {
-    	for (int j = cell(1) - 1; j <= cell(1) + 1; ++j) {
+    	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
     	  if (j >= 0 && j <= (int)j_max) {
-    	    for (int k = cell(2) - 1; k <= cell(2) + 1; ++k) {
+    	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
 	      if (k >= 0 && k <= (int)k_max) {
 		uint ind = index(i, j, k);
 		if (active_nodes[ind]) {
