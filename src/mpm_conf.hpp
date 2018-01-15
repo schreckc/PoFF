@@ -13,6 +13,7 @@
 #define MAT4 Matrix4d
 #define MATX MatrixXd
 #define ANGLE_AXIS AngleAxisd
+#define QUATERNION Quaterniond
 
 using namespace Eigen;
 

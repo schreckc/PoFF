@@ -396,6 +396,8 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
       for (int k = 0; k <= (int)k_max; ++k) {
 	uint ind = index(i, j, k);
 	VEC3 f(0, 0, 0);
+	QUATERNION q(MAT3::Identity());
+	FLOAT we = 0;
 	for (int l = i - 2; l < i + 2; ++l) {
 	  if (l >= 0 && l < (int)i_max) {
 	    for (int m = j - 2; m < j + 2; ++m) {
@@ -405,12 +407,16 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 		    uint indc = l*j_max*k_max + m*(k_max) + n;
 		    for (auto& p : cells[indc]) {
 	
-		      FLOAT w = p->weight(Vector3i(i, j, k));
 		      if (active_nodes[ind]) {
-			MAT3 r = p->getMixRot();
-			ANGLE_AXIS aa(r);
-			FLOAT angle = w*aa.angle();
-			rotations[ind] += aa.toRotationMatrix();//w*p->getMixRot();
+			FLOAT w = p->weight(Vector3i(i, j, k));
+			QUATERNION qp( p->getMixRot());
+			q = q.slerp( w/(we+w), qp);
+			we += w;
+
+			// MAT3 r = p->getMixRot();
+			// ANGLE_AXIS aa(r);
+			// FLOAT angle = w*aa.angle();
+			// rotations[ind] += aa.toRotationMatrix();//w*p->getMixRot();
 		      }
 		    }
 		  }
@@ -419,9 +425,10 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 	    }
 	  }
 	}
-	HouseholderQR<MAT3> decomp(rotations[ind]);
-      	MAT3 Q = decomp.householderQ();
-	rotations[ind] = Q;
+	// HouseholderQR<MAT3> decomp(rotations[ind]);
+      	// MAT3 Q = decomp.householderQ();
+	// rotations[ind] = Q;
+	rotations[ind] = q.toRotationMatrix();
       }
     }
     }
@@ -430,7 +437,8 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
      for (uint ip = 0; ip < subparticules.size(); ++ip) {
     Subparticule *p = subparticules[ip];
     Vector3i cell = p->getCell();
-    MAT3 rot = MAT3::Zero();
+    QUATERNION q(MAT3::Identity());
+    FLOAT we = 0;
       for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
       if (i >= 0 && i <= (int)i_max) {
     	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
@@ -442,10 +450,14 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 		  rotations[ind] = MAT3::Zero();
 		}
 		FLOAT w = p->weight(Vector3i(i, j, k));
-		MAT3 r = rotations[ind];
-		ANGLE_AXIS aa(r);
-		FLOAT angle = w*aa.angle();
-		rot += aa.toRotationMatrix();
+		QUATERNION qp(rotations[ind]);
+		q = q.slerp( w/(we+w), qp);
+		we += w;
+		
+		// MAT3 r = rotations[ind];
+		// ANGLE_AXIS aa(r);
+		// FLOAT angle = w*aa.angle();
+		// rot += aa.toRotationMatrix();
 		//rot += w*rotations[ind];
 	      }
 	    }
@@ -453,9 +465,11 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 	}
       }
       }
-      HouseholderQR<MAT3> decomp(rot);
-      MAT3 Q = decomp.householderQ();
-      p->rotate(Q);
+      // HouseholderQR<MAT3> decomp(rot);
+      // MAT3 Q = decomp.householderQ();
+      // p->rotate(Q);
+      MAT3 rot = q.toRotationMatrix();
+      p->rotate(rot);
      }
 }
   

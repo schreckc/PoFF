@@ -139,7 +139,7 @@ void Particule::draw(glm::mat4 m, int s) {
       
       //valx = 0.08; valy = 0.08;  valz = 1.0;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
-      valx = 0.2; valy = 0.2;  valz = 1.0;
+      valx = 0.1; valy = 0.1;  valz = 1.0;
       glm::mat3 D;
       D[0] = glm::vec3(valx, 0, 0);
       D[1] = glm::vec3(0, valy, 0);
@@ -153,11 +153,12 @@ void Particule::draw(glm::mat4 m, int s) {
 
     
       Sphere sp(0.01, m_shader);
-      if (fixed) {
-      	sp.setColor(0, 0, 0);
-      } else {
-      	sp.setColor(color(0), color(1), color(2));
-      }
+      // if (fixed) {
+      // 	sp.setColor(0, 0, 0);
+      // } else {
+      // 	sp.setColor(color(0), color(1), color(2));
+      // }
+      	sp.setColor(1, 1, 1);
       int cur_shader = m_shader;
       if (m_shader == -1) {
         cur_shader = s;
