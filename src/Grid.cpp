@@ -395,29 +395,33 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
     for (int j = 0; j <= (int)j_max; ++j) {
       for (int k = 0; k <= (int)k_max; ++k) {
 	uint ind = index(i, j, k);
-	VEC3 f(0, 0, 0);
-	QUATERNION q(MAT3::Identity());
-	FLOAT we = 0;
-	for (int l = i - 2; l < i + 2; ++l) {
+	if (active_nodes[ind]) {
+	// QUATERNION q(MAT3::Identity());
+	// FLOAT we = 0;
+	for (int l = i - 1; l < i + 1; ++l) {
 	  if (l >= 0 && l < (int)i_max) {
-	    for (int m = j - 2; m < j + 2; ++m) {
+	    for (int m = j - 1; m < j + 1; ++m) {
 	      if (m >= 0 && m < (int)j_max) {
-		for (int n = k - 2; n < k + 2; ++n) {
+		for (int n = k - 1; n < k + 1; ++n) {
 		  if (n >= 0 && n < (int)k_max) {
 		    uint indc = l*j_max*k_max + m*(k_max) + n;
 		    for (auto& p : cells[indc]) {
-	
-		      if (active_nodes[ind]) {
-			FLOAT w = p->weight(Vector3i(i, j, k));
-			QUATERNION qp( p->getMixRot());
-			q = q.slerp( w/(we+w), qp);
-			we += w;
+		      
+		      FLOAT w = p->weight(Vector3i(i, j, k));
+		       if (w > 10e-8) {
+		      // QUATERNION qp( p->getMixRot());
+		      // q = q.slerp( w/(we+w), qp);
+		      // we += w;
+		     
+		// 			INFO(3, "weight "<<w<<" "<<we);
+		// INFO(3, "mat\n"<<qp.toRotationMatrix());
+		// INFO(3, "mat2\n"<<q.toRotationMatrix());
 
-			// MAT3 r = p->getMixRot();
-			// ANGLE_AXIS aa(r);
-			// FLOAT angle = w*aa.angle();
-			// rotations[ind] += aa.toRotationMatrix();//w*p->getMixRot();
-		      }
+			MAT3 r = p->getMixRot();
+			 ANGLE_AXIS aa(r);
+			 FLOAT angle = w*aa.angle();
+			 rotations[ind] += aa.toRotationMatrix();//w*p->getMixRot();
+		       }
 		    }
 		  }
 		}
@@ -425,10 +429,13 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 	    }
 	  }
 	}
-	// HouseholderQR<MAT3> decomp(rotations[ind]);
-      	// MAT3 Q = decomp.householderQ();
-	// rotations[ind] = Q;
-	rotations[ind] = q.toRotationMatrix();
+	 HouseholderQR<MAT3> decomp(rotations[ind]);
+      	 MAT3 Q = decomp.householderQ();
+	 rotations[ind] = Q;
+	 //	 INFO(3, "Q\n"<<Q*Q.transpose());
+	//rotations[ind] = q.toRotationMatrix();
+	//INFO(3, "rot ind\n"<<rotations[ind]);
+	}
       }
     }
     }
@@ -437,39 +444,45 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
      for (uint ip = 0; ip < subparticules.size(); ++ip) {
     Subparticule *p = subparticules[ip];
     Vector3i cell = p->getCell();
-    QUATERNION q(MAT3::Identity());
-    FLOAT we = 0;
-      for (int i = cell(0) - 2; i <= cell(0) + 2; ++i) {
+    // QUATERNION q(MAT3::Identity());
+    // FLOAT we = 0;
+    MAT3 rot = MAT3::Zero();
+      for (int i = cell(0) - 1; i <= cell(0) + 1; ++i) {
       if (i >= 0 && i <= (int)i_max) {
-    	for (int j = cell(1) - 2; j <= cell(1) + 2; ++j) {
+    	for (int j = cell(1) - 1; j <= cell(1) + 1; ++j) {
     	  if (j >= 0 && j <= (int)j_max) {
-    	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
+    	    for (int k = cell(2) - 1; k <= cell(2) + 1; ++k) {
 	      if (k >= 0 && k <= (int)k_max) {
 		uint ind = index(i, j, k);
-		if (!active_nodes[ind]) {
-		  rotations[ind] = MAT3::Zero();
-		}
-		FLOAT w = p->weight(Vector3i(i, j, k));
-		QUATERNION qp(rotations[ind]);
-		q = q.slerp( w/(we+w), qp);
-		we += w;
+		if (active_nodes[ind]) {
+	 	  FLOAT w = p->weight(Vector3i(i, j, k));
+		  if (w > 10e-8) {
+		  // QUATERNION qp(rotations[ind]);
+		  // q = q.slerp(w/(we+w), qp);
+		  // we += w;
 		
-		// MAT3 r = rotations[ind];
-		// ANGLE_AXIS aa(r);
-		// FLOAT angle = w*aa.angle();
-		// rot += aa.toRotationMatrix();
-		//rot += w*rotations[ind];
+		 // INFO(3, "weight "<<w<<" "<<we);
+		  // INFO(3, "mat\n"<<qp.toRotationMatrix());
+		  // INFO(3, "mat2\n"<<q.toRotationMatrix());
+		    MAT3 r = rotations[ind];
+		 ANGLE_AXIS aa(r);
+		 FLOAT angle = w*aa.angle();
+		 rot += aa.toRotationMatrix();
+		rot += w*rotations[ind];
+		    }
+
+		}
 	      }
 	    }
 	  }
 	}
       }
       }
-      // HouseholderQR<MAT3> decomp(rot);
-      // MAT3 Q = decomp.householderQ();
-      // p->rotate(Q);
-      MAT3 rot = q.toRotationMatrix();
-      p->rotate(rot);
+       HouseholderQR<MAT3> decomp(rot);
+       MAT3 Q = decomp.householderQ();
+       p->rotate(Q);
+      // MAT3 rot = q.toRotationMatrix();
+      // p->rotate(rot);
      }
 }
   
