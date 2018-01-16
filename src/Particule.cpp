@@ -883,7 +883,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  MAT3 W = 0.5/mpm_conf::cheat_damping_*(t - t.transpose()); // skew-sym part of velocity grad
  MAT3 D = 0.5/mpm_conf::cheat_damping_*(t + t.transpose()); // sym part of velocity grad, strain rate tensor
   D = rotation.transpose()*D*rotation;
- FLOAT width = 1, length = 1.04;
+ FLOAT width = 1, length = 1.0;
  FLOAT l = (length/width - 1)/(length/width + 1); //ellongation of the ellipsoidal object
 
 
@@ -2038,9 +2038,13 @@ void Particule::addToMesh(std::list<VEC3> & points, std::list<VEC3> & normals,
 
 
 void Particule::exportMitsuba(std::ofstream &file) {
+  if ((rotation.col(0).cross(rotation.col(1))).dot(rotation.col(2)) < 0) {
+    rotation.col(0) = -rotation.col(0);
+  }
   ANGLE_AXIS rot(rotation);
   VEC3 axe = rot.axis();
-  FLOAT angle = rot.angle()/M_PI*180;
+  FLOAT angle = rot.angle()/M_PI*180.0;
+  
   // file<<"<shape type=\"sphere\">\n";
   // //  file<<"<point name=\"center\" x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   // file<<"<point name=\"center\" x=\"0\" y=\"0\" z=\"0\"/>\n";
@@ -2058,7 +2062,7 @@ void Particule::exportMitsuba(std::ofstream &file) {
   // file<<"<scale x=\""<<valx<<"\" y=\""<<valy<<"\" z=\""<<valz<<"\"/>\n";
   //   file<<"<scale x=\"0.015\" y=\"0.015\" z=\"0.015\"/>\n";
   // file<<"<scale x=\"0.005\" y=\"0.005\" z=\"0.005\"/>\n";
-   file<<"<scale x=\"0.02\" y=\"0.02\" z=\"0.1\"/>\n";
+   file<<"<scale x=\"0.01\" y=\"0.01\" z=\"0.05\"/>\n";
   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   file<<"</transform>\n";

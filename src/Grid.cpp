@@ -408,7 +408,7 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 		    for (auto& p : cells[indc]) {
 		      
 		      FLOAT w = p->weight(Vector3i(i, j, k));
-		       if (w > 10e-8) {
+		      //if (w > 10e-8) {
 		      // QUATERNION qp( p->getMixRot());
 		      // q = q.slerp( w/(we+w), qp);
 		      // we += w;
@@ -422,7 +422,7 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 			 FLOAT angle = w*aa.angle();
 			 rotations[ind] += aa.toRotationMatrix();//w*p->getMixRot();
 			 
-		       }
+			 //}
 		    }
 		  }
 		}
@@ -463,7 +463,7 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 		  rotations[ind] = MAT3::Zero();
 		}
 	 	  FLOAT w = p->weight(Vector3i(i, j, k));
-		  if (w > 10e-8) {
+		  // if (w > 10e-8) {
 		  // QUATERNION qp(rotations[ind]);
 		  // q = q.slerp(w/(we+w), qp);
 		  // we += w;
@@ -478,7 +478,7 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 		 //rot += w*rotations[ind];
 		//   }
 
-		}
+		 //	}
 	      }
 	    }
 	  }
@@ -487,11 +487,11 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
       }
        HouseholderQR<MAT3> decomp(rot);
        MAT3 Q = decomp.householderQ();
-       	 ANGLE_AXIS aa(Q);
-	 FLOAT angle = aa.angle();
-	 if (angle < 0.1) {
-	   p->rotate(Q);
-	 }
+       ANGLE_AXIS aa(Q);
+       FLOAT angle = aa.angle();
+       if (angle < 0.5 || M_PI - angle < 0.5) {
+	 p->rotate(Q);
+       }
       // MAT3 rot = q.toRotationMatrix();
       // p->rotate(rot);
      }
