@@ -14,34 +14,30 @@
   <length> 1.02
  </plane>
  <box>
-  <min pos> 0.02 0.02 0.02
-  <max pos> 0.98 0.98 0.98
+  <min pos> 0.2 0.02 0.02
+  <max pos> 0.8 0.98 0.98
  </box>
  <cylinder>
-  <pos> 0.5 0.5 0.3
+  <pos> 0.3 0.45 0.3
   <direction> 0 0 1
   <ray> 0.04
  </cylinder>
  <cylinder>
-  <pos> 0.2 0.5 0.3
+  <pos> 0.6 0.45 0.3
   <direction> 0 0 1
   <ray> 0.04
  </cylinder>
- <cylinder>
-  <pos> 0.8 0.5 0.3
-  <direction> 0 0 1
-  <ray> 0.04
- </cylinder> 
 </obstacles>
 <particules>
  <rotation>
   <axe> 1 0 0
-  <angle> 0
- </rotation>	
- <cuboid> 
-  <x> 0.1 0.9
+  <angle> 1.5708
+ </rotation>
+ <cuboid>
+  <x> 0.3 0.7
   <y> 0.05 0.25
   <z> 0.5 0.8
-  <nb particules> 50000
+  <nb particules> 10000
+  <nb subparticules> 50000
  </cuboid>
 </particules>
