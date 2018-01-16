@@ -454,7 +454,9 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
     	    for (int k = cell(2) - 2; k <= cell(2) + 2; ++k) {
 	      if (k >= 0 && k <= (int)k_max) {
 		uint ind = index(i, j, k);
-		if (active_nodes[ind]) {
+		if (!active_nodes[ind]) {
+		  rotations[ind] = MAT3::Zero();
+		}
 	 	  FLOAT w = p->weight(Vector3i(i, j, k));
 		  if (w > 10e-8) {
 		  // QUATERNION qp(rotations[ind]);
@@ -468,8 +470,8 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 		 ANGLE_AXIS aa(r);
 		 FLOAT angle = w*aa.angle();
 		 rot += aa.toRotationMatrix();
-		rot += w*rotations[ind];
-		    }
+		 //rot += w*rotations[ind];
+		//   }
 
 		}
 	      }
