@@ -1712,11 +1712,17 @@ void Simulation::exportMitsuba(std::string file_name) const {
     ERROR(file.good(), "cannot open file \""<<file_name<<"\"", "");
     INFO(1, "Export file \""<<file_name<<"\"");
 
-    // std::string diff_reflectance = "#dda824"; // yellowy brownish
-     std::string diff_reflectance = "#DBEDFF"; // dull blue
+    std::string diff_reflectance = "#ddd224"; // yellowish
+    //std::string diff_reflectance = "#dda824"; // yellowy brownish
+     // std::string diff_reflectance = "#DBEDFF"; // dull blue
     //   std::string diff_reflectance = "#a90202"; //brownish
+    //std::string diff_reflectance = "#c19c8a"; //brownish
+    //  std::string diff_reflectance = "#cc6666"; // dull red
     std::string truck_color = "#aaaaaa";
     std::string integrator = "direct";
+
+    //<srgb name="reflectance" value="#bc8753"/>
+    //<srgb name="reflectance" value="#c19c8a"/>
     
     file<<"<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
     file<<"<scene version=\"0.5.0\">\n";
@@ -1729,7 +1735,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
 
     /** WOOD ***/
     
-        file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
+    file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
     file<<"<shape type=\"sphere\">\n";
     file<<"<bsdf type=\"diffuse\">\n";
      file<<"<srgb name=\"reflectance\" value=\""<<diff_reflectance<<"\"/>\n";
@@ -1737,6 +1743,43 @@ void Simulation::exportMitsuba(std::string file_name) const {
      file<<"</shape>\n";
      file<<"</shape>\n";
      /* END WOOD */
+    
+    /** rod ***/
+    /*
+    file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<0<<"\" y=\""<<0<<"\" z=\""<<-0.04<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<0<<"\" y=\""<<0<<"\" z=\""<<0.04<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<0.01<<"\"/>\n";
+    file<<"<bsdf type=\"diffuse\">\n";
+    file<<"<srgb name=\"reflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+    file<<"</bsdf>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<scale  value=\""<<0.02<<"\"/>\n";
+    file<<"<translate x=\""<<0<<"\" y=\""<<0<<"\" z=\""<<-0.07<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<bsdf type=\"twosided\">\n";
+    file<<"<bsdf type=\"diffuse\">\n";
+    file<<"<srgb name=\"reflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+    file<<"</bsdf>\n";
+    file<<"</bsdf>\n";
+    file<<"</shape>\n";
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<scale  value=\""<<0.02<<"\"/>\n";
+    file<<"<translate x=\""<<0<<"\" y=\""<<0<<"\" z=\""<<0.07<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<bsdf type=\"twosided\">\n";
+    file<<"<bsdf type=\"diffuse\">\n";
+    file<<"<srgb name=\"reflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+    file<<"</bsdf>\n";
+    file<<"</bsdf>\n";
+    file<<"</shape>\n";
+    file<<"</shape>\n";
+
+     /* END rod */
 
     /** mesh **/
      /*
@@ -1843,7 +1886,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     /****end bend **/
     
     /*** truck ***/
-    /*
+    
     file<<"<bsdf type=\"twosided\" id=\"truck\">\n";
     file<<"<bsdf type=\"diffuse\">\n";
     file<<"<srgb name=\"diffuseReflectance\" value=\""<<truck_color<<"\"/>\n";
@@ -1911,7 +1954,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
     file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
     file<<"</shape>\n";
-        file<<"<shape  type=\"disk\">\n";
+    file<<"<shape  type=\"disk\">\n";
     file<<"<transform  name=\"toWorld\">\n";
     file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
     file<<"<scale  value=\""<<10*ray<<"\"/>\n";
@@ -1937,7 +1980,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
     file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
     file<<"</shape>\n";
-        file<<"<shape  type=\"disk\">\n";
+    file<<"<shape  type=\"disk\">\n";
     file<<"<transform  name=\"toWorld\">\n";
     file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
     file<<"<scale  value=\""<<10*ray<<"\"/>\n";
@@ -2006,7 +2049,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
     file<<"</shape>\n";
 
-     p0 = VEC3(0.3, 0.57, 0.18);
+    p0 = VEC3(0.3, 0.57, 0.18);
     p1 = VEC3(0.7, 0.57, 0.18);
     ray = 0.01;
     file<<"<shape type=\"cylinder\">\n";
@@ -2047,8 +2090,8 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
     file<<"</shape>\n";
 
-    p0 = VEC3(0.26, -0.12, 0.18);
-    p1 = VEC3(0.3, -0.12, 0.18);
+    p0 = VEC3(0.29, -0.12, 0.18);
+    p1 = VEC3(0.33, -0.12, 0.18);
     ray = 0.08;
     file<<"<shape type=\"cylinder\">\n";
     file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
@@ -2073,8 +2116,8 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
     file<<"</shape>\n";
 
-    p0 = VEC3(0.74, -0.12, 0.18);
-    p1 = VEC3(0.7, -0.12, 0.18);
+    p0 = VEC3(0.71, -0.12, 0.18);
+    p1 = VEC3(0.67, -0.12, 0.18);
     ray = 0.08;
     file<<"<shape type=\"cylinder\">\n";
     file<<"<point name=\"p0\" x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
@@ -2082,7 +2125,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"<float name=\"radius\" value=\""<<10*ray<<"\"/>\n";
     file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
     file<<"</shape>\n";
-        file<<"<shape  type=\"disk\">\n";
+    file<<"<shape  type=\"disk\">\n";
     file<<"<transform  name=\"toWorld\">\n";
     file<<"<rotate  y=\"1\"  angle=\"90\"/>\n";
     file<<"<scale  value=\""<<10*ray<<"\"/>\n";
@@ -2096,13 +2139,38 @@ void Simulation::exportMitsuba(std::string file_name) const {
     file<<"<scale  value=\""<<10*ray<<"\"/>\n";
     file<<"<translate x=\""<<10*p1(0)<<"\" y=\""<<10*p1(1)<<"\" z=\""<<10*p1(2)<<"\"/>\n";
     file<<"</transform>\n";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+
+    p0 = VEC3(0.5, 1.03, 0.13);
+    file<<"<shape type=\"cube\">\n";
+    file<<"<transform name=\"toWorld\">\n";
+    file<<"<scale x=\""<<5.5<<"\" y=\""<<0.2<<"\" z=\"0.3\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    p0 = VEC3(1.03, 0.5, 0.13);
+    file<<"<shape type=\"cube\">\n";
+    file<<"<transform name=\"toWorld\">\n";
+    file<<"<scale x=\""<<0.2<<"\" y=\""<<5.1<<"\" z=\"0.3\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>";
+    file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
+    file<<"</shape>\n";
+    p0 = VEC3(-0.03, 0.5, 0.13);
+    file<<"<shape type=\"cube\">\n";
+    file<<"<transform name=\"toWorld\">\n";
+    file<<"<scale x=\""<<0.2<<"\" y=\""<<5.1<<"\" z=\"0.3\"/>\n";
+    file<<"<translate x=\""<<10*p0(0)<<"\" y=\""<<10*p0(1)<<"\" z=\""<<10*p0(2)<<"\"/>\n";
+    file<<"</transform>";
     file<<"<ref name=\"bsdf\" id=\"truck\"/>\n";
     file<<"</shape>\n";
     
     /* end truck */
 
     /*** avalanche **/
-    
+    /*
     std::string color = "bbbbbb";
     file<<"<shape type=\"rectangle\">\n";
   file<<"<transform name=\"toWorld\">\n";
