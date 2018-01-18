@@ -249,7 +249,7 @@ void PlaneObstacle::exportMitsuba(std::ofstream & file) const {
   
   file<<"<shape type=\"rectangle\">\n";
   file<<"<transform name=\"toWorld\">\n";
-  file<<"<scale x=\""<<w<<"\" y=\""<<l<<"\" z=\"1\"/>\n";
+  file<<"<scale x=\""<<l<<"\" y=\""<<w<<"\" z=\"1\"/>\n";
   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   file<<"</transform>";

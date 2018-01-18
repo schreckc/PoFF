@@ -466,11 +466,18 @@ export OMP_PROC_BIND=true
 #./poff -s truckh.sc -l test_truck4.conf -e truck/testh2_ -stop 8000 -es 4 -r
 #./poff -s truckv.sc -l test_truck5.conf -e truck/testv3_ -stop 8000 -es 4 -r
 #./poff -s truckh.sc -l test_truck5.conf -e truck/testh3_ -stop 8000 -es 4 -r
-./poff -s truckh2.sc -l test_truck5.conf -e truck/testh4_ -stop 8000 -es 4 -r
-./poff -s truckv2.sc -l test_truck5.conf -e truck/testv4_ -stop 8000 -es 4 -r
-./poff -s truckd2.sc -l test_truck5.conf -e truck/testd4_ -stop 8000 -es 4 -r
+#./poff -s truckh2.sc -l test_truck5.conf -e truck/testh4_ -stop 8000 -es 4 -r
+#./poff -s truckv2.sc -l test_truck5.conf -e truck/testv4_ -stop 8000 -es 4 -r
+#./poff -s truckd2.sc -l test_truck5.conf -e truck/testd4_ -stop 8000 -es 4 -r
 
 #./poff -s truckv.sc -l test_truck2.conf -e truck/testv_ -stop 12000 -es 5 -r
 #./poff -s truckd.sc -l test_truck2.conf -e truck/testd_ -stop 12000 -es 1 -r
 #./poff -s truckd2.sc -l test_truck2.conf -e truck/testd2_ -stop 12000 -es 5 -r
 #./poff -s truckd3.sc -l test_truck2.conf -e truck/testd3_ -stop 12000 -es 5 -r
+
+mkdir avalancheh_mit2
+./poff -s empty_avalanche.sc -i avalanche/test1h_ -em avalancheh_mit2/test -es 2 -stop 2000 -r
+mitsuba avalancheh_mit2/*xml
+mkdir avalanchev_mit2
+./poff -s empty_avalanche.sc -i avalanche/test1v_ -em avalanchev_mit2/test -es 2 -stop 2000 -r
+mitsuba avalanchev_mit2/*xml
