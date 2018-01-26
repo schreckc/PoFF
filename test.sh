@@ -475,9 +475,44 @@ export OMP_PROC_BIND=true
 #./poff -s truckd2.sc -l test_truck2.conf -e truck/testd2_ -stop 12000 -es 5 -r
 #./poff -s truckd3.sc -l test_truck2.conf -e truck/testd3_ -stop 12000 -es 5 -r
 
-mkdir avalancheh_mit2
-./poff -s empty_avalanche.sc -i avalanche/test1h_ -em avalancheh_mit2/test -es 2 -stop 2000 -r
-mitsuba avalancheh_mit2/*xml
-mkdir avalanchev_mit2
-./poff -s empty_avalanche.sc -i avalanche/test1v_ -em avalanchev_mit2/test -es 2 -stop 2000 -r
-mitsuba avalanchev_mit2/*xml
+#mkdir avalancheh_mit2
+#./poff -s empty_avalanche.sc -i avalanche/test1h_ -em avalancheh_mit2/test -es 2 -stop 2000 -r
+#mitsuba avalancheh_mit2/*xml
+#mkdir avalanchev_mit2
+#./poff -s empty_avalanche.sc -i avalanche/test1v_ -em avalanchev_mit2/test -es 2 -stop 2000 -r
+#mitsuba avalanchev_mit2/*xml
+
+#mkdir column_paper
+#./poff -s columnd.sc -l mat_coin_test.conf -e column_paper/testd -es 5 -stop 5000 -r 
+#mkdir column_rod
+#./poff -s columnd.sc -l mat_rod_test.conf -e column_rod/testd -es 5 -stop 5000 -r
+#./poff -s columnh.sc -l mat_coin_test.conf -e column_paper/testh -es 5 -stop 5000 -r
+##./poff -s columnv.sc -l mat_coin_test.conf -e column_paper/testv -es 5 -stop 5000 -r
+#./poff -s columnh.sc -l mat_rod_test.conf -e column_rod/testh -es 5 -stop 5000 -r
+#./poff -s columnv.sc -l mat_rod_test.conf -e column_rod/testv -es 5 -stop 5000 -r
+#mkdir column_leaves_test
+#./poff -s columnh0.sc -l mat_snow_test.conf -e column_leaves_test/testh -es 5 -stop 5000 -r
+#./poff -s columnh0.sc -l mat_snow_test2.conf -e column_leaves_test/test2h -es 50 -stop 25000 -r
+#./poff -s columnh0.sc -l mat_snow_test3.conf -e column_leaves_test/test3h -es 5 -stop 5000 -r
+#./poff -s columnh0.sc -l mat_snow_test4.conf -e column_leaves_test/test4h -es 5 -stop 5000 -r
+#./poff -s columnh0.sc -l mat_snow_test5.conf -e column_leaves_test/test5h -es 5 -stop 5000 -r
+#./poff -s columnv.sc -l mat_snow_test.conf -e column_leaves/testv -es 5 -stop 5000 -r
+#./poff -s columnd.sc -l mat_snow_test.conf -e column_leaves/testd -es 5 -stop 5000 -r
+#./poff -s columnh.sc -l mat_snow_test2.conf -e column_leaves/test2h -es 50 -stop 50000 -r
+#./poff -s columnd.sc -l mat_snow_test2.conf -e column_leaves/test2d -es 50 -stop 50000 -r
+#./poff -s columnv.sc -l mat_snow_test2.conf -e column_leaves/test2v -es 50 -stop 50000 -r
+
+#mkdir column_sparkleh_mit
+#./poff -i column_leaves/test3h_dt -em column_sparkleh_mit/test -s empty_plane.sc -es 2 -stop 800 -r
+#mitsuba column_sparkleh_mit/*xml
+
+#mkdir column_sparkled_mit
+#./poff -i column_leaves/test3d_dt -em column_sparkled_mit/test -s empty_plane.sc -es 2 -stop 800 -r
+mitsuba column_sparkled_mit/*002[456789].xml
+mitsuba column_sparkled_mit/*00[3456789]?.xml
+mitsuba column_sparkled_mit/*0[1234]??.xml
+
+mkdir column_sparklev_mit
+./poff -i column_leaves/test3v_dt -em column_sparklev_mit/test -s empty_plane.sc -es 2 -stop 800 -r
+mitsuba column_sparklev_mit/*xml
+

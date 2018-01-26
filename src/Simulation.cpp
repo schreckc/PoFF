@@ -1712,12 +1712,13 @@ void Simulation::exportMitsuba(std::string file_name) const {
     ERROR(file.good(), "cannot open file \""<<file_name<<"\"", "");
     INFO(1, "Export file \""<<file_name<<"\"");
 
-    //std::string diff_reflectance = "#ddd224"; // yellowish
+       std::string diff_reflectance = "#ddd224"; // yellowish
     //std::string diff_reflectance = "#dda824"; // yellowy brownish
     //  std::string diff_reflectance = "#DBEDFF"; // dull blue
-    //   std::string diff_reflectance = "#a90202"; //brownish
-    std::string diff_reflectance = "#c19c8a"; //brownish
-    //  std::string diff_reflectance = "#cc6666"; // dull red
+    // std::string diff_reflectance = "#a90202"; //brownish
+       //std::string diff_reflectance = "#c19c8a"; //brownish
+    //std::string diff_reflectance = "#f94242"; // dull red
+    //std::string diff_reflectance = "#a92222"; //blood red
     std::string truck_color = "#aaaaaa";
     std::string integrator = "direct";
 
@@ -1734,7 +1735,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     // file<<"</bsdf>\n";
 
     /** WOOD ***/
-    /*
+    
     file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
     file<<"<shape type=\"sphere\">\n";
     file<<"<bsdf type=\"diffuse\">\n";
@@ -1743,6 +1744,47 @@ void Simulation::exportMitsuba(std::string file_name) const {
      file<<"</shape>\n";
      file<<"</shape>\n";
      /* END WOOD */
+
+    /*** sparkle **/
+    /*
+    file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
+
+    file<<"<shape type=\"cylinder\">\n";
+    file<<"<point name=\"p0\" x=\""<<0<<"\" y=\""<<0<<"\" z=\""<<-0.001<<"\"/>\n";
+    file<<"<point name=\"p1\" x=\""<<0<<"\" y=\""<<0<<"\" z=\""<<0.001<<"\"/>\n";
+    file<<"<float name=\"radius\" value=\""<<0.02<<"\"/>\n";
+    file<<"<bsdf type=\"diffuse\">\n";
+    file<<"<srgb name=\"reflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+    file<<"</bsdf>\n";
+    file<<"</shape>\n";
+
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<scale  value=\""<<0.02<<"\"/>\n";
+    file<<"<translate x=\""<<0<<"\" y=\""<<0<<"\" z=\""<<0.001<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<bsdf type=\"twosided\">\n";
+    file<<"<bsdf type=\"plastic\">\n";
+    file<<"<srgb name=\"diffuseReflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+    file<<"</bsdf>\n";
+    file<<"</bsdf>\n";
+    file<<"</shape>\n";
+
+    file<<"<shape  type=\"disk\">\n";
+    file<<"<transform  name=\"toWorld\">\n";
+    file<<"<scale  value=\""<<0.02<<"\"/>\n";
+    file<<"<translate x=\""<<0<<"\" y=\""<<0<<"\" z=\""<<-0.001<<"\"/>\n";
+    file<<"</transform>\n";
+    file<<"<bsdf type=\"twosided\">\n";
+    file<<"<bsdf type=\"plastic\">\n";
+    file<<"<srgb name=\"diffuseReflectance\" value=\""<<diff_reflectance<<"\"/>\n";
+    file<<"</bsdf>\n";
+    file<<"</bsdf>\n";
+    file<<"</shape>\n";
+
+    file<<"</shape>\n";
+
+    /** end sparkle **/
     
     /** rod ***/
     /*
@@ -1782,6 +1824,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
      /* END rod */
 
     /** paper **/
+    /*
     file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
       file<<"<shape type=\"rectangle\">\n";
   file<<"<transform name=\"toWorld\">\n";
@@ -1803,7 +1846,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
      file<<"<shape type=\"obj\">\n";
      file<<"<string  name=\"filename\"  value=\"dragon.obj\"/>\n";
      file<<"<transform name=\"toWorld\">\n";
-      file<<"<scale x=\"0.005\" y=\"0.005\" z=\"0.005\"/>\n";
+      file<<"<scale x=\"0.0075\" y=\"0.0075\" z=\"0.0075\"/>\n";
       //      file<<"<rotate x=\""<<1<<"\" y=\""<<0<<"\" z=\""<<0<<"\" angle=\""<<90<<"\"/>\n";
        file<<"<rotate x=\""<<0<<"\" y=\""<<1<<"\" z=\""<<0<<"\" angle=\""<<90<<"\"/>\n";
      file<<"</transform>\n";
@@ -1903,7 +1946,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     /****end bend **/
     
     /*** truck ***/
-    /*
+    
     file<<"<bsdf type=\"twosided\" id=\"truck\">\n";
     file<<"<bsdf type=\"diffuse\">\n";
     file<<"<srgb name=\"diffuseReflectance\" value=\""<<truck_color<<"\"/>\n";
@@ -2250,10 +2293,10 @@ void Simulation::exportMitsuba(std::string file_name) const {
 
 
     file<<"<shape type=\"sphere\">\n";
-    file<<"<point name=\"center\" x=\"-15\" y=\"15\" z=\"50\"/>\n";
+    file<<"<point name=\"center\" x=\"-15\" y=\"-15\" z=\"50\"/>\n";
     file<<"<float name=\"radius\" value=\"4.0\"/>\n";
     file<<"<emitter type=\"area\">\n";
-    file<<"<spectrum name=\"radiance\" value=\"160\"/>\n";
+    file<<"<spectrum name=\"radiance\" value=\"320\"/>\n";
     file<<"</emitter>\n";
     file<<"</shape>\n";
 

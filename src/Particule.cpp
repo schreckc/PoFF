@@ -139,8 +139,10 @@ void Particule::draw(glm::mat4 m, int s) {
       
       //valx = 0.08; valy = 0.08;  valz = 1.0;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
-      // valx = 0.1; valy = 0.1;  valz = 1.0;
-        valx = 0.5; valy = 0.5;  valz = 0.05;
+      //valx = 0.2; valy = 0.2;  valz = 0.2;
+          valx = 0.1; valy = 0.1;  valz = 1.0;
+	 //  valx = 0.5; valy = 0.5;  valz = 0.05;
+	  // 	valx = 0.2; valy = 0.2;  valz = 0.02;
       glm::mat3 D;
       D[0] = glm::vec3(valx, 0, 0);
       D[1] = glm::vec3(0, valy, 0);
@@ -2061,9 +2063,10 @@ void Particule::exportMitsuba(std::ofstream &file) {
   file<<"<ref id=\"particle\"/>\n";
   file<<"<transform name=\"toWorld\">\n";
   // file<<"<scale x=\""<<valx<<"\" y=\""<<valy<<"\" z=\""<<valz<<"\"/>\n";
-  //   file<<"<scale x=\"0.015\" y=\"0.015\" z=\"0.015\"/>\n";
-  // file<<"<scale x=\"0.005\" y=\"0.005\" z=\"0.005\"/>\n";
-  // file<<"<scale x=\"0.01\" y=\"0.01\" z=\"0.05\"/>\n";
+  //  file<<"<scale x=\"0.015\" y=\"0.015\" z=\"0.015\"/>\n";
+  //file<<"<scale x=\"0.005\" y=\"0.005\" z=\"0.005\"/>\n";
+    file<<"<scale x=\"0.01\" y=\"0.01\" z=\"0.05\"/>\n";
+  // file<<"<scale y=\"2\"/>\n";
   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";
   file<<"</transform>\n";

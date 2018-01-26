@@ -2,11 +2,11 @@
  <motion>
   <rotation>
    <axe> 1 0 0
-   <angle> -0.37
+   <angle> -70.6
    <center> 0.5 0.65 0.2
   </rotation>
-  <begin> 0.2
-  <end> 2.2
+  <begin> 0.0
+  <end> 0
  </motion> 
  <open box>
   <min pos> 0.3 0.05 0.2
@@ -46,4 +46,8 @@
 <camera>
  <position> 0.380926 1.55282 0.955515
  <orientation> 0.0431534 -0.803627 -0.593564
+</camera>
+<camera>
+ <position> -0.702516 0.653874 0.268882
+ <orientation> 0.983632 -0.094998 0.153112
 </camera>

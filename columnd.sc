@@ -18,6 +18,6 @@
   <y> 0.45 0.55
   <z> 0.3 0.5
   <nb particules> 10000
-  <nb subparticules> 100000
+  <nb subparticules> 100000	
  </cuboid>
 </particules>

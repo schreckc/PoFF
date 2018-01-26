@@ -34,11 +34,18 @@ void Subparticule::draw(glm::mat4 m, int s) {
       R[1] = glm::vec3(y[0], y[1], y[2]);
       R[2] = glm::vec3(z[0], z[1], z[2]);
 
+      // glm::mat3 D;
+      // D[0] = glm::vec3(0.1, 0, 0);
+      // D[1] = glm::vec3(0, 0.1, 0);
+      // D[2] = glm::vec3(0, 0, 1);
+      
+      // FLOAT valx = 0.1, valy = 0.1,  valz = 1.0;
+      FLOAT  valx = 0.5, valy = 0.5,  valz = 0.05;
       glm::mat3 D;
-      D[0] = glm::vec3(0.1, 0, 0);
-      D[1] = glm::vec3(0, 0.1, 0);
-      D[2] = glm::vec3(0, 0, 1);
-
+      D[0] = glm::vec3(valx, 0, 0);
+      D[1] = glm::vec3(0, valy, 0);
+      D[2] = glm::vec3(0, 0, valz);
+      
       glm::mat3 S = R*D;
       //glm::mat3 S = R;
       glm::mat4 S4 = glm::mat4(S);
