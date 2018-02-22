@@ -13,11 +13,6 @@ SphereObstacle::SphereObstacle(VEC3 p, FLOAT r, FLOAT ha, VEC3 hn, int shader) :
 SphereObstacle::~SphereObstacle() {
 }
 
-// void SphereObstacle::animate() {
-//   //  ray -= 0.0005;
-//   //  INFO(3, "ray "<<ray);
-// }
-
 void SphereObstacle::apply(Motion m) {
   pos += m.translation;
   ray *= m.scale;
@@ -62,10 +57,6 @@ FLOAT SphereObstacle::getRay() const {
 
 
 VEC3 SphereObstacle::getNormal(VEC3 p) const {
-  // VEC3 n = pos - p;
-  // n.normalize();
-  // return n;
-
   VEC3 normal;
   
   VEC3 n = p - pos;
@@ -90,9 +81,6 @@ VEC3 SphereObstacle::getNormal(VEC3 p) const {
 }
 
 FLOAT SphereObstacle::distance(VEC3 v) const {
-   // VEC3 n = v - pos;
-   // return ray - n.norm();
-
   FLOAT dist;
   VEC3 n = v - pos;
   FLOAT norm = n.norm();

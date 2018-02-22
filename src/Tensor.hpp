@@ -12,13 +12,13 @@ class Tensor {
 
 public: 
   Tensor(FLOAT d = 3);
+
+  /** not tested */
   Tensor(MAT3 M);
   FLOAT& operator() (int i, int j, int k, int l);
   const FLOAT& operator()(int i, int j, int k, int l) const;
 
-  // Tensor inverse() const;
-  // Tensor inverseOrtho() const;
-
+  /** not tested **/
   friend MATX tensor2Mat(const Tensor & T);
   friend Tensor mat2Tensor(const MATX & M);
 
@@ -32,9 +32,11 @@ public:
   friend std::ostream& operator<<(std::ostream& os, const Tensor& T);
 
   friend Tensor rotateTensor(const Tensor & T, const MAT3 & R);
+  /** not tested **/
   friend Tensor transformTensor(const Tensor & T, const MAT3 & M);
 };
 
+/*** not tested **/
 MATX tensor2Mat(const Tensor & T);
 Tensor mat2Tensor(const MATX & M);
 
@@ -51,6 +53,8 @@ MAT3 vec2Mat(const VECX & v);
 std::ostream& operator<<(std::ostream& os, const Tensor& T);
 
 Tensor rotateTensor(const Tensor & T, const MAT3 & R);
+
+/** not tested **/
 Tensor transformTensor(const Tensor & T, const MAT3 & M);
 
 Tensor outerProduct(const MAT3 & M1, const MAT3 & M2);

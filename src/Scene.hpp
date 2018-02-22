@@ -24,7 +24,9 @@
 #include "Object.hpp"
 #include "Simulation.hpp"
 #include "Skybox.hpp"
-#include <SDL2/SDL_ttf.h>
+
+/** to implement **/
+//#include <SDL2/SDL_ttf.h>
 
 class Scene {
 public:
@@ -54,11 +56,17 @@ public:
   void setCameraOrientation(glm::vec3 pos);
 
   void setLoad(std::string);
+  void setScene(std::string);
+
+  /** import ot export postition and orientation of the particles (or subparticles) **/
   void setExport(std::string);
   void setImport(std::string);
-  void setScene(std::string);
+  
+  /** export or import the velocities of the grid **/
   void setExportGrid(std::string);
   void setImportGrid(std::string);
+
+  /** export xml file to be render with mitsuba */
   void setExportMitsuba(std::string);
 
   
@@ -67,32 +75,33 @@ public:
 
   FLOAT getTime();
   void printCameraPos();
-    bool running;
+  bool running;
 
   bool saveScreenshotBMP(std::string filepath);
   bool saveScreenshotBMP();
 private:
   uint step_by_step;
-  uint t;
+  uint time_;
   bool end_;
   bool re_init;
   int back;
   uint stop;
 
+  /** to record viewer into bmp files **/
   bool toggle_record;
   uint nb_file_m;
   std::string movie_path;
 
-    std::string m_titreFenetre;
-  int m_largeurFenetre;
-  int m_hauteurFenetre;
+  std::string m_titreFenetre; // window title
+  int m_largeurFenetre; // window width
+  int m_hauteurFenetre; // window height
 
   SDL_Window* m_fenetre;
   SDL_GLContext m_contexteOpenGL;
   SDL_Renderer* m_renderer;
-  TTF_Font *font;
-  
-  //  SDL_Event m_evenements;
+
+  /*** to implement */
+  //  TTF_Font *font;
 
   Input m_input;
   
@@ -103,7 +112,6 @@ private:
 
   std::vector<Shader*> l_shaders;
   std::vector<Texture*> l_textures;
-  //std::vector<glm::mat4>  l_model_views;
 
   std::list<Object*> l_objects;
   Simulation *sim;
@@ -117,14 +125,14 @@ private:
 };
 
 
-
-void render_text(SDL_Renderer *renderer,
-    int x,
-    int y,
-    const char *text,
-    TTF_Font *font,
-    SDL_Rect *rect,
-    SDL_Color *color);
+/*** not implemented ***/
+// void render_text(SDL_Renderer *renderer,
+//     int x,
+//     int y,
+//     const char *text,
+//     TTF_Font *font,
+//     SDL_Rect *rect,
+//     SDL_Color *color);
 
 
 #endif

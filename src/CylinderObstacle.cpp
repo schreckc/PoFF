@@ -3,8 +3,6 @@
 #include "error.hpp"
 #include "utils.hpp"
 #include <fstream>
-//#include <glm/gtc/type_ptr.hpp>
-//#include <glm/gtx/transform.hpp>
 
 CylinderObstacle::CylinderObstacle(VEC3 p, VEC3 d, FLOAT r, int shader) : Obstacle(shader){
   pos = p;
@@ -16,11 +14,6 @@ CylinderObstacle::CylinderObstacle(VEC3 p, VEC3 d, FLOAT r, int shader) : Obstac
 
 CylinderObstacle::~CylinderObstacle() {
 }
-
-// void CylinderObstacle::animate() {
-//   //  ray -= 0.0005;
-//   //  INFO(3, "ray "<<ray);
-// }
 
 void CylinderObstacle::apply(Motion m) {
   pos += m.translation;
@@ -43,7 +36,6 @@ void CylinderObstacle::draw(glm::mat4 m, int s) {
   }
 
   glm::vec3 axis((GLfloat)axe(0), (GLfloat)axe(1), (GLfloat)axe(2));
-  //  INFO(3, "angle "<<angle<<" "<<norm<<"\n"<<axe);
   
   m_model_view = translate(glm::mat4(1.0f), glm::vec3(pos(0), pos(1), pos(2)))*
     rotate(glm::mat4(1.0f), (GLfloat)angle, axis);
@@ -54,7 +46,6 @@ void CylinderObstacle::draw(glm::mat4 m, int s) {
     }
     glm::mat4 cur_model = m * m_model_view;
     c.draw(cur_model, cur_shader);
-    // INFO(3, "ray "<<ray);
 }
 #endif
 
@@ -72,19 +63,15 @@ FLOAT CylinderObstacle::distance(VEC3 v) const {
 }
 
 void CylinderObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) const {
-  // INFO(3, p);
   VEC3 proj = utils::projectionOrtho(p, pos, dir);
   VEC3 n = p - proj;
   FLOAT norm = n.norm();
 
   normal = n/norm;
-  //  normal.normalize();
   dist = norm - ray;
 }
 
 void CylinderObstacle::exportMitsuba(std::ofstream & file) const {
-  INFO(3, "Export boxobstacle in xml format for mitsuba not implemented");
-  //  TEST(false); //TODO
   VEC3 p0 = pos - 10*dir;
   VEC3 p1 = pos + 10*dir;
 

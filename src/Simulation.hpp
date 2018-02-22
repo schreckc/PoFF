@@ -64,7 +64,7 @@ public :
   void exportSim() const;
   
 
-  void exportMesh(std::ofstream & file) const;
+  //  void exportMesh(std::ofstream & file) const;
 
 
   void setLoad(std::string s);
@@ -80,6 +80,7 @@ public :
 
   void loadScene();
 
+  /** not impmented yet **/
   void saveState(std::string save_file);
   
   void addRotatingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT angular_speed);

@@ -20,7 +20,6 @@ using namespace Eigen;
 class Tensor;
 
 namespace mpm_conf {
-  //  extern unsigned int nb_particules_;
 
   enum method_t {apic_ = 0, 
 		 pic_,
@@ -42,7 +41,7 @@ namespace mpm_conf {
   extern Eigen::VEC3 poisson_vec_;
   extern Eigen::VEC3 shearing_vec_;
   
-  extern FLOAT dt_; // s
+  extern FLOAT dt_; // second
   extern Eigen::VEC3 gravity_; // m/s^2
 
   extern FLOAT density_; //kg/m^3 
@@ -54,15 +53,15 @@ namespace mpm_conf {
 
   extern unsigned int plastic_mode_; //0 drucker_prager (sand), 1 clamp eigenvalues (snow), 2 clamp diff between eigenvalues, 3 no plasticity
   extern unsigned int elastic_mode_; //0 sand, 1 snow, 2 linear
-  // extern bool plastic_anisotropy_;
-  // extern bool elastic_anisotropy_;
+
   extern bool anisotropy_on;
 
   // drucker-prager param
   extern Eigen::VEC4 hardenning_param_;
-  // plastic_mode 2-3 param
-   extern Eigen::VEC3 stretch_max;
+  // plastic_mode 1 param (snow-Stomakhin)
+  extern Eigen::VEC3 stretch_max;
   extern Eigen::VEC3 stretch_min;
+  // todo param plastic 2
 
   // damping
   extern FLOAT damping_;
@@ -76,6 +75,7 @@ namespace mpm_conf {
   extern Tensor anisotropy_strain_;
   extern Tensor inv_anisotropy_strain_;
 
+  // elatic tangent tensors
   extern MATX tangent_stiffness;
   extern MATX inverse_tangent_stiffness;
   extern MATX tangent_stiffness_iso;

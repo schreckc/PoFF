@@ -8,6 +8,7 @@ void help() {
   std::cout<<"     -l, -load <file>: load configuration file"<<std::endl;
   std::cout<<"     -s, -scene <file>: load scene from file"<<std::endl;
   std::cout<<"     -e, -export <name>: export animation in a set of files <name><frame number>.obj"<<std::endl;
+  std::cout<<"     -em <name>: export xml files for mitsuba in a set of files <name><frame number>.obj"<<std::endl;
   std::cout<<"     -i, -import <name>: import animation from a set of files <name><frame number>.obj"<<std::endl;
   std::cout<<"     -stop <t>: stop animation and exit at time t"<<std::endl;
   std::cout<<"     -es, -export_step <n>: export every n frames"<<std::endl;
@@ -22,14 +23,12 @@ void help() {
 
 int main(int argc, char **argv) {
 	
-  //  Scene scene("test", 2400, 1800);
-   if(Scene::SCENE->initialiserFenetre() == false)
-     return -1;  
-    Scene::SCENE->init();
+  if(Scene::SCENE->initialiserFenetre() == false)
+    return -1;  
+  Scene::SCENE->init();
 
   for (int i = 1;  i < argc; ++i) {
     std::string s(argv[i]);
-    //    INFO(3, s);
     if (s == "-l" || s == "-load") {
       if (argc < i + 2) {
   	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
@@ -202,6 +201,8 @@ int main(int argc, char **argv) {
       std::cout<<"Export every "<<argv[i+1]<<" steps"<<std::endl;
       mpm_conf::export_step_ = atoi(argv[i+1]);
       ++i;
+    } else if (s == "-r" || s == "-run") {
+      // no effect for the no graphic mode
     } else if (s == "-h" || s == "-help") {
       help();
     } else {
@@ -228,10 +229,6 @@ int main(int argc, char **argv) {
     
     Times::TIMES->tock(Times::total_time_);
     Times::TIMES->next_loop();
-    // if (t%100==0) {
-    //   std::cout<<".";
-    // }
-
   }
 
   

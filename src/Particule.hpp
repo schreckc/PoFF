@@ -5,25 +5,6 @@
 #include "Tensor.hpp"
 #include <list>
 
-// struct Tensor {
-//   FLOAT dim;
-//   std::vector<FLOAT> t;
-//   Tensor(FLOAT d = 3): dim(d) {
-//     t =  std::vector<FLOAT>(pow(d,4));
-//     for (uint i = 0; i < t.size(); ++i) {
-//       t[i] = 0;
-//     }
-//   };
-//   FLOAT& operator() (int i, int j, int k, int l) {
-//     int ind = pow(dim,3)*i+pow(dim,2)*k+dim*j+l;
-//     return t[ind];
-//   }
-//   const FLOAT& operator()(int i, int j, int k, int l) const {
-//     int ind = pow(dim,3)*i+pow(dim, 2)*k+dim*j+l;
-//     return t[ind];
-//   }
-// };
-
 class Particule : public Object {
 
 private :
@@ -32,10 +13,9 @@ private :
   VEC3 pos; //position
   VEC3 vel; //velocity
 
-  Vector3i cell;
+  Vector3i cell; //position in the grid
 
   FLOAT v0; //init volume
-  FLOAT v; //volume
   FLOAT m; //masse
   FLOAT density;
   
@@ -52,23 +32,13 @@ private :
   //anisotropy
   VEC3 normal;
   
-  // VEC3 axex;
-  // VEC3 axey;
-  // VEC3 axez;
-
-  MAT3 axes;
-  
   FLOAT valx;
   FLOAT valy;
   FLOAT valz;
 
-  MAT3 ellipse;
-
   MAT3 rotation;
-
   MAT3 orientation;
 
-  MAT3 prevD;
   MAT3 mix_rot;
   
  mutable MAT3 forceIncrement;
@@ -83,8 +53,6 @@ private :
   // volume correction
   FLOAT vp; //plastic volume change 
 
-  bool fixed;
-  
 public:
   Particule(int shader = -1);
   Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n = VEC3(0, 0, 0), VEC3 vel = VEC3(0, 0, 0), int shader = -1);
@@ -131,13 +99,16 @@ public:
   void updateForceIncrement();
   
   void setAnisotropyTensor(VEC3 a);
+  /** not tested **/
   void setAnisotropyTensor(MAT3 a);
+  
   void update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t); 
 
   void initVolume(FLOAT d);
 
-  void computeEnergyDerivative(VEC3 sigma); // take a diag mat in entry
+  void computeEnergyDerivative(VEC3 sigma); // take the eigenvalues of strain in entry
   MAT3 linearElasticity();
+  MAT3 linearElasticity(MAT3 E);
   void project(VEC3 sigma, VEC3 & T);
   
   //anisotropy
@@ -152,19 +123,22 @@ public:
 
   MAT3 getMixRot()const;
   
-  void anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U);
+  //  void anisotropicProject(VEC3 sigma, VEC3 &T, MAT3 U);
   
   void computeEnergySecondDer(VEC3 sigma, MAT3 U, MAT3 V);
   FLOAT energySecondDer(VEC3 sigma, uint i, uint j);
 
   MAT3 getOrientation();
 
-  void fix();
-
-  void addToMesh(std::list<VEC3> & points, std::list<VEC3> & normals,
-		 std::list<VEC2> & tex_points, std::list<unsigned int> & connectivity);
+  // void addToMesh(std::list<VEC3> & points, std::list<VEC3> & normals,
+  // 		 std::list<VEC2> & tex_points, std::list<unsigned int> & connectivity);
 
   void exportMitsuba(std::ofstream &file);
+
+  void realToFictitious(const MAT3 & real_strain, MAT3 & fic_strain);
+  void fictitiousToReal(const MAT3 & fic_strain, const MAT3 & fic_stress,
+			MAT3 & real_strain, MAT3 & real_stress);
+  void updateAnisotropy(const MAT3 & t);
 };
 
 

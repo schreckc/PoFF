@@ -23,9 +23,9 @@ public :
     
   void animate();
 
-  #ifndef NO_GRAPHICS_ 
+#ifndef NO_GRAPHICS_ 
   void draw(glm::mat4 m = glm::mat4(1.0f), int s = -1);
-  #endif
+#endif
   
   VEC3 getPosition() const;
   void setPosition(VEC3 &p);

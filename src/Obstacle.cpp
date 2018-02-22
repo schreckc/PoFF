@@ -9,25 +9,17 @@ Obstacle::Obstacle(int shader) : Object(shader) {
 }
 
 void Obstacle::animate() {
-  //  #ifndef NO_GRAPHICS_
   for (auto& m : motions) {
-  // if (m.isRunning(Scene::SCENE->getTime())) {
-      apply(m);
-      // }
+    apply(m);
   }
-  //  INFO(3, "animate obs "<<Scene::SCENE->getTime());
-  // #endif
 }
 
 void Obstacle::animate(FLOAT t) {
-  //  #ifndef NO_GRAPHICS_
   for (auto& m : motions) {
     if (m.isRunning(t)) {
       apply(m);
-      //    INFO(3, "animate obs "<<t);
-      }
+    }
   }
-  // #endif
 }
 
 FLOAT Obstacle::getFriction() const {

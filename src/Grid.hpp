@@ -39,7 +39,6 @@ private :
   std::vector<VEC3> new_positions;
   std::vector<std::list<Particule*> > cells;
   std::vector<FLOAT> distance_collision;
-  std::vector< std::vector<MAT3>> second_der;
   std::vector<MAT3> rotations;
   
   inline uint index(uint i, uint j, uint k) const;
@@ -63,21 +62,25 @@ public :
   void nextStep(); //reset values in vectors
   void smoothVelocity();
 
+  /*** not tested ***/
   void smoothRotation(std::vector<Particule*> & particules, std::vector<Subparticule*> & subparticules);
+  
   void particulesToGrid(std::vector<Particule*> & particules);
+  /*** not tested **/
   void particulesToGridImplicite(std::vector<Particule*> & particules);
   void gridToParticules(std::vector<Particule*> & particules);
   void gridToSubparticules(std::vector<Subparticule*> & subparticules);
 
 
-  void initCollision(Obstacle *ob);
   void initCollision(std::list<Obstacle*> obstacles);
-  void collision(Obstacle *ob);
   void collision(std::list<Obstacle*> obstacles);
-    
+
+  /** not tested **/
   MAT3 secondDer(uint i, uint j, std::vector<Particule*> & particules);
 
+  /** fix the velocity of the nodes between min and max to null */
   void fix(VEC3 min, VEC3 max);
+  /** fix the velocity of the nodes between min and max to dt*trans */
   void move(VEC3 min, VEC3 max, VEC3 trans);
 
   void exportGrid(std::ofstream & file) const;

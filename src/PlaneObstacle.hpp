@@ -15,7 +15,6 @@ public :
   PlaneObstacle(VEC3 p, VEC3 n, FLOAT l, FLOAT w, VEC3 d1, VEC3 d2, int shader = -1);
   ~PlaneObstacle();
 
-  //  void animate();
   void apply(Motion m);
 #ifndef NO_GRAPHICS_ 
   void draw(glm::mat4 m = glm::mat4(1.0f), int s = -1);

@@ -16,7 +16,7 @@ Tensor::Tensor(FLOAT d): dim(d) {
 }
 
 Tensor::Tensor(MAT3 M): dim(3) {
-   t =  std::vector<FLOAT>(pow(dim,4));
+  t =  std::vector<FLOAT>(pow(dim,4));
   for (uint i = 0; i < t.size(); ++i) {
     t[i] = 0;
   }
@@ -24,8 +24,8 @@ Tensor::Tensor(MAT3 M): dim(3) {
     for (uint j = 0; j < 3; ++j) {
       for (uint k = 0; k < 3; ++k) {
 	(*this)(i, j, k, j) += M(i, k);
-	  // (*this)(i, j, k, j) += 0.5*M(i, k)*M(j, j);
-	  // (*this)(i, j, j, k) += 0.5*M(i, k)*M(j, j);
+	// (*this)(i, j, k, j) += 0.5*M(i, k)*M(j, j);
+	// (*this)(i, j, j, k) += 0.5*M(i, k)*M(j, j);
       }
       //      (*this)(i, j, j, j) = M(i, j);
     }
@@ -96,7 +96,7 @@ MATX tensor2MatOrtho(const Tensor & T) {
       M(i, j+3) = 0;
       M(i+3, j+3) = 0;
     }
-    M(i+3, i+3) = 2*T((i+1)%3, (i+2)%3, (i+1)%3, (i+2)%3);// + T((i+1)%3, (i+2)%3, (i+2)%3, (i+1)%3) ;
+    M(i+3, i+3) = 2*T((i+1)%3, (i+2)%3, (i+1)%3, (i+2)%3);
   }
   return M;
 }
@@ -114,7 +114,6 @@ Tensor mat2TensorOrtho(const MATX & M) {
     T((i+2)%3, (i+1)%3, (i+1)%3, (i+2)%3) =  0.5*M(i+3, i+3);
     T((i+2)%3, (i+1)%3, (i+2)%3, (i+1)%3) =  0.5*M(i+3, i+3);
     T((i+1)%3, (i+2)%3, (i+2)%3, (i+1)%3) =  0.5*M(i+3, i+3);
-    // T((i+1)%3, (i+2)%3, (i+2)%3, (i+1)%3) = 0.5*M(i+3, i+3);
   }
   return T;
 }
@@ -204,9 +203,9 @@ std::ostream& operator<<(std::ostream& os, const Tensor& T) {
   uint dim = 3;
   os<<"\n---------------\n";
   for (uint i = 0; i < dim; ++i) {
-     for (uint k = 0; k < dim; ++k) {
-    os << "| ";
-       for (uint j = 0; j < dim; ++j) {
+    for (uint k = 0; k < dim; ++k) {
+      os << "| ";
+      for (uint j = 0; j < dim; ++j) {
      	for (uint l = 0; l < dim; ++l) {
 	  if (fabs(T(i, j, k, l)) > 1e-15) {
 	    os<<T(i, j, k, l)<<" ";
@@ -215,9 +214,9 @@ std::ostream& operator<<(std::ostream& os, const Tensor& T) {
 	  }
      	}
      	os<<"| ";
-       }
-       os <<"\n";
-     }
+      }
+      os <<"\n";
+    }
     os<<"\n---------------\n";
   }
   return os;
@@ -241,11 +240,7 @@ Tensor rotateTensor(const Tensor & T, const MAT3 & R) {
 	      }
 	    }
 	  }
-	  //if (std::fabs(rotT_ijkl) > 10e-12) {
-	    rotT(i, j, k, l) = rotT_ijkl;
-	  // } else {
-	  //   rotT(i, j, k, l) = 0;
-	  // }
+	  rotT(i, j, k, l) = rotT_ijkl;
 	}
       }
     }
@@ -257,7 +252,6 @@ Tensor rotateTensor(const Tensor & T, const MAT3 & R) {
 Tensor transformTensor(const Tensor & T, const MAT3 & M) {
   uint d = T.dim;
   Tensor rotT(d);
-  MAT3 Minv = M.inverse();
   for (uint i = 0; i < d; ++i) {
     for (uint j = 0; j < d; ++j) {
       for (uint k = 0; k < d; ++k) {
@@ -273,19 +267,19 @@ Tensor transformTensor(const Tensor & T, const MAT3 & M) {
 	  //   }
 	  // }
 
-   for (uint m = 0; m < d; ++m) {
-     //	     for (uint n = 0; n < d; ++n) {
-	  //     for (uint o = 0; o < d; ++o) {
-	  // 	for (uint p = 0; p < d; ++p) {
-	   	  rotT_ijkl += M(i, m)*T(m, j, k, l);
-	  // 	}
-	  //     }
-		  //	     }
-	   }
+	  for (uint m = 0; m < d; ++m) {
+	    //	     for (uint n = 0; n < d; ++n) {
+	    //     for (uint o = 0; o < d; ++o) {
+	    // 	for (uint p = 0; p < d; ++p) {
+	    rotT_ijkl += M(i, m)*T(m, j, k, l);
+	    // 	}
+	    //     }
+	    //	     }
+	  }
 
 	  
 	  //if (std::fabs(rotT_ijkl) > 10e-12) {
-	    rotT(i, j, k, l) = rotT_ijkl;
+	  rotT(i, j, k, l) = rotT_ijkl;
 	  // } else {
 	  //   rotT(i, j, k, l) = 0;
 	  // }
@@ -298,7 +292,7 @@ Tensor transformTensor(const Tensor & T, const MAT3 & M) {
 
 Tensor outerProduct(const MAT3 & M1, const MAT3 & M2) {
   Tensor T(3);
-    for (uint i = 0; i < 3; ++i) {
+  for (uint i = 0; i < 3; ++i) {
     for (uint j = 0; j < 3; ++j) {
       for (uint k = 0; k < 3; ++k) {
 	for (uint l = 0; l < 3; ++l) {
@@ -306,8 +300,8 @@ Tensor outerProduct(const MAT3 & M1, const MAT3 & M2) {
 	}
       }
     }
-    }
-    return T;
+  }
+  return T;
 }
 
 

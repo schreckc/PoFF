@@ -1,12 +1,7 @@
 #ifndef ERROR_HPP
 #define ERROR_HPP
 
-// #include <stdio.h>
-// #include <stdlib.h>
-// #include <stdarg.h>
 #include <assert.h>
-// #include <stdint.h>
-// #include <stdbool.h>
 #include <iostream>
 #include "ExceptionSimu.hpp"
 
@@ -26,7 +21,6 @@ void close();
 
 #define WARNING(cond, msg, debug_info) if (!(cond)) {std::cout<<"WARNING: "<<msg<<"\n"<<debug_info<<std::endl;}
 
-//#define INFO(debug_info) if (__MODE_DEBUG == 3) {std::cout<<"INFO: \n"<<debug_info<<std::endl;}
 #define INFO(level, debug_info) if (__MODE_DEBUG >= level) {std::cout<<"INFO: \n"<<debug_info<<std::endl;}
 
 #define TEST(cond) if (!(cond)) {close(); assert(cond);}
@@ -41,7 +35,6 @@ void close();
 
 #define WARNING(cond, msg, debug_info) do {if (!(cond)) {std::cerr<<"\n****WARNING*** : \n"<<msg<<"\n"<<std::endl;}while(0)
 
-//#define INFO(debug_info)
 #define INFO(level, debug_info)
 
 #define TEST(cond)

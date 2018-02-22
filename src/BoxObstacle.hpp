@@ -12,9 +12,8 @@ public :
   BoxObstacle(VEC3 min_p = VEC3(0, 0, 0), VEC3 max_p = VEC3(0, 0, 0), int shader = -1);
   ~BoxObstacle();
 
-  //  void animate();
   void apply(Motion m);
-  #ifndef NO_GRAPHICS_ 
+#ifndef NO_GRAPHICS_ 
   void draw(glm::mat4 m = glm::mat4(1.0f), int s = -1); 
 #endif
   
