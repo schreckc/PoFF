@@ -23,11 +23,11 @@ Tensor::Tensor(MAT3 M): dim(3) {
   for (uint i = 0; i < 3; ++i) {
     for (uint j = 0; j < 3; ++j) {
       for (uint k = 0; k < 3; ++k) {
-	(*this)(i, j, k, j) += M(i, k);
-	// (*this)(i, j, k, j) += 0.5*M(i, k)*M(j, j);
-	// (*this)(i, j, j, k) += 0.5*M(i, k)*M(j, j);
+	//(*this)(i, j, k, j) += M(i, k);
+	 (*this)(i, j, k, j) += 0.5*M(i, k)*M(j, j);
+	 (*this)(i, j, j, k) += 0.5*M(i, k)*M(j, j);
       }
-      //      (*this)(i, j, j, j) = M(i, j);
+            (*this)(i, j, j, j) = M(i, j);
     }
   }
 
@@ -45,42 +45,104 @@ const FLOAT& Tensor::operator()(int i, int j, int k, int l) const {
 
 
 MATX tensor2Mat(const Tensor & T) {
-  MATX M(2*T.dim, 2*T.dim);
+  // MATX M(2*T.dim, 2*T.dim);
+  // for (uint i = 0; i < T.dim; ++i) {
+  //   for (uint j = 0; j < T.dim; ++j) {
+  //     M(i, j) = T(i, i, j, j);
+  //     M(i+3, j) = T((i+1)%3, (i+2)%3, j, j);
+  //     M(i, j+3) = T(i, i, (j+1)%3, (j+2)%3);
+  //     M(i+3, j+3) = T((i+1)%3, (i+2)%3, (j+1)%3, (j+2)%3);
+  //   }
+  // }
+
   
+  MATX M(2*T.dim, 2*T.dim);
   for (uint i = 0; i < T.dim; ++i) {
     for (uint j = 0; j < T.dim; ++j) {
       M(i, j) = T(i, i, j, j);
-      M(i+3, j) = T((i+1)%3, (i+2)%3, j, j);
-      M(i, j+3) = T(i, i, (j+1)%3, (j+2)%3);
-      M(i+3, j+3) = T((i+1)%3, (i+2)%3, (j+1)%3, (j+2)%3);
+      M(i+3, j) = sqrt(2.0)*T((i+1)%3, (i+2)%3, j, j);
+      M(i, j+3) = sqrt(2.0)*T(i, i, (j+1)%3, (j+2)%3);
+      M(i+3, j+3) = 2*T((i+1)%3, (i+2)%3, (j+1)%3, (j+2)%3);
     }
   }
-  TEST(false);
+  
+  // MATX M(2*T.dim, 2*T.dim);
+  
+  // for (uint i = 0; i < T.dim; ++i) {
+  //   for (uint j = 0; j < T.dim; ++j) {
+  //     M(i, j) = T(i, i, j, j);
+  //     M(i+3, j) = T((i+1)%3, (i+2)%3, j, j);
+  //     M(i, j+3) = T(i, i, (j+1)%3, (j+2)%3);
+  //     M(i+3, j+3) = T((i+1)%3, (i+2)%3, (j+1)%3, (j+2)%3);
+  //   }
+  // }
+  
+  //  TEST(false);
   //need debbugging
   return M;
 }
 
 Tensor mat2Tensor(const MATX & M) {
-  Tensor T;
-  TEST(M.cols() == M.rows());
-  T = Tensor(M.cols()/2);
- 
-  for (uint i = 0; i < T.dim; ++i) {
-    for (uint j = 0; j < T.dim; ++j) {
-      T(i, i, j, j) = M(i, j);
-      
-      T((i+1)%3, (i+2)%3, (j+1)%3, (j+2)%3) = M(i+3, j+3);
-      T((i+2)%3, (i+1)%3, (j+1)%3, (j+2)%3) = M(i+3, j+3);
-      T((i+1)%3, (i+2)%3, (j+2)%3, (j+1)%3) = M(i+3, j+3);
-      T((i+2)%3, (i+1)%3, (j+2)%3, (j+1)%3) = M(i+3, j+3);
+   // Tensor T;
+   // TEST(M.cols() == M.rows());
+   // T = Tensor(M.cols()/2);
+   
+   //  for (uint i = 0; i < T.dim; ++i) {
+   //    for (uint j = 0; j < T.dim; ++j) {
+   // 	T(i, i, j, j) = M(i, j);
 
-      T((i+1)%3, (i+2)%3, j, j) = M(i+3, j);
-      T((i+2)%3, (i+1)%3, j, j) = M(i+3, j);
-      T(j, j, (i+1)%3, (i+2)%3) = M(i+3, j);
-      T(j, j, (i+2)%3, (i+1)%3) = M(i+3, j);
+   // 	T((i+1)%3, (i+2)%3, (j+1)%3, (j+2)%3) = M(i+3, j+3);
+   // 	T((i+2)%3, (i+1)%3, (j+1)%3, (j+2)%3) = M(i+3, j+3);
+   // 	T((i+1)%3, (i+2)%3, (j+2)%3, (j+1)%3) = M(i+3, j+3);
+   // 	T((i+2)%3, (i+1)%3, (j+2)%3, (j+1)%3) = M(i+3, j+3);
+
+   // 	T((i+1)%3, (i+2)%3, j, j) = M(i+3, j);
+   // 	T((i+2)%3, (i+1)%3, j, j) = M(i+3, j);
+   // 	T(i, i, (j+1)%3, (j+2)%3) = M(i, j+3);
+   // 	T(i, i, (j+2)%3, (j+1)%3) = M(i, j+3);
+   //    }
+   //  }
+  
+   Tensor T;
+   TEST(M.cols() == M.rows());
+   T = Tensor(M.cols()/2);
+   
+    for (uint i = 0; i < T.dim; ++i) {
+      for (uint j = 0; j < T.dim; ++j) {
+   	T(i, i, j, j) = M(i, j);
+
+   	T((i+1)%3, (i+2)%3, (j+1)%3, (j+2)%3) = M(i+3, j+3)/2.0;
+   	T((i+2)%3, (i+1)%3, (j+1)%3, (j+2)%3) = M(i+3, j+3)/2.0;
+   	T((i+1)%3, (i+2)%3, (j+2)%3, (j+1)%3) = M(i+3, j+3)/2.0;
+   	T((i+2)%3, (i+1)%3, (j+2)%3, (j+1)%3) = M(i+3, j+3)/2.0;
+
+   	T((i+1)%3, (i+2)%3, j, j) = M(i+3, j)/sqrt(2.0);
+   	T((i+2)%3, (i+1)%3, j, j) = M(i+3, j)/sqrt(2.0);
+   	T(i, i, (j+1)%3, (j+2)%3) = M(i, j+3)/sqrt(2.0);
+   	T(i, i, (j+2)%3, (j+1)%3) = M(i, j+3)/sqrt(2.0);
+      }
     }
-  }
-  TEST(false);
+	
+  // Tensor T;
+  // TEST(M.cols() == M.rows());
+  // T = Tensor(M.cols()/2);
+ 
+  // for (uint i = 0; i < T.dim; ++i) {
+  //   for (uint j = 0; j < T.dim; ++j) {
+  //     T(i, i, j, j) = M(i, j);
+      
+  //     T((i+1)%3, (i+2)%3, (j+1)%3, (j+2)%3) = M(i+3, j+3);
+  //     T((i+2)%3, (i+1)%3, (j+1)%3, (j+2)%3) = M(i+3, j+3);
+  //     T((i+1)%3, (i+2)%3, (j+2)%3, (j+1)%3) = M(i+3, j+3);
+  //     T((i+2)%3, (i+1)%3, (j+2)%3, (j+1)%3) = M(i+3, j+3);
+
+  //     T((i+1)%3, (i+2)%3, j, j) = M(i+3, j);
+  //     T((i+2)%3, (i+1)%3, j, j) = M(i+3, j);
+  //     T(j, j, (i+1)%3, (i+2)%3) = M(i+3, j);
+  //     T(j, j, (i+2)%3, (i+1)%3) = M(i+3, j);
+  //   }
+  // }
+  //TEST(false);
   //need debbugging
   return T;
 }

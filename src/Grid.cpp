@@ -430,10 +430,14 @@ void Grid::smoothRotation(std::vector<Particule*> & particules, std::vector<Subp
 void Grid::particulesToGrid(std::vector<Particule*> & particules) {
   for (auto &p : particules) {
     Vector3i c = p->getCell();
+    if (c(0) <= 0 && c(0) >= i_max-1 && c(1) <= 0 && c(1) >= j_max-1 && c(2) <= 0 && c(2) >= k_max-1) {
+      p->setOut(true);
+    } else {
     uint ind = c(0)*j_max*k_max + c(1)*(k_max) + c(2);
     if (ind < nb_cells) {
       cells[ind].push_back(p);
-    }   
+    }
+    }
   }
   
   uint nb_ac = 0;
@@ -460,7 +464,7 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 		    for (auto& p : cells[indc]) {
 	
 		      FLOAT w = p->weight(Vector3i(i, j, k));
-		      if (w > 0) {
+		      if (w > 0 && !p->isOut()) {
 			active_nodes[ind] = true;
 			masses[ind] += w*p->getMass();
 			if (mpm_conf::method_ == mpm_conf::apic_) {
@@ -496,7 +500,7 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
 	    velocities[ind] -= mpm_conf::dt_*f + mpm_conf::dt_*mpm_conf::damping_*velocities[ind];
 	    velocities[ind] /= masses[ind];
 	  } else {
-	    //active_nodes[ind] = false;
+	    active_nodes[ind] = false;
 	    velocities[ind] = VEC3(0, 0, 0);
 	    masses[ind] = 0;
 	  }
@@ -1053,13 +1057,13 @@ void Grid::collision(std::list<Obstacle*> obstacles) {
 	  if (!ob->isMoving()) {
 
 	    FLOAT d_prev= ob->distance(positions[i]);
-	    ob->getCollisionValues(new_positions[i], d, n);
+	    ob->getCollisionValues(positions[i] + mpm_conf::dt_*velocities[i], d, n);
 	    FLOAT dcomp = d - std::min(d_prev, (FLOAT)0.0);
 	    if (dcomp < 0) {
-	      VEC3 vel_prev = velocities[i];
+	      //VEC3 vel_prev = velocities[i];
 	      FLOAT dv = -dcomp/mpm_conf::dt_;
-	      velocities[i] += 1.0*dv*n;
-
+	      velocities[i] += 3*dv*n;
+	      // INFO(3, "vel "<<velocities[i]);
 	      // //friction
 	      VEC3 vt = velocities[i] - velocities[i].dot(n)*n;
 	      FLOAT nvt = vt.norm();

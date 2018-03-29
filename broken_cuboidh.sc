@@ -4,11 +4,10 @@
   <angle> 1.57
  </rotation>	
  <cuboid> 
-  <x> 0.4 0.6
+  <x> 0.4 0.5
   <y> 0.2 0.5
   <z> 0.8 0.9
-  <nb particules> 10000
-  <nb subparticules> 100000	
+  <nb particules> 5000
   <velocity> 0 0 0
  </cuboid>
 </particules>

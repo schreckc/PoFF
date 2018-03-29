@@ -314,17 +314,34 @@ namespace mpm_conf {
     tangent_stiffness(5, 5) = 2*shearing_vec_(2);//2*G12;
 
     // map from anisotropic to isotropc space
-    for (uint i = 0; i < 3; ++i) {
-      for (uint j = 0; j < 3; ++j) {
-	anisotropy_stress_(i, j, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
-	anisotropy_stress_(j, i, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
-	inv_anisotropy_stress_(i, j, i, j) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
-	inv_anisotropy_stress_(i, j, j, i) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
-      }
-      anisotropy_stress_(i, i, i, i) = anisotropy_values_(i)*anisotropy_values_(i);
-      inv_anisotropy_stress_(i, i, i, i) = 1.0/anisotropy_values_(i)/anisotropy_values_(i);
 
-    }
+
+     for (uint i = 0; i < 3; ++i) {
+       for (uint j = 0; j < 3; ++j) {
+     	anisotropy_stress_(i, j, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
+     	anisotropy_stress_(j, i, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
+     	inv_anisotropy_stress_(i, j, i, j) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
+     	inv_anisotropy_stress_(i, j, j, i) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
+       }
+       anisotropy_stress_(i, i, i, i) = anisotropy_values_(i)*anisotropy_values_(i);
+       inv_anisotropy_stress_(i, i, i, i) = 1.0/anisotropy_values_(i)/anisotropy_values_(i);
+
+     }
+
+     // MATX stress_mat(6, 6);
+     //  stress_mat  <<
+     // 	  1, 0.0, 0,     0, 0, 0,
+     //     0.0, 1, 0.0,    0, 0, 0,
+     //     0.0, 0.0, 1,    1, 0, 0,
+       
+     //    0, 0, 0,    1, 0, 0,
+     //    0, 0, 0,    0, 1, 0,
+     //    0, 0, 0,    0, 0, 1;
+
+     //  anisotropy_stress_ = mat2Tensor(stress_mat);
+     //  inv_anisotropy_stress_ = mat2Tensor(stress_mat.inverse());
+
+    
     Tensor C_iso = mat2TensorOrtho(tangent_stiffness_iso);
     Tensor inv_C_iso = mat2TensorOrtho(inverse_tangent_stiffness_iso);
     Tensor C = mat2TensorOrtho(tangent_stiffness);
@@ -335,9 +352,58 @@ namespace mpm_conf {
    
     aux = innerProduct(inv_anisotropy_stress_, C_iso);
     inv_anisotropy_strain_ = innerProduct(inv_C, aux);
-    
+
+    //    INFO(2, "stress mat voight\n"<<stress_mat);
     INFO(2, "stress anisotropy map"<< anisotropy_stress_);
-    INFO(2, "strain anisotropy map"<< anisotropy_strain_);
+    INFO(2, "inv stress anisotropy map"<< inv_anisotropy_stress_);
+      INFO(2, "test"<< innerProduct(anisotropy_stress_, inv_anisotropy_stress_));
+      //  INFO(2, "test"<< innerProduct(C_iso, inv_C_iso));
+       INFO(2, "strain anisotropy map"<< anisotropy_strain_);
+       INFO(2, "inv strain anisotropy map"<< inv_anisotropy_strain_);
+      
+
+    //**** TEST *****////
+
+    // MAT3 M;
+    // M << 2, 0.0, 0,
+    //   0.0, 2, 0,
+    //   0, 0, 0.5;
+    // Tensor T(M);
+    
+    // INFO(3, "test T"<<T);
+    //  MAT3 X = MAT3::Identity();
+    //   X << 1, 2, 3,
+    //     2, 5, 6,
+    //     3, 6, 9;
+
+    // INFO(3, "test T:X\n"<<innerProduct(T, X));
+    // INFO(3, "test MX\n"<<M*X);
+
+     MATX M(6, 6);
+     // M <<
+     //   1, 0, 0,    0, 0, 0,
+     //   0, 1, 0,    0, 0, 0,
+     //   0, 0, 1,    0, 0, 0,
+
+     //   0, 0, 0,    0.5, 0, 0,
+     //   0, 0, 0,    0, 0.5, 0,
+     //   0, 0, 0,    0, 0, 0.5;
+
+     // M <<
+     //   1, 2, 3,    10, 11, 12,
+     //   4, 5, 6,    13, 14, 15,
+     //   7, 8, 9,    16, 17, 18,
+       
+     //   19, 20, 21,    28, 29, 03,
+     //   22, 23, 24,    31, 32, 33,
+     //   25, 26, 27,    34, 35, 36;
+     
+
+     // INFO(3, "mat2tensor M\n"<< mat2Tensor(M));
+     // INFO(3, "tensor2at mat2tensor M\n"<< tensor2Mat(mat2Tensor(M)));
+     
+    // INFO(3, "tensor2mat T\n"<< tensor2Mat(anisotropy_stress_));
+    // INFO(3, "mat2tensor tensor2mat T\n"<< mat2Tensor(tensor2Mat(anisotropy_stress_)));
   }
 
   

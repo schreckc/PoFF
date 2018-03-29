@@ -55,6 +55,8 @@ Particule::Particule(FLOAT mass, FLOAT vol, VEC3 p, VEC3 n, VEC3 velo, int shade
   valx = 0.1;
   valy = 0.1;
   valz = 1;
+
+  out = false;
 }
 
 
@@ -83,7 +85,7 @@ void Particule::draw(glm::mat4 m, int s) {
 
       
       //valx = 0.08; valy = 0.08;  valz = 1.0;
-      valx = 0.5; valy = 0.5;  valz = 0.5;
+       valx = 0.5; valy = 0.5;  valz = 0.5;
       //valx = 0.1; valy = 0.1;  valz = 1.0;
       //valx = 0.5; valy = 0.5;  valz = 0.05;
       //valx = 0.2; valy = 0.2;  valz = 0.02;
@@ -100,7 +102,10 @@ void Particule::draw(glm::mat4 m, int s) {
     
       Sphere sp(0.01, m_shader);
       sp.setColor(color(0), color(1), color(2));
-      //sp.setColor(1, 1, 1);
+      if (out) {
+	sp.setColor(0, 0, 0);
+      }
+      sp.setColor(1, 1, 1);
       int cur_shader = m_shader;
       if (m_shader == -1) {
         cur_shader = s;
@@ -250,7 +255,12 @@ Vector3i Particule::getCell() const {
   return cell;
 }
 
-
+bool Particule::isOut() const {
+  return out;
+}
+void Particule::setOut(bool is_out) {
+  out = is_out;
+}
 
 
 void Particule::setColor(FLOAT r, FLOAT g, FLOAT b) {
@@ -558,6 +568,7 @@ void Particule::setAnisotropyTensor(MAT3 a) {
 
 
 void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
+  if (!out) {
   VEC3 prev_pos = pos;
   IS_DEF(t(0, 0));
   if (mpm_conf::method_ == mpm_conf::apic_) {
@@ -632,7 +643,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
     IS_DEF(sigma(2));
 
     /* plastic step */
-    //    INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
+    //INFO(3, "sigma "<<sigma(0)<<" "<<sigma(1)<<" "<<sigma(2));
     project(sigma, T);
     //     INFO(3, "proj "<<T(0)<<" "<<T(1)<<" "<<T(2));
   }
@@ -712,6 +723,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  if (mpm_conf::implicit_) {
    computeEnergySecondDer(sigma, V, V);
  }
+  }
 }
 
 
@@ -1011,8 +1023,9 @@ void Particule::project(VEC3 sigma, VEC3 & T) {
     FLOAT fr_norm = 0;
     FLOAT plastic_def = 0;
     for (uint i = 0; i < 3; ++i) {
-      if (sigma(i) != 0) {
-	ln_sigma(i) = log(sigma(i));///*volume correction*/ + vp/3.0;
+      if (sigma(i) >= 1e-15) {
+	IS_DEF(sigma(i));
+	ln_sigma(i) = log(sigma(i))/*volume correction*/ + vp/3.0;
 	IS_DEF(ln_sigma(i));
 	tr += ln_sigma(i);
 	fr_norm += pow(ln_sigma(i), 2);

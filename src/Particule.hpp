@@ -40,6 +40,8 @@ private :
   MAT3 orientation;
 
   MAT3 mix_rot;
+
+  bool out;
   
  mutable MAT3 forceIncrement;
   VEC3 energy_der;
@@ -80,8 +82,10 @@ public:
   const MAT3& getB() const;
   void setB(const MAT3 & b);
   Vector3i getCell() const;
-
- 
+  
+  bool isOut() const;
+  void setOut(bool is_out);
+  
   void setColor(FLOAT r, FLOAT g, FLOAT b);
   
   MAT3 getDeformationElastic() const;

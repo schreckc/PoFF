@@ -9,10 +9,14 @@
  </box>
 </obstacles>
 <particules>
+ <rotation>
+  <axe> 1 0 0
+  <angle> 0
+ </rotation>
  <sphere> 
   <center> 0.5 0.5 0.2
   <ray> 0.2
-  <nb particules> 100000
-  <velocity> 0 0 -2
+  <nb particules> 10000
+  <velocity> 0 0 0
  </sphere>
 </particules>
