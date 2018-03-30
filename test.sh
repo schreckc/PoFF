@@ -508,11 +508,24 @@ export OMP_PROC_BIND=true
 
 #mkdir column_sparkled_mit
 #./poff -i column_leaves/test3d_dt -em column_sparkled_mit/test -s empty_plane.sc -es 2 -stop 800 -r
-mitsuba column_sparkled_mit/*002[456789].xml
-mitsuba column_sparkled_mit/*00[3456789]?.xml
-mitsuba column_sparkled_mit/*0[1234]??.xml
+#mitsuba column_sparkled_mit/*002[456789].xml
+#mitsuba column_sparkled_mit/*00[3456789]?.xml
+#mitsuba column_sparkled_mit/*0[1234]??.xml
 
-mkdir column_sparklev_mit
-./poff -i column_leaves/test3v_dt -em column_sparklev_mit/test -s empty_plane.sc -es 2 -stop 800 -r
-mitsuba column_sparklev_mit/*xml
+#mkdir column_sparklev_mit
+#./poff -i column_leaves/test3v_dt -em column_sparklev_mit/test -s empty_plane.sc -es 2 -stop 800 -r
+#mitsuba column_sparklev_mit/*xml
 
+#mkdir not_ortho
+#./poff -l mat0.conf -s falling_sphere.sc -e not_ortho/testv -es 5 -stop 10000 -r
+#./poff -l mat0.conf -s falling_sphered.sc -e not_ortho/testd -es 5 -stop 10000 -r
+#mkdir not_ortho_col
+#./poff -l mat0.conf -s columnd0.sc -e not_ortho_col/testd -es 5 -stop 5000 -r
+#./poff -l mat0.conf -s columnv0.sc -e not_ortho_col/testv -es 5 -stop 5000 -r
+#make
+mkdir not_ortho2
+./poff -l mat0.conf -s falling_sphere.sc -e not_ortho2/testv -es 5 -stop 5000 -r
+./poff -l mat0.conf -s falling_sphered.sc -e not_ortho2/testd -es 5 -stop 5000 -r
+mkdir not_ortho2_col
+./poff -l mat0.conf -s columnd0.sc -e not_ortho2_col/testd -es 5 -stop 5000 -r
+./poff -l mat0.conf -s columnv0.sc -e not_ortho2_col/testv -es 5 -stop 5000 -r

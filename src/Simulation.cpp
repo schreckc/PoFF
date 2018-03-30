@@ -1094,6 +1094,7 @@ void Simulation::loadScene() {
 	    }
 	      FLOAT volume = 4.0/3.0*M_PI*pow(ray, 3);
 
+	      center = center - VEC3(ray/2.0, ray/2.0, ray/2.0);
 	    PoissonGenerator::PRNG prng;
 	    std::list<VEC3> points = PoissonGenerator::GeneratePoissonPointsC(nb_part, prng, 30);
 	    nb_part = points.size();
