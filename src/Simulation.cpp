@@ -1713,13 +1713,14 @@ void Simulation::exportMitsuba(std::string file_name) const {
     ERROR(file.good(), "cannot open file \""<<file_name<<"\"", "");
     INFO(1, "Export file \""<<file_name<<"\"");
 
-       std::string diff_reflectance = "#ddd224"; // yellowish
+    //   std::string diff_reflectance = "#ddd224"; // yellowish
     //std::string diff_reflectance = "#dda824"; // yellowy brownish
     //  std::string diff_reflectance = "#DBEDFF"; // dull blue
     // std::string diff_reflectance = "#a90202"; //brownish
        //std::string diff_reflectance = "#c19c8a"; //brownish
     //std::string diff_reflectance = "#f94242"; // dull red
     //std::string diff_reflectance = "#a92222"; //blood red
+    std::string diff_reflectance = "#c94242"; //red
     std::string truck_color = "#aaaaaa";
     std::string integrator = "direct";
 
@@ -1947,7 +1948,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     /****end bend **/
     
     /*** truck ***/
-    
+    /*
     file<<"<bsdf type=\"twosided\" id=\"truck\">\n";
     file<<"<bsdf type=\"diffuse\">\n";
     file<<"<srgb name=\"diffuseReflectance\" value=\""<<truck_color<<"\"/>\n";
@@ -2294,10 +2295,12 @@ void Simulation::exportMitsuba(std::string file_name) const {
 
 
     file<<"<shape type=\"sphere\">\n";
-    file<<"<point name=\"center\" x=\"-15\" y=\"-15\" z=\"50\"/>\n";
+    file<<"<point name=\"center\" x=\"-15\" y=\"0\" z=\"50\"/>\n";
+    // file<<"<point name=\"center\" x=\"-15\" y=\"-15\" z=\"50\"/>\n";
     file<<"<float name=\"radius\" value=\"4.0\"/>\n";
     file<<"<emitter type=\"area\">\n";
-    file<<"<spectrum name=\"radiance\" value=\"320\"/>\n";
+    file<<"<spectrum name=\"radiance\" value=\"80\"/>\n";
+    // file<<"<spectrum name=\"radiance\" value=\"320\"/>\n";
     file<<"</emitter>\n";
     file<<"</shape>\n";
 
