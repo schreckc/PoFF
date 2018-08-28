@@ -41,6 +41,7 @@ public :
   virtual FLOAT distance(VEC3 v) const = 0;
   virtual VEC3 getNormal(VEC3 v) const = 0;
   virtual void getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &normal) const = 0;
+  virtual VEC3 projection(VEC3 v) const = 0; 
 
   FLOAT getFriction() const;
   void setFriction(FLOAT f);

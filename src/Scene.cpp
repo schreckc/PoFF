@@ -101,7 +101,7 @@ bool Scene::initialiserFenetre() {
 }
 
 bool Scene::initGL() {
-  srand (time(NULL));
+  srand(time(NULL));
 #ifdef WIN32
   GLenum initialisationGLEW( glewInit() );
   if(initialisationGLEW != GLEW_OK) {

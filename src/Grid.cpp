@@ -58,9 +58,11 @@ Grid::Grid(FLOAT width, FLOAT depth, FLOAT height, FLOAT space_step, int shader)
   positions = std::vector<VEC3>(nb_nodes);
   new_positions = std::vector<VEC3>(nb_nodes);
   cells = std::vector<std::list<Particule*> >(nb_cells);
+  is_collision = std::vector<bool>(nb_nodes);
   distance_collision = std::vector<FLOAT>(nb_nodes);
+  dir_collision = std::vector<VEC3>(nb_nodes);
   //  second_der = std::vector<std::vector<MAT3> >(nb_nodes);
-    rotations = std::vector<MAT3>(nb_nodes);
+  rotations = std::vector<MAT3>(nb_nodes);
   
   // for (uint i = 0; i <= nb_nodes; ++i) {
   //   second_der[i] = std::vector<MAT3>(nb_nodes);
@@ -866,6 +868,9 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
     density_max /= s3;
     density_av /= s3;
     p->setDensity(density_max);
+    VEC3 dir_coll(0, 0, 0);
+    FLOAT dist_coll = 0;
+    bool is_coll = false;
     
     /* Rotation */
     MAT3 A = MAT3::Zero(3, 3);
@@ -881,6 +886,14 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
     		  FLOAT w = p->weight(Vector3i(i, j, k));
     		  sum += w;
     		  A += w * (new_positions[ind] - pos)*(positions[ind] - prev_pos).transpose();
+
+		  /* rotation due to collision */
+		  if (is_collision[ind]) {
+		    is_coll = true;
+		    dir_coll += w*dir_collision[ind];
+		    dist_coll += w*distance_collision[ind];
+		  }
+		  
     		}
     	      }
     	    }
@@ -892,6 +905,12 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
      JacobiSVD<MAT3> svd(A, ComputeFullU | ComputeFullV);
      MAT3 rot = svd.matrixU()*svd.matrixV().transpose();
      p->rotate(rot);
+
+     /* rotation due to collision */
+     if (is_coll) {
+       dir_coll.normalize();
+       p->collisionRotation(dist_coll, dir_coll);
+     }
 
      if (mpm_conf::method_ == mpm_conf::apic_ || mpm_conf::method_ == mpm_conf::pic_) {
       p->update(pos, vel, B, T);
@@ -938,7 +957,7 @@ void Grid::gridToParticules(std::vector<Particule*> & particules) {
 
 
 
-void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
+void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules, std::list<Obstacle*> obstacles) {
     FLOAT s3 = pow(mpm_conf::grid_spacing_, 3);
 #pragma omp parallel for
   //for (auto& p : particules) {
@@ -982,7 +1001,8 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
       }
     }
     //  INFO(3, "total weigth  "<<total_weigth);
-    if (total_masse > 0.01*mpm_conf::density_*s3) {
+    //    INFO(3, "total masse --------------------------- "<<total_masse<<" "<<0.5*mpm_conf::density_*s3);
+    if (total_masse > 0.5*mpm_conf::density_*s3) {
       /* Rotation */
       MAT3 A = MAT3::Zero(3, 3);
       FLOAT sum = 0;
@@ -1023,9 +1043,9 @@ void Grid::gridToSubparticules(std::vector<Subparticule*> & subparticules) {
       }
       //INFO(3, "total masse  "<<total_masse);
     } else {
-      // INFO(3, "total masse e "<<total_masse<<" "<<mpm_conf::density_*s3);
+      //INFO(3, "total masse e "<<total_masse<<" "<<0.5*mpm_conf::density_*s3);
      // INFO(3, "total weigth  "<<total_weigth);
-      p->eulerStep();
+      p->eulerStep(obstacles);
     }
   }
 
@@ -1227,7 +1247,8 @@ void Grid::collision(std::list<Obstacle*> obstacles) {
 	    //	VEC3 n = ob->getNormal(pos);
 	    FLOAT dv = -dcomp/mpm_conf::dt_;
 	    velocities[i] += dv*n;//dcomp*ob->getNormal(pos)/mpm_conf::dt_;
-
+	    is_collision[i] = (dv != 0);
+	    dir_collision[i] = n;
 	    //INFO(3,"vel new\n"<< velocities[i]);
 	
 	    // //friction
@@ -1261,7 +1282,8 @@ void Grid::collision(std::list<Obstacle*> obstacles) {
 	      //	VEC3 n = ob->getNormal(pos);
 	      FLOAT dv = -dcomp/mpm_conf::dt_;
 	      velocities[i] += 1.0*dv*n;//dcomp*ob->getNormal(pos)/mpm_conf::dt_;
-
+	      is_collision[i] = (dv != 0);
+	      dir_collision[i] = n;
 	      //  INFO(3,"vel new\n"<< velocities[i](0)<<" "<< velocities[i](1)<<" "<< velocities[i](2));
 	      //      INFO(3,"vel prev "<< velocities[i](0)<<" "<< velocities[i](1)<<" "<< velocities[i](2));
 	      // // //friction

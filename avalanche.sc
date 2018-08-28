@@ -28,3 +28,15 @@
   <ray> 0.04
  </cylinder>
 </obstacles>
+<particules>
+ <rotation>
+  <axe> 0 1 0
+  <angle> 1.5708
+ </rotation>
+ <cuboid>
+  <x> 0.3 0.7
+  <y> 0.05 0.25
+  <z> 0.5 0.7
+  <nb particules> 100000
+ </cuboid>
+</particules>

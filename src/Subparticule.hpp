@@ -3,6 +3,7 @@
 
 #include "mpm_conf.hpp"
 #include "Object.hpp"
+#include "Obstacle.hpp"
 
 class Subparticule : public Object {
 
@@ -14,6 +15,8 @@ private :
 
   FLOAT mass;
   MAT3 rotation;
+  MAT3 prec_rot;
+  
 
 public :
 
@@ -44,8 +47,10 @@ public :
   void update(VEC3 &p, VEC3 &vel);
   FLOAT weight(Vector3i node);
 
-  void eulerStep(VEC3 forces = VEC3(0, 0, 0));
+  void eulerStep(std::list<Obstacle*> obstacles, VEC3 forces = VEC3(0, 0, 0));
   void exportMitsuba(std::ofstream &file);
+
+  void collisionRotation(FLOAT dist, VEC3 dir);
 };
 
 #endif

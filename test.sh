@@ -523,9 +523,20 @@ export OMP_PROC_BIND=true
 #./poff -l mat0.conf -s columnd0.sc -e not_ortho_col/testd -es 5 -stop 5000 -r
 #./poff -l mat0.conf -s columnv0.sc -e not_ortho_col/testv -es 5 -stop 5000 -r
 #make
-mkdir not_ortho2
-./poff -l mat0.conf -s falling_sphere.sc -e not_ortho2/testv -es 5 -stop 5000 -r
-./poff -l mat0.conf -s falling_sphered.sc -e not_ortho2/testd -es 5 -stop 5000 -r
-mkdir not_ortho2_col
-./poff -l mat0.conf -s columnd0.sc -e not_ortho2_col/testd -es 5 -stop 5000 -r
-./poff -l mat0.conf -s columnv0.sc -e not_ortho2_col/testv -es 5 -stop 5000 -r
+#mkdir not_ortho2
+#./poff -l mat0.conf -s falling_sphere.sc -e not_ortho2/testv -es 5 -stop 5000 -r
+#./poff -l mat0.conf -s falling_sphered.sc -e not_ortho2/testd -es 5 -stop 5000 -r
+#mkdir not_ortho2_col
+#./poff -l mat0.conf -s columnd0.sc -e not_ortho2_col/testd -es 5 -stop 5000 -r
+#./poff -l mat0.conf -s columnv0.sc -e not_ortho2_col/testv -es 5 -stop 5000 -r
+
+#mkdir test_pasta_mit
+#./poff -i test_pasta/test -em test_pasta_mit/test -s empty_plane.sc -es 2 -stop 800 -r
+#mitsuba test_pasta_mit/test02??.xml
+
+mkdir avalanche_mit
+./poff -i avalanche_mix/testa_ -em avalanche_mit/test -s empty_avalanche.sc -es 2 -stop 1000 -r
+mitsuba avalanche_mit/test01??.xml
+mitsuba avalanche_mit/test02??.xml
+mitsuba avalanche_mit/test03??.xml
+mitsuba avalanche_mit/test04??.xml

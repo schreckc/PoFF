@@ -39,6 +39,8 @@ private :
   std::vector<VEC3> new_positions;
   std::vector<std::list<Particule*> > cells;
   std::vector<FLOAT> distance_collision;
+  std::vector<bool> is_collision;
+  std::vector<VEC3> dir_collision;
   std::vector< std::vector<MAT3>> second_der;
   std::vector<MAT3> rotations;
   
@@ -67,7 +69,7 @@ public :
   void particulesToGrid(std::vector<Particule*> & particules);
   void particulesToGridImplicite(std::vector<Particule*> & particules);
   void gridToParticules(std::vector<Particule*> & particules);
-  void gridToSubparticules(std::vector<Subparticule*> & subparticules);
+  void gridToSubparticules(std::vector<Subparticule*> & subparticules, std::list<Obstacle*> obstacles);
 
 
   void initCollision(Obstacle *ob);

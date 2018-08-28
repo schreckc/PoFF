@@ -14,6 +14,15 @@
 #define POISSON_PROGRESS_INDICATOR 1
 #include "PoissonGenerator.hpp"
 
+void smallRandomRotation(MAT3 & R) {
+  VEC3 dir((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
+  dir.normalize();
+  FLOAT angle = 0.5*M_PI*(exp(-(FLOAT)rand()/(FLOAT)RAND_MAX/0.2));
+  R = utils::rotation(angle, dir);
+}
+
+
+
 Simulation::Simulation(int shader) : Object(shader) {
   import_ = false;
   export_ = false;
@@ -208,10 +217,11 @@ void Simulation::oneStep() {
   //   grid.collision(ob);
   //  }
   grid.collision(obstacles);
-  grid.gridToSubparticules(subparticules);
+  grid.gridToSubparticules(subparticules, obstacles);
   grid.gridToParticules(particules);
 
   //  grid.smoothRotation(particules, subparticules);
+  
    // for (auto & ob : obstacles) {
    //   grid.initCollision(ob); //set for each node previous distance to the closest obstacle
    // }
@@ -309,7 +319,7 @@ void Simulation::importGrid() {
   if (file.good()) {
   grid.nextStep();
   grid.importGrid(file);
-  grid.gridToSubparticules(subparticules);
+  grid.gridToSubparticules(subparticules, obstacles);
     nb_file_i += mpm_conf::replay_speed_;
 
   }else {
@@ -340,6 +350,8 @@ void Simulation::importParticules(std::ifstream & file) {
   particules.clear();
   std::string line;
   uint ir = 0, ia = 0;
+  srand(0);
+
   while (getline(file, line)) {
       if (line.substr(0,2) == "v ") {
 	std::istringstream s(line.substr(2));
@@ -358,6 +370,10 @@ void Simulation::importParticules(std::ifstream & file) {
 	for (uint i = 0; i < 9; ++i) {
 	  s >> r(i);
 	}
+	// MAT3 sr;
+	// smallRandomRotation(sr);
+	// r = sr*r;
+
 	particules[ir]->setAnisotropyRotation(r);//setAnisotropyAxes(VEC3(r(0), r(3), r(6)), VEC3(r(1), r(4), r(7)), VEC3(r(2), r(5), r(8)));
 	++ir;
 	//	INFO(3, r);
@@ -378,6 +394,8 @@ void Simulation::importParticules(std::ifstream & file) {
     // }
   }
 }
+
+
 
 void Simulation::importSubparticules(std::ifstream & file) {
   subparticules.clear();
@@ -403,7 +421,7 @@ void Simulation::importSubparticules(std::ifstream & file) {
 	}
 	subparticules[ir]->rotate(r);
 	++ir;
-	//	INFO(3, r);
+	INFO(3, r);
       } else if (line[0] == '#') {
 	//INFO(3, "COMMENT "<<line);
       } else {
@@ -640,11 +658,6 @@ void randomRotation(MAT3 & R) {
   R.col(2) = z;
 }
 
-void smallRandomRotation(MAT3 & R) {
-  VEC3 dir((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
-  FLOAT angle = 0.1*(FLOAT)rand()/(FLOAT)RAND_MAX;
-  R = utils::rotation(angle, dir);
-}
 
 void Simulation::loadScene() {
     std::ifstream file(scene_path.c_str());
@@ -1003,23 +1016,6 @@ void Simulation::loadScene() {
 	    }
 	    FLOAT h = zmax - zmin, w = xmax - xmin, l = ymax - ymin;
 	    FLOAT volume = h*l*w;
-	    // for(uint i = 0; i < nb_part; ++i) {
-	    //   VEC3 r(xmin + w*rand()/RAND_MAX, ymin + l*rand()/RAND_MAX, zmin + h*rand()/RAND_MAX);
-	    //   //      VEC3 r(0.515, 0.515, 0.515);
-	    //   Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, r, VEC3(0, 0, 1), vel);
-	    //   particules.push_back(p);
-
-	    //   // VEC3 x((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
-	    //   // VEC3 y((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
-	    //   // VEC3 z((FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX, (FLOAT)rand()/(FLOAT)RAND_MAX);
-	    //   VEC3 x(1, 0, 0);
-	    //   VEC3 y(0, 1, 0);
-	    //   VEC3 z(0, 0, 1);
-	      
-	    //   p->setAnisotropyAxes(x, y, z);
-	    //   p->setAnisotropyValues(0.5, 0.5, 2);
-	      
-	    // }
 	      PoissonGenerator::PRNG prng;
 	      std::list<VEC3> points;
 	      uint i;
@@ -1055,11 +1051,149 @@ void Simulation::loadScene() {
 	      if (random) {
 		randomRotation(rotation);
 	      }
-	       ++i;
+	      // MAT3 sr;
+	      // smallRandomRotation(sr);
+	      // sr = sr*rotation;
+	           ++i;
 	       p->rotate(rotation);
+	       MAT3 id = MAT3::Identity();
+		p->rotate(id);
+
 	     }
 	    }
 	    //end cuboid
+	    } else if (line.substr(0,11) == " <cylinder>") {
+	    FLOAT xmin = 0, xmax = 0, ymin = 0, ymax = 0, zmin = 0, zmax = 0;
+	    FLOAT ray = 0;
+	    uint nb_part;
+	    VEC3 vel(0, 0, 0);
+	    getline(file, line);
+	    while (line.substr(0,12) != " </cylinder>") {
+	      if (line.substr(0,5) == "  <x>") {
+		std::istringstream s(line.substr(5));
+		s >> xmin;
+		s >> xmax;
+	      } else  if (line.substr(0,5) == "  <y>") {
+		std::istringstream s(line.substr(5));
+		s >> ymin;
+		s >> ymax;
+	      } else if (line.substr(0,5) == "  <z>") {
+		std::istringstream s(line.substr(5));
+		s >> zmin;
+		s >> zmax;
+	      } else if (line.substr(0,7) == "  <ray>") {
+		std::istringstream s(line.substr(7));
+		s >> ray;
+	      } else if (line.substr(0,17) == "  <nb particules>") {
+		std::istringstream s(line.substr(17));
+		s >> nb_part;
+	      } else if (line.substr(0,20) == "  <nb subparticules>") {
+		std::istringstream s(line.substr(20));
+		s >> nb_sub;
+	      } else if (line.substr(0,12) == "  <velocity>") {
+		std::istringstream s(line.substr(12));
+		for (uint i = 0; i < 3; ++i) {
+		  s >> vel(i);
+		}
+	    
+	      } else {
+		std::cerr<<"Line not recognized in file FERWE\""<<scene_path<<"\": "<<line<<std::endl;
+		exit(-1);
+	      }
+	      getline(file, line);
+	    }
+	    VEC3 p1 = VEC3(xmin, ymin, zmin);
+	    VEC3 p2 = VEC3(xmax, ymax, zmax);
+	    INFO(3, p1);
+	    INFO(3, p2);
+	    VEC3 dir = p2 - p1;
+	    dir.normalize();
+	    FLOAT h = (p1 - p2).norm() , w = h, l = h;
+	    VEC3 p_min(xmin, ymin, zmin);
+	    if (xmin == xmax) {
+	      w = 2*ray;
+	      p_min(0) = xmin-ray;
+	    }
+	    if (ymin == ymax) {
+	      l = 2*ray;
+	      p_min(1) = ymin-ray;
+	    }
+	    if (zmin == zmax) {
+	      h = 2*ray;
+	      p_min(2) = zmin-ray;
+	    }
+	    //	    h= (p1 - p2).norm(), w = 2*ray, l = 2*ray;
+	    FLOAT volume = h*M_PI*ray*ray;
+	    FLOAT coef = 1 + 4*M_PI;
+	      PoissonGenerator::PRNG prng;
+	      std::list<VEC3> points;
+	      uint i;
+	      VEC3 n(0, 0, 1);
+	    if (!import_) {
+	      points = PoissonGenerator::GeneratePoissonPointsR(coef*nb_part, prng, 30, VEC3(w, l, h));
+	      nb_part = points.size();
+	      INFO(3, w<<" "<< l <<" "<< h);
+	      for (auto &v: points) {
+		v += p_min;//VEC3(xmin-ray, ymin-ray, zmin);
+		VEC3 proj = utils::projectionOrtho(v, p1, dir);
+		//INFO(3, "v "<<v(0)<<" "<<v(1)<<" "<<v(2));
+		// INFO(3, "proj "<<proj(0)<<" "<<proj(1)<<" "<<proj(2));
+		//INFO(3, "r "<<ray<<" "<<(proj - v).norm());
+		if ((proj - v).norm() <= ray) {
+		Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, v/*VEC3(0.05, 0.05, 0.052)*/, VEC3(0, 0, 1), vel);
+	       particules.push_back(p);
+		
+	       if (random) {
+		 randomRotation(rotation);
+	       }
+	         // if (i % 2 == 0) {
+	       // 	 p->setAnisotropyValues(1, 1, 0.1);
+	       // } else {
+	       // 	 p->setAnisotropyValues(1, 1, 0.2);
+	       // }
+	       //	       INFO(3, "rot2 \n"<<rotation);
+	       ++i;
+	       //     p->setAnisotropyValues(0.2, 0.2, 1.5);
+	          p->setAnisotropyRotation(rotation);
+
+	        VEC3 ortho = proj - v;
+	        ortho.normalize();
+	        VEC3 axe = n.cross(ortho);
+		axe.normalize();
+	        FLOAT angle = acos(ortho.dot(n));// + M_PI/2.0;
+	        //	       MAT3 rot = utils::rotation(angle, axe);
+	        ANGLE_AXIS aa(angle, axe);
+	        MAT3 rot = aa.toRotationMatrix();
+	        //	p->setAnisotropyRotation(rot);
+		//INFO(3, "rot\n "<<rot);
+	        p->rotate(rot);
+		}
+	      }
+	    }
+	    //INFO(3, "nb suuuuuuub"<<nb_sub);
+	    if (nb_sub != 0) {
+	    points.clear();
+	    points = PoissonGenerator::GeneratePoissonPointsR(nb_sub, prng, 30, VEC3(w, l, h));
+	    nb_sub = points.size();
+	    for (auto &v: points) {
+	      VEC3 proj = utils::projectionOrtho(v, p1, dir);
+	      if ((proj - v).norm() <= ray) {
+		Subparticule *p = new Subparticule(volume*mpm_conf::density_/(FLOAT)nb_part, v + VEC3(xmin, ymin, zmin), vel);
+		subparticules.push_back(p);
+		if (random) {
+		  randomRotation(rotation);
+		}
+		// MAT3 sr;
+		// smallRandomRotation(sr);
+		// sr = sr*rotation;
+		++i;
+		p->rotate(rotation);
+		MAT3 id = MAT3::Identity();
+		p->rotate(id);
+	      }
+	    }
+	    }
+	    //end cylinder
 	    } else if (line.substr(0,9) == " <sphere>") {
 	      VEC3 center(0, 0, 0);
 	      FLOAT ray = 1;
@@ -1125,6 +1259,8 @@ void Simulation::loadScene() {
 		  randomRotation(rotation);
 		}
 		p->rotate(rotation);
+		MAT3 id = MAT3::Identity();
+		p->rotate(id);
 	      }
 	    }
 	    //sphere
@@ -1347,6 +1483,8 @@ void Simulation::loadScene() {
 	  s >> trans(i);
 	}
 	move(min, max, trans);
+      } else if (line.substr(0,1) == "#") {
+	// COMMENT
       } else {
 	std::cerr<<"Line not recognized in file \""<<scene_path<<"\": "<<line<<std::endl;
 	exit(-1);
@@ -1356,16 +1494,16 @@ void Simulation::loadScene() {
 
     // DO NOT FORGET TO REMOVE
     // mpm_conf::dt_ = 0.0001; 
-    //  addRotatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 30);
+    // addRotatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 30);
     //    addRotatingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, M_PI*10);
-    // addExtendingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
-    // addSimpleShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
+    //  addExtendingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
+    //addSimpleShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
     // addSimpleShearingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
-    //addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.2, 10);
+    //  addPurShearingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 10);
     //addPurShearingCubeOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 20);
     // addTranslatingSphereOfParticules(VEC3(0.5, 0.5, 0.45), 0.1, 1);
     //     addSphereOfCenterOrientedParticules(VEC3(0.5, 0.5, 0.3), 0.2);
-    // mpm_conf::anisotropy_on = false;
+    //  mpm_conf::anisotropy_on = false;
      // for (auto &p: particules) {
      //   MAT3 r;
      //   smallRandomRotation(r);
@@ -1521,8 +1659,8 @@ void Simulation::addExtendingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT sp
        VEC3 vel = VEC3(0, speed*(v(1) - 0.5), 0);
        Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), vel);
        particules.push_back(p);
-       p->setAnisotropyValues(1, 1, 1); 
-	//	p->setAnisotropyRotation(utils::rotation(1.5708, VEC3(1, 0, 0)));
+       //p->setAnisotropyValues(1, 1, 1); 
+       // p->setAnisotropyRotation(utils::rotation(1.5708, VEC3(1, 0, 0)));
      }
      
 }
@@ -1542,8 +1680,8 @@ void Simulation::addSimpleShearingSphereOfParticules(VEC3 center, FLOAT ray, FLO
        VEC3 vel = VEC3(0, speed*(v(2) - 0.5), 0);
        Particule *p = new Particule(volume*mpm_conf::density_/(FLOAT)nb_part, volume/(FLOAT)nb_part, ray*(v-VEC3(0.5, 0.5, 0.5)) + center, VEC3(0, 0, 1), vel);
        particules.push_back(p);
-        p->setAnisotropyValues(0.1, 0.1, 1);
-	p->setAnisotropyRotation(utils::rotation(1.5708, VEC3(1, 0, 0)));
+       // p->setAnisotropyValues(0.1, 0.1, 1);
+	//p->setAnisotropyRotation(utils::rotation(1.5708, VEC3(1, 0, 0)));
      }
      
 }
@@ -1564,7 +1702,7 @@ void Simulation::addSimpleShearingCubeOfParticules(VEC3 center, FLOAT ray, FLOAT
        particules.push_back(p);
         p->setAnisotropyValues(1, 1, 1);
 
-	//p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
+	p->setAnisotropyRotation(utils::rotation(/*1.5708*/0.7, VEC3(1, 0, 0)));
      }
      
 }
@@ -1586,7 +1724,7 @@ void Simulation::addPurShearingSphereOfParticules(VEC3 center, FLOAT ray, FLOAT 
        particules.push_back(p);
         p->setAnisotropyValues(0.1, 0.1, 1.0);
 
-	//	p->setAnisotropyRotation(utils::rotation(0.8, VEC3(1, 0, 0)));
+	//	p->setAnisotropyRotation(utils::rotation(1.57, VEC3(1, 0, 0)));
      }
      
 }

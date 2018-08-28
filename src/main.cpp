@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
       std::cout<<"Importing (grid)"<<" "<<argv[i+1]<<std::endl;
       Scene::SCENE->setImportGrid(argv[i+1]);
       ++i;
-    } else if (s == "-e") {
+    } else if (s == "-e" || s == "-export") {
       if (argc < i + 2) {
   	std::cerr<<"\nERROR: wrong number of arguments\n"<<std::endl;
   	help();

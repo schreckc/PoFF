@@ -56,13 +56,12 @@ private :
   // VEC3 axey;
   // VEC3 axez;
 
-  MAT3 axes;
+  //  MAT3 axes;
   
   FLOAT valx;
   FLOAT valy;
   FLOAT valz;
 
-  MAT3 ellipse;
 
   MAT3 rotation;
 
@@ -165,6 +164,8 @@ public:
 		 std::list<VEC2> & tex_points, std::list<unsigned int> & connectivity);
 
   void exportMitsuba(std::ofstream &file);
+
+  void collisionRotation(FLOAT dist, VEC3 dir);
 };
 
 

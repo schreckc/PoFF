@@ -39,8 +39,8 @@ void Subparticule::draw(glm::mat4 m, int s) {
       // D[1] = glm::vec3(0, 0.1, 0);
       // D[2] = glm::vec3(0, 0, 1);
       
-      // FLOAT valx = 0.1, valy = 0.1,  valz = 1.0;
-      FLOAT  valx = 0.5, valy = 0.5,  valz = 0.05;
+      //      FLOAT valx = 0.05, valy = 0.05,  valz = 1.5;
+       FLOAT  valx = 0.5, valy = 0.5,  valz = 0.05;
       glm::mat3 D;
       D[0] = glm::vec3(valx, 0, 0);
       D[1] = glm::vec3(0, valy, 0);
@@ -171,6 +171,7 @@ Vector3i Subparticule::getCell() const {
 
 void Subparticule::rotate(MAT3 & rot) {
   rotation = rot*rotation;
+  prec_rot = rot;
 }
 
 MAT3 Subparticule::setRotation(MAT3 &rot) {
@@ -214,14 +215,33 @@ FLOAT Subparticule::weight(Vector3i node) {
   return w;
 }
 
-void Subparticule::eulerStep(VEC3 forces) {
+void Subparticule::eulerStep(std::list<Obstacle*> obstacles, VEC3 forces) {
   // INFO(3, "prev vel "<<vel(0)<<" "<<vel(1)<<" "<<vel(2));
   // INFO(3, "prev pos "<<pos(0)<<" "<<pos(1)<<" "<<pos(2));
   VEC3 a = forces/mass + mpm_conf::gravity_;
   vel += mpm_conf::dt_*a;
   pos += mpm_conf::dt_*vel;
   FLOAT h = mpm_conf::grid_spacing_;
-  cell = Vector3i((int)(pos(0)/h), (int)(pos(1)/h), (int)(pos(2)/h));   
+  cell = Vector3i((int)(pos(0)/h), (int)(pos(1)/h), (int)(pos(2)/h));
+  //rotation = prec_rot*rotation;
+  
+  for (auto & ob : obstacles) {
+    VEC3 n_cur;
+    FLOAT d_cur;
+     if (!std::isnan(pos(0)) && ! std::isinf(pos(0))) {
+       ob->getCollisionValues(pos, d_cur, n_cur);
+       if (d_cur <= 0) {
+     	pos -= d_cur*n_cur;
+	vel = ob->projection(vel);
+	collisionRotation(d_cur, n_cur);
+	// prec_rot = MAT3::Identity();
+       }
+    
+    }
+    // } else {
+    //   // pos = VEC3(0, 0, 0);
+    // }
+  }
   // INFO(3, "new vel "<<vel(0)<<" "<<vel(1)<<" "<<vel(2));
   // INFO(3, "new pos "<<pos(0)<<" "<<pos(1)<<" "<<pos(2));
 }
@@ -252,4 +272,34 @@ void Subparticule::exportMitsuba(std::ofstream &file) {
   file<<"</transform>\n";
   //  file<<"<ref name=\"bsdf\" id=\"particle\"/>\n";
   file<<"</shape>\n";
+}
+
+void Subparticule::collisionRotation(FLOAT dist, VEC3 dir) {
+  // FLOAT speed = 10*mpm_conf::dt_;
+  //     VEC3 n = rotation.col(2);
+  //   FLOAT cosa = dir.dot(n);
+  // if (mpm_conf::normal_up) { //pancake_like
+  //   if (fabs(cosa) < 0.95) {
+  //     //FLOAT a = acos(cosa);
+  //     FLOAT sgn = cosa/fabs(cosa);
+  //     if (cosa == 0) {
+  // 	FLOAT r = (FLOAT)rand()/(FLOAT)RAND_MAX - 0.5;
+  // 	sgn = r / fabs(r);
+  //     }
+  //     VEC3 axe = dir.cross(n);
+  //     ANGLE_AXIS aa(-sgn*speed, axe);
+  //     MAT3 rot = aa.toRotationMatrix();
+  //     rotation = rot*rotation;
+  //   }
+  // } else { //cylinder_like
+  //   if (fabs(cosa) > 0.05) {
+  //     // FLOAT a = acos(cosa);
+  //     FLOAT sgn = cosa/fabs(cosa);
+  //     VEC3 axe = dir.cross(n);
+  //     ANGLE_AXIS aa(sgn*speed, axe);
+  //     MAT3 rot = aa.toRotationMatrix();
+  //     rotation = rot*rotation;
+  //   }
+    
+  // }
 }

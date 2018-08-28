@@ -27,6 +27,7 @@ public :
   
   FLOAT distance(VEC3 v) const;
   void getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &n) const;
+  VEC3 projection(VEC3 v) const; 
 
   void rotate(FLOAT angle, VEC3 axe);
   void exportMitsuba(std::ofstream & file) const;

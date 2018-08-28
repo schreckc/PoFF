@@ -58,6 +58,8 @@ namespace mpm_conf {
 
   uint method_ = apic_;
   bool implicit_ = false;
+
+  bool normal_up = false;
   
   uint export_step_ = 1;
   
@@ -337,33 +339,33 @@ namespace mpm_conf {
    tangent_stiffness(5, 5) = 2*shearing_vec_(2);//2*G12;
 
    // map from anisotropic to isotropc space
-   // for (uint i = 0; i < 3; ++i) {
-   //   for (uint j = 0; j < 3; ++j) {
-   //    //   anisotropy_stress_(i, j, i, j) = anisotropy_values_(i);
-   //    //   inv_anisotropy_stress_(i, j, i, j) = 1.0/anisotropy_values_(i);
-   //    // }
-   //     anisotropy_stress_(i, j, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
-   //     anisotropy_stress_(j, i, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
-   //     inv_anisotropy_stress_(i, j, i, j) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
-   //     inv_anisotropy_stress_(i, j, j, i) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
-   //    }
-   //   anisotropy_stress_(i, i, i, i) = anisotropy_values_(i)*anisotropy_values_(i);
-   //   inv_anisotropy_stress_(i, i, i, i) = 1.0/anisotropy_values_(i)/anisotropy_values_(i);
+   for (uint i = 0; i < 3; ++i) {
+     for (uint j = 0; j < 3; ++j) {
+      //   anisotropy_stress_(i, j, i, j) = anisotropy_values_(i);
+      //   inv_anisotropy_stress_(i, j, i, j) = 1.0/anisotropy_values_(i);
+      // }
+       anisotropy_stress_(i, j, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
+       anisotropy_stress_(j, i, i, j) = 0.5*anisotropy_values_(i)*anisotropy_values_(j);
+       inv_anisotropy_stress_(i, j, i, j) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
+       inv_anisotropy_stress_(i, j, j, i) = 0.5/anisotropy_values_(i)/anisotropy_values_(j);
+      }
+     anisotropy_stress_(i, i, i, i) = anisotropy_values_(i)*anisotropy_values_(i);
+     inv_anisotropy_stress_(i, i, i, i) = 1.0/anisotropy_values_(i)/anisotropy_values_(i);
 
-   // }
+   }
 
-        MATX stress_mat(6, 6);
-      stress_mat  <<
-     	  1, 0, 0,     0, 0, 0,
-         0.0, 1, 0.0,    0, 0, 0,
-         0.0, 0.0, 1,    0, 0, 0,
+      //   MATX stress_mat(6, 6);
+      // stress_mat  <<
+      // 	  1, 0, 0,     0, 0, 0,
+      //    0.0, 1, 0.0,    0, 0, 0,
+      //    0.0, 0.0, 1,    0, 0, 0,
        
-        0, 0, 0.3,    1, 0, 0,
-        0, 0, 0.2,    0, 1, 0,
-        0, 0, 0.5,    0, 0, 1;
+      //   0, 0, 0.3,    1, 0, 0,
+      //   0, 0, 0.2,    0, 1, 0,
+      //   0, 0, 0.5,    0, 0, 1;
 
-      anisotropy_stress_ = mat2Tensor(stress_mat);
-      inv_anisotropy_stress_ = mat2Tensor(stress_mat.inverse());
+      // anisotropy_stress_ = mat2Tensor(stress_mat);
+      // inv_anisotropy_stress_ = mat2Tensor(stress_mat.inverse());
    
    
    Tensor C_iso = mat2TensorOrtho(tangent_stiffness_iso);

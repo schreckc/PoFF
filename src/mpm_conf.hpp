@@ -83,6 +83,8 @@ namespace mpm_conf {
 
   extern uint method_; //0 apic, 1 pic, 2 flip, 3 0.5*pic+0.95*flip
   extern bool implicit_;
+
+  extern bool normal_up; //indicate if the vec orientation.col(2) is vertical or horizontal when a particule is lying down
   
   extern uint export_step_; //export particules every x steps 
   void loadConf(std::string file);

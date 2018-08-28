@@ -174,6 +174,12 @@ FLOAT PlaneObstacle::distance(VEC3 v) const {
   return dist;
 }
 
+
+VEC3 PlaneObstacle::projection(VEC3 v) const {
+  VEC3 proj = utils::projectionOrtho(v + pos, pos, v1, v2);
+  return proj - pos;
+}
+
 void PlaneObstacle::getCollisionValues(VEC3 p, FLOAT & dist, VEC3 &n) const {
   // //dist = p(2) - pos;
   //  FLOAT nv = p.norm();
