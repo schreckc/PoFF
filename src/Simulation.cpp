@@ -1157,16 +1157,16 @@ void Simulation::loadScene() {
 	          p->setAnisotropyRotation(rotation);
 
 	        VEC3 ortho = proj - v;
-	        ortho.normalize();
-	        VEC3 axe = n.cross(ortho);
-		axe.normalize();
-	        FLOAT angle = acos(ortho.dot(n));// + M_PI/2.0;
-	        //	       MAT3 rot = utils::rotation(angle, axe);
-	        ANGLE_AXIS aa(angle, axe);
-	        MAT3 rot = aa.toRotationMatrix();
-	        //	p->setAnisotropyRotation(rot);
-		//INFO(3, "rot\n "<<rot);
-	        p->rotate(rot);
+	         ortho.normalize();
+	         VEC3 axe = n.cross(ortho);
+		 axe.normalize();
+		 FLOAT angle = acos(ortho.dot(n)) + M_PI/2.0;
+		 //MAT3 rot = utils::rotation(angle, axe);
+	         ANGLE_AXIS aa(angle, axe);
+	         MAT3 rot = aa.toRotationMatrix();
+	         //	p->setAnisotropyRotation(rot);
+		 //INFO(3, "rot\n "<<rot);
+	         p->rotate(rot);
 		}
 	      }
 	    }
@@ -1875,7 +1875,7 @@ void Simulation::exportMitsuba(std::string file_name) const {
     // file<<"</bsdf>\n";
 
     /** WOOD ***/
-    
+   
     file<<"<shape  type=\"shapegroup\" id=\"particle\">\n";
     file<<"<shape type=\"sphere\">\n";
     file<<"<bsdf type=\"diffuse\">\n";
@@ -2420,13 +2420,15 @@ void Simulation::exportMitsuba(std::string file_name) const {
      #endif
     file<<"</transform>\n";
     file<<"<sampler type=\"ldsampler\">\n";
-    file<<"<integer name=\"sampleCount\" value=\"64\"/>\n";
+    file<<"<integer name=\"sampleCount\" value=\"32\"/>\n";
     file<<"</sampler>\n";
     file<<"<film type=\"hdrfilm\">\n";
     file<<"<boolean name=\"banner\" value=\"false\"/>\n";
-    file<<"<integer name=\"height\" value=\"720\"/>\n";
+        file<<"<integer name=\"height\" value=\"720\"/>\n";
+	//file<<"<integer name=\"height\" value=\"1440\"/>\n";
     file<<"<string name=\"pixelFormat\" value=\"rgb\"/>\n";
-    file<<"<integer name=\"width\" value=\"1280\"/>\n";
+            file<<"<integer name=\"width\" value=\"1280\"/>\n";
+    //file<<"<integer name=\"width\" value=\"2560\"/>\n";
     file<<"<rfilter type=\"gaussian\"/>\n";
     file<<"</film>\n";
     file<<"</sensor>\n";

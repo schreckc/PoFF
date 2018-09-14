@@ -135,9 +135,10 @@ void Particule::draw(glm::mat4 m, int s) {
       
       //valx = 0.08; valy = 0.08;  valz = 1.0;
       //  INFO(3, "val "<<valx<<" "<<valy<<" "<<valz);
-      //valx = 0.2; valy = 0.2;  valz = 0.2;
-        valx = 0.05; valy = 0.05;  valz = 1.5;
-     //	valx = 0.05; valy = 1.5;  valz = 0.05;
+     //valx = 0.2; valy = 0.2;  valz = 0.2;
+     valx = 0.1; valy = 0.1;  valz = 1.5;
+     //valx = 0.03; valy = 0.03;  valz = 0.45;
+     //valx = 0.05; valy = 1.5;  valz = 0.05;
       //  valx = 0.5; valy = 0.5;  valz = 0.05;
 	  // 	valx = 0.2; valy = 0.2;  valz = 0.02;
       glm::mat3 D;
@@ -883,7 +884,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
  MAT3 W = 0.5/mpm_conf::cheat_damping_*(t - t.transpose()); // skew-sym part of velocity grad
  MAT3 D = 0.5/mpm_conf::cheat_damping_*(t + t.transpose()); // sym part of velocity grad, strain rate tensor
   D = rotation.transpose()*D*rotation;
- FLOAT width = 0.1, length = 1.0;
+ FLOAT width = 0.2, length = 1.0;
  FLOAT l = (length/width - 1)/(length/width + 1); //ellongation of the ellipsoidal object
 
  
@@ -902,7 +903,7 @@ void Particule::update(VEC3 & p, VEC3 & v, MAT3 & b, MAT3 & t) {
      INFO(3, "rotation*roation\n"<< rotation*rotation.transpose());
      /*  */
 
- /*
+ 
  MAT3 Pi2 = 0.5*(MAT3::Identity() - orientation);//0.5*P*(MAT3::Identity() - Diag)*P.transpose();
  // MAT3 der_Pi2 = W*Pi2 + Pi2*W.transpose() + l*(D*Pi2 + Pi2*D - 2*innerProduct(D, outerProduct(Pi2, Pi2)));
  MAT3 der_Pi2 = -l*(D*Pi2 + Pi2*D - 2*innerProduct(D, outerProduct(Pi2, Pi2)));
@@ -1994,6 +1995,7 @@ void Particule::exportMitsuba(std::ofstream &file) {
   //file<<"<scale x=\"0.005\" y=\"0.005\" z=\"0.005\"/>\n";
   //   file<<"<scale x=\"0.02\" y=\"0.02\" z=\"0.05\"/>\n";
     file<<"<scale x=\"0.01\" y=\"0.01\" z=\"0.15\"/>\n";
+    //    file<<"<scale x=\"0.004\" y=\"0.004\" z=\"0.06\"/>\n";
   // file<<"<scale y=\"2\"/>\n";
   file<<"<rotate x=\""<<axe(0)<<"\" y=\""<<axe(1)<<"\" z=\""<<axe(2)<<"\" angle=\""<<angle<<"\"/>\n";
   file<<"<translate x=\""<<10*pos(0)<<"\" y=\""<<10*pos(1)<<"\" z=\""<<10*pos(2)<<"\"/>\n";

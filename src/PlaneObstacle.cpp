@@ -240,7 +240,7 @@ void PlaneObstacle::exportMitsuba(std::ofstream & file) const {
   ANGLE_AXIS aa(rotation);
   VEC3 axe = aa.axis();
   FLOAT angle = aa.angle()/M_PI*180;
-  FLOAT l = 5*length, w = 5*width;
+  FLOAT w = 5*length, l = 5*width;
   //std::string color = "FFD1BC";
   std::string color = "bbbbbb";
   if (l == 0) {

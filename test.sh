@@ -5,11 +5,13 @@
 #$ -pe openmp 8
 #$ -l h_vmem=2G
 
-export OMP_NUM_THREADS=8  # gets number from -pe
+#export OMP_NUM_THREADS=7  # gets number from -pe
 ### for performance reasons, you might want to use some agressive scheduling ###
-export OMP_WAIT_POLICY=active
-export OMP_DYNAMIC=false
-export OMP_PROC_BIND=true
+#export OMP_WAIT_POLICY=active
+#export OMP_DYNAMIC=false
+#export OMP_PROC_BIND=true
+
+source ../../../mitsuba/setpath.sh
 
 
 #rm -r test_snow0
@@ -534,9 +536,25 @@ export OMP_PROC_BIND=true
 #./poff -i test_pasta/test -em test_pasta_mit/test -s empty_plane.sc -es 2 -stop 800 -r
 #mitsuba test_pasta_mit/test02??.xml
 
-mkdir avalanche_mit
-./poff -i avalanche_mix/testa_ -em avalanche_mit/test -s empty_avalanche.sc -es 2 -stop 1000 -r
-mitsuba avalanche_mit/test01??.xml
-mitsuba avalanche_mit/test02??.xml
-mitsuba avalanche_mit/test03??.xml
-mitsuba avalanche_mit/test04??.xml
+#mkdir avalanche2_mit
+#./poff -i test/test -em avalanche2_mit/test -s empty_avalanche.sc -es 2 -stop 260 -r
+#mitsuba avalanche2_mit/test*xml
+#mkdir avalanche_no_mix_mit
+#./poff -i avalanche_no_mix/test -em avalanche_no_mix_mit/test -s empty_avalanche.sc -es 2 -stop 260 -r
+#mitsuba avalanche_no_mix_mit/test*.xml
+#mitsuba avalanche_mit/test03??.xml
+#mitsuba avalanche_mit/test04??.xml
+
+
+#./poff -s cylinder.sc -l test_cyl.conf -e test/test3_ -es 10 -stop 20000 -r
+#./poff -s cylinder.sc -l test_cyl2.conf -e test/test5_ -es 10 -stop 20000 -r
+#make
+#./poff -s cylinder.sc -l test_cyl.conf -e test/test4_ -es 10 -stop 20000 -r
+#./poff -s cylinder.sc -l test_cyl2.conf -e test/test6_ -es 10 -stop 20000 -r
+
+mkdir avalanche_mix_mit
+./poff -i avalanche_mix/test -em avalanche_mix_mit/test -s empty_avalanche.sc -es 2 -stop 200 -r
+mitsuba avalanche_mix_mit/test*xml
+mkdir avalanche_lesser_mix_mit
+./poff -i avalanche_lesser_mix/test -em avalanche_lesser_mix_mit/test -s empty_avalanche.sc -es 2 -stop 260 -r
+mitsuba avalanche_lesser_mix_mit/test*.xml

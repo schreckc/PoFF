@@ -510,12 +510,15 @@ void Grid::particulesToGrid(std::vector<Particule*> & particules) {
   }
   
   uint nb_ac = 0;
+  uint nb_part_cell = 0;
   for (uint i = 0; i < cells.size(); ++i) {
     if (cells[i].size() != 0) {
       ++nb_ac;
+      nb_part_cell += cells[i].size();
     }
   }
-   FLOAT s3 = pow(mpm_conf::grid_spacing_, 3);
+  INFO(3, "nb_cell not empty "<<nb_ac<<"    part per cell "<<nb_part_cell/nb_ac);
+  FLOAT s3 = pow(mpm_conf::grid_spacing_, 3);
   //    INFO(2, "Part 2 Grid");
   // INFO(3, particules.front()->getVelocity());
   FLOAT s2 = mpm_conf::grid_spacing_*mpm_conf::grid_spacing_;

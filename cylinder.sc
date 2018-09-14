@@ -19,6 +19,7 @@
   <z> 0.6 0.6
   <ray> 0.1
   <nb particules> 1000
+  <nb subparticules> 100000	  
  </cylinder>
 </particules>
 <fix> 0.44 0.39 0.66 0.56 0.61 0.8
